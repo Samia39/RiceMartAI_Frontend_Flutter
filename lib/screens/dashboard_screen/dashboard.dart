@@ -5,11 +5,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_repo/screens/dashboard_screen/admin%20screen/admin_screen.dart';
 
 import 'add_shops.dart';
 import 'create_shops.dart';
 import 'profile_screen.dart';
-import 'admin_screen.dart';
 import './ai screen/ai_suggestion.dart';
 import 'ai screen/ai_detection.dart';
 
@@ -167,7 +167,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const ShopsScreen(),
     const CreateScreen(),
     const ProfileScreen(),
-    const AdminScreen(),
+    AdminScreen(),
   ];
 
   @override

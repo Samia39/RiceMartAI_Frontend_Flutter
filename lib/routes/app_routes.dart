@@ -10,9 +10,10 @@ import 'package:flutter_repo/screens/dashboard_screen/dashboard.dart';
 import 'package:flutter_repo/screens/dashboard_screen/create_shops.dart';
 import 'package:flutter_repo/screens/dashboard_screen/add_shops.dart';
 import 'package:flutter_repo/screens/dashboard_screen/profile_screen.dart';
-import 'package:flutter_repo/screens/dashboard_screen/admin_screen.dart';
+import 'package:flutter_repo/screens/dashboard_screen/admin%20screen/admin_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/ai screen/ai_detection.dart';
 import 'package:flutter_repo/screens/dashboard_screen/ai screen/ai_suggestion.dart';
+import 'package:flutter_repo/screens/dashboard_screen/admin screen/content_management.dart';
 
 //import 'auth_middleware.dart';
 
@@ -30,6 +31,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String recommendation = '/recommendation';
   static const String suggestion = '/suggestion';
+  static const String contentManagement = '/content-management';
 
   static final List<GetPage<dynamic>> pages = [
     GetPage(name: splash, page: () => SplashScreen()),
@@ -51,5 +53,6 @@ class AppRoutes {
     GetPage(name: profile, page: () => ProfileScreen()),
     GetPage(name: suggestion, page: () => AiRecommendationScreen()),
     GetPage(name: recommendation, page: () => AiDetectionScreen()),
+    GetPage(name: contentManagement, page: () => ContentManagementScreen()),
   ];
 }

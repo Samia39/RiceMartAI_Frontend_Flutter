@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../admin screen/content_management.dart';
+
 // ─────────────────────────────────────────────
-//  COLOR PALETTE (same as dashboard)
+//  COLOR PALETTE
 // ─────────────────────────────────────────────
 class _C {
   static const darkGreen = Color(0xFF1A2820);
@@ -16,12 +18,9 @@ class _C {
 //  MODELS
 // ─────────────────────────────────────────────
 class _Stat {
-  final String label;
-  final String value;
-  final String change;
+  final String label, value, change;
   final IconData icon;
   final Color iconBg;
-
   const _Stat({
     required this.label,
     required this.value,
@@ -32,8 +31,7 @@ class _Stat {
 }
 
 class _Activity {
-  final String title;
-  final String timeAgo;
+  final String title, timeAgo;
   const _Activity({required this.title, required this.timeAgo});
 }
 
@@ -105,7 +103,7 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  // ── card wrapper ──────────────────────────
+  // ── Card wrapper ──────────────────────────────────────────────
   Widget _card({required Widget child, EdgeInsets? padding}) => Container(
     width: double.infinity,
     margin: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
@@ -125,7 +123,7 @@ class _AdminScreenState extends State<AdminScreen> {
     child: child,
   );
 
-  // ── section title ─────────────────────────
+  // ── Section title ─────────────────────────────────────────────
   Widget _sectionTitle(String title, IconData icon) => Padding(
     padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
     child: Row(
@@ -145,11 +143,10 @@ class _AdminScreenState extends State<AdminScreen> {
     ),
   );
 
-  // ── stat card ─────────────────────────────
+  // ── Stat card ─────────────────────────────────────────────────
   Widget _statCard(_Stat s) => _card(
     child: Row(
       children: [
-        // Icon badge
         Container(
           width: 46,
           height: 46,
@@ -182,7 +179,6 @@ class _AdminScreenState extends State<AdminScreen> {
             ],
           ),
         ),
-        // Change badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
           decoration: BoxDecoration(
@@ -203,7 +199,7 @@ class _AdminScreenState extends State<AdminScreen> {
     ),
   );
 
-  // ── activity tile ─────────────────────────
+  // ── Activity tile ─────────────────────────────────────────────
   Widget _activityTile(_Activity a, bool isLast) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
     decoration: BoxDecoration(
@@ -254,73 +250,7 @@ class _AdminScreenState extends State<AdminScreen> {
     ),
   );
 
-  // ── management tile ───────────────────────
-  Widget _managementTile({
-    required IconData icon,
-    required Color iconBg,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    bool showDivider = true,
-  }) => Column(
-    children: [
-      InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: _C.darkGreen,
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _C.darkGreen.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 13,
-                color: _C.darkGreen.withOpacity(0.45),
-              ),
-            ],
-          ),
-        ),
-      ),
-      if (showDivider)
-        Divider(
-          height: 1,
-          color: _C.border.withOpacity(0.25),
-          indent: 16,
-          endIndent: 16,
-        ),
-    ],
-  );
-
+  // ─────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -328,7 +258,7 @@ class _AdminScreenState extends State<AdminScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ─────────────────────────────
+            // ── Header ──────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 16, 18, 4),
               child: Row(
@@ -356,7 +286,6 @@ class _AdminScreenState extends State<AdminScreen> {
                       ],
                     ),
                   ),
-                  // Back button
                   GestureDetector(
                     onTap: () => Get.back(),
                     child: Container(
@@ -384,7 +313,7 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
             const SizedBox(height: 8),
 
-            // ── Stats ──────────────────────────────
+            // ── Stats ────────────────────────────────
             _sectionTitle('Overview', Icons.bar_chart_outlined),
             if (_loadingStats)
               _card(
@@ -403,7 +332,7 @@ class _AdminScreenState extends State<AdminScreen> {
 
             const SizedBox(height: 4),
 
-            // ── Recent Activity ────────────────────
+            // ── Recent Activities ────────────────────
             _sectionTitle('Recent Activities', Icons.timeline_outlined),
             _card(
               padding: EdgeInsets.zero,
@@ -426,51 +355,74 @@ class _AdminScreenState extends State<AdminScreen> {
 
             const SizedBox(height: 4),
 
-            // ── Management Tools ───────────────────
+            // ── Management — ONLY Content Management ─
             _sectionTitle('Management', Icons.settings_outlined),
             _card(
               padding: EdgeInsets.zero,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Column(
-                  children: [
-                    _managementTile(
-                      icon: Icons.remove_red_eye_outlined,
-                      iconBg: const Color(0xFF2E7D32),
-                      title: 'Content Management',
-                      subtitle: 'App content and settings',
-                      onTap: () {},
+                child: InkWell(
+                  onTap: () => Get.to(
+                    () => const ContentManagementScreen(),
+                    transition: Transition.rightToLeft,
+                    duration: const Duration(milliseconds: 300),
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 15,
                     ),
-                    _managementTile(
-                      icon: Icons.people_outline,
-                      iconBg: const Color(0xFF1565C0),
-                      title: 'User Management',
-                      subtitle: 'View and manage all users',
-                      onTap: () {},
+                    child: Row(
+                      children: [
+                        // Icon badge
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2E7D32),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          child: const Icon(
+                            Icons.remove_red_eye_outlined,
+                            color: Colors.white,
+                            size: 21,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        // Text
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Content Management',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: _C.darkGreen,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'App content and settings',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0x801A2820),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Arrow
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 13,
+                          color: _C.darkGreen.withOpacity(0.45),
+                        ),
+                      ],
                     ),
-                    _managementTile(
-                      icon: Icons.storefront_outlined,
-                      iconBg: const Color(0xFF6A1B9A),
-                      title: 'Shop Management',
-                      subtitle: 'Review and approve shops',
-                      onTap: () {},
-                    ),
-                    _managementTile(
-                      icon: Icons.trending_up_outlined,
-                      iconBg: const Color(0xFF9D7E3F),
-                      title: 'Price Management',
-                      subtitle: 'Update market rice prices',
-                      onTap: () {},
-                    ),
-                    _managementTile(
-                      icon: Icons.analytics_outlined,
-                      iconBg: const Color(0xFF00695C),
-                      title: 'Analytics & Reports',
-                      subtitle: 'View detailed platform stats',
-                      onTap: () {},
-                      showDivider: false,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
