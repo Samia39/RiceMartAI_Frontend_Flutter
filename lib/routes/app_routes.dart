@@ -9,11 +9,13 @@ import '../screens/register_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/dashboard.dart';
 import 'package:flutter_repo/screens/dashboard_screen/create_shops.dart';
 import 'package:flutter_repo/screens/dashboard_screen/add_shops.dart';
-import 'package:flutter_repo/screens/dashboard_screen/profile_screen.dart';
+import 'package:flutter_repo/screens/dashboard_screen/profile%20screen/profile_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/admin%20screen/admin_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/ai screen/ai_detection.dart';
 import 'package:flutter_repo/screens/dashboard_screen/ai screen/ai_suggestion.dart';
 import 'package:flutter_repo/screens/dashboard_screen/admin screen/content_management.dart';
+import '../screens/dashboard_screen/profile screen/change_password_screen.dart';
+import '../screens/dashboard_screen/profile screen/notification_settings_screen.dart';
 
 //import 'auth_middleware.dart';
 
@@ -32,7 +34,8 @@ class AppRoutes {
   static const String recommendation = '/recommendation';
   static const String suggestion = '/suggestion';
   static const String contentManagement = '/content-management';
-
+  static const String changepassword = '/change-password';
+  static const String notification = '/notification';
   static final List<GetPage<dynamic>> pages = [
     GetPage(name: splash, page: () => SplashScreen()),
     GetPage(name: login, page: () => LoginScreen()),
@@ -54,5 +57,7 @@ class AppRoutes {
     GetPage(name: suggestion, page: () => AiRecommendationScreen()),
     GetPage(name: recommendation, page: () => AiDetectionScreen()),
     GetPage(name: contentManagement, page: () => ContentManagementScreen()),
+    GetPage(name: changepassword, page: () => ChangePasswordScreen()),
+    GetPage(name: notification, page: () => NotificationSettingsScreen()),
   ];
 }

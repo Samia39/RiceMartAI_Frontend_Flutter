@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:flutter_repo/screens/login%20screen/privacy_policy_screen.dart';
+
+import 'change_password_screen.dart';
+import 'notification_settings_screen.dart';
 
 // ─────────────────────────────────────────────
 //  COLOR PALETTE (same as dashboard)
@@ -321,15 +325,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _settingsTile(
                     icon: Icons.lock_outline,
                     label: 'Change Password',
+                    onTap: () => Get.to(() => const ChangePasswordScreen()),
                   ),
                   _settingsTile(
                     icon: Icons.notifications_outlined,
                     label: 'Notification Settings',
+                    onTap: () =>
+                        Get.to(() => const NotificationSettingsScreen()),
                   ),
                   _settingsTile(
                     icon: Icons.shield_outlined,
                     label: 'Privacy & Security',
                     showDivider: false,
+                    onTap: () => Get.to(() => PrivacyPolicyScreen()),
                   ),
                 ],
               ),

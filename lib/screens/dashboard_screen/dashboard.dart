@@ -9,7 +9,7 @@ import 'package:flutter_repo/screens/dashboard_screen/admin%20screen/admin_scree
 
 import 'add_shops.dart';
 import 'create_shops.dart';
-import 'profile_screen.dart';
+import 'profile screen/profile_screen.dart';
 import './ai screen/ai_suggestion.dart';
 import 'ai screen/ai_detection.dart';
 
@@ -166,7 +166,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ),
     const ShopsScreen(),
     const CreateScreen(),
-    const ProfileScreen(),
+    ProfileScreen(),
     AdminScreen(),
   ];
 
