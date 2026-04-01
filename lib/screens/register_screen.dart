@@ -1,9 +1,9 @@
-// ignore_for_file: unused_import
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../core/services/auth_service.dart';
+import './login screen/terms_screen.dart';
+import './login screen/privacy_policy_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -193,6 +193,97 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  // ── Terms & Privacy tappable row ─────────────────────────────
+  Widget _buildTermsRow() {
+    const darkGreen = Color(0xFF1A2820);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Checkbox
+        SizedBox(
+          width: 24,
+          height: 24,
+          child: Checkbox(
+            value: _acceptedTerms,
+            onChanged: (v) => setState(() => _acceptedTerms = v ?? false),
+            activeColor: Color(0xFF9D7E3F),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            side: BorderSide(color: darkGreen.withOpacity(0.7), width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+        SizedBox(width: 8),
+        // Rich text with tappable links
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Wrap(
+              children: [
+                Text(
+                  'I accept the ',
+                  style: TextStyle(
+                    color: darkGreen.withOpacity(0.85),
+                    fontSize: 13,
+                    height: 1.6,
+                  ),
+                ),
+                // ── Terms & Conditions link ──────────────
+                GestureDetector(
+                  onTap: () => Get.to(
+                    () => TermsScreen(),
+                    transition: Transition.rightToLeft,
+                    duration: const Duration(milliseconds: 300),
+                  ),
+                  child: Text(
+                    'Terms & Conditions',
+                    style: TextStyle(
+                      color: darkGreen,
+                      fontSize: 13,
+                      height: 1.6,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: darkGreen,
+                    ),
+                  ),
+                ),
+                Text(
+                  ' and ',
+                  style: TextStyle(
+                    color: darkGreen.withOpacity(0.85),
+                    fontSize: 13,
+                    height: 1.6,
+                  ),
+                ),
+                // ── Privacy Policy link ──────────────────
+                GestureDetector(
+                  onTap: () => Get.to(
+                    () => PrivacyPolicyScreen(),
+                    transition: Transition.rightToLeft,
+                    duration: const Duration(milliseconds: 300),
+                  ),
+                  child: Text(
+                    'Privacy Policy',
+                    style: TextStyle(
+                      color: darkGreen,
+                      fontSize: 13,
+                      height: 1.6,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: darkGreen,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,10 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF5A8A6E), // top — same as splash
-              Color(0xFF9D7E3F), // bottom — same as splash
-            ],
+            colors: [Color(0xFF5A8A6E), Color(0xFF9D7E3F)],
           ),
         ),
         child: SafeArea(
@@ -307,66 +395,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 SizedBox(height: 14),
 
-                // Terms and conditions
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Checkbox(
-                        value: _acceptedTerms,
-                        onChanged: (v) =>
-                            setState(() => _acceptedTerms = v ?? false),
-                        activeColor: Color(0xFF9D7E3F),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                        side: BorderSide(
-                          color: Color(0xFF1A2820).withOpacity(0.7),
-                          width: 1.5,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 2),
-                        child: RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              color: Color(0xFF1A2820).withOpacity(0.85),
-                              fontSize: 13,
-                              height: 1.5,
-                            ),
-                            children: [
-                              TextSpan(text: 'I accept the '),
-                              TextSpan(
-                                text: 'Terms & Conditions',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1A2820),
-                                ),
-                              ),
-                              TextSpan(text: ' and\n'),
-                              TextSpan(
-                                text: 'Privacy Policy',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1A2820),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                // ── Tappable Terms & Privacy row ──────────
+                _buildTermsRow(),
                 SizedBox(height: 20),
 
                 // Sign Up button
@@ -442,37 +472,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _buildSocialButton(
                   icon: Icons.g_mobiledata_rounded,
                   label: 'Continue with Google',
-                  onTap: () {
-                    Get.snackbar(
-                      "Google",
-                      "Google sign-up coming soon",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  },
+                  onTap: () => Get.snackbar(
+                    "Google",
+                    "Google sign-up coming soon",
+                    snackPosition: SnackPosition.BOTTOM,
+                  ),
                 ),
                 SizedBox(height: 10),
                 _buildSocialButton(
                   icon: Icons.facebook,
                   label: 'Continue with Facebook',
-                  onTap: () {
-                    Get.snackbar(
-                      "Facebook",
-                      "Facebook sign-up coming soon",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  },
+                  onTap: () => Get.snackbar(
+                    "Facebook",
+                    "Facebook sign-up coming soon",
+                    snackPosition: SnackPosition.BOTTOM,
+                  ),
                 ),
                 SizedBox(height: 10),
                 _buildSocialButton(
                   icon: Icons.flutter_dash,
                   label: 'Continue with Twitter',
-                  onTap: () {
-                    Get.snackbar(
-                      "Twitter",
-                      "Twitter sign-up coming soon",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  },
+                  onTap: () => Get.snackbar(
+                    "Twitter",
+                    "Twitter sign-up coming soon",
+                    snackPosition: SnackPosition.BOTTOM,
+                  ),
                 ),
                 SizedBox(height: 28),
 

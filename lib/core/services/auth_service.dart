@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const String baseUrl = 'https://your-domain.com/api'; // 🔁 change this
+  static const String baseUrl = 'https://wholesaleapp.sandbox.pk/api/login';
 
   static Future<Map<String, dynamic>> login(
     String email,
