@@ -3,120 +3,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_repo/screens/dashboard_screen/admin%20screen/admin_screen.dart';
+import '/core/utils/themes.dart';
 
-import 'add_shops.dart';
+import '/core/services/dashboard_service.dart';
+import '/routes/app_routes.dart';
+
+import 'my_shop.dart';
 import 'create_shops.dart';
 import 'profile screen/profile_screen.dart';
-import './ai screen/ai_suggestion.dart';
+import 'admin screen/admin_screen.dart';
 import 'ai screen/ai_detection.dart';
+import 'ai screen/ai_suggestion.dart';
+import 'cart_screen.dart';
+import 'chat_screen.dart';
 
 // ─────────────────────────────────────────────
-//  DATA MODEL
-// ─────────────────────────────────────────────
-class RicePrice {
-  final String name;
-  final double price;
-  final double change;
-
-  RicePrice({required this.name, required this.price, required this.change});
-
-  factory RicePrice.fromJson(Map<String, dynamic> json) {
-    return RicePrice(
-      name: json['name'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
-      change: (json['change'] ?? 0).toDouble(),
-    );
-  }
-
-  static List<RicePrice> fallback() => [
-    RicePrice(name: 'Basmati Rice', price: 280, change: 5),
-    RicePrice(name: 'Super Basmati', price: 320, change: 3),
-    RicePrice(name: 'Sella Rice', price: 250, change: -2),
-    RicePrice(name: 'Brown Rice', price: 200, change: 1),
-    RicePrice(name: 'Kainat Rice', price: 265, change: 2),
-    RicePrice(name: 'Supri Rice', price: 185, change: 0),
-    RicePrice(name: 'IR-6 Rice', price: 150, change: -1),
-    RicePrice(name: 'Kernel Basmati', price: 295, change: 4),
-  ];
-}
-
-// ─────────────────────────────────────────────
-//  PRICE API SERVICE
-// ─────────────────────────────────────────────
-class RicePriceService {
-  static const String _baseUrl =
-      'https://your-api-endpoint.com/api/rice-prices';
-
-  static Future<List<RicePrice>> fetchPrices() async {
-    try {
-      final response = await http
-          .get(Uri.parse(_baseUrl))
-          .timeout(const Duration(seconds: 8));
-      if (response.statusCode == 200) {
-        final List data = json.decode(response.body);
-        return data.map((e) => RicePrice.fromJson(e)).toList();
-      }
-      return RicePrice.fallback();
-    } catch (_) {
-      return RicePrice.fallback();
-    }
-  }
-}
-
-// ─────────────────────────────────────────────
-//  PRODUCT MODEL
-// ─────────────────────────────────────────────
-class RiceProduct {
-  final String name, shop, imagePath;
-  final double price;
-
-  RiceProduct({
-    required this.name,
-    required this.shop,
-    required this.price,
-    required this.imagePath,
-  });
-
-  // FIX: image paths match exactly what's declared in pubspec.yaml assets
-  static List<RiceProduct> samples() => [
-    RiceProduct(
-      name: 'Basmati Rice',
-      shop: 'Anware Sidra Rice Shop',
-      price: 280,
-      imagePath: 'assets/images/rice.jpeg',
-    ),
-    RiceProduct(
-      name: 'Super Basmati',
-      shop: 'Anware Sidra Rice Shop',
-      price: 320,
-      imagePath: 'assets/images/rice.jpeg',
-    ),
-    RiceProduct(
-      name: 'Sella Rice',
-      shop: 'Anware Sidra Rice Shop',
-      price: 250,
-      imagePath: 'assets/images/rice.jpeg',
-    ),
-    RiceProduct(
-      name: 'Kainat Rice',
-      shop: 'Anware Sidra Rice Shop',
-      price: 265,
-      imagePath: 'assets/images/rice.jpeg',
-    ),
-    RiceProduct(
-      name: 'Brown Rice',
-      shop: 'Anware Sidra Rice Shop',
-      price: 200,
-      imagePath: 'assets/images/rice.jpeg',
-    ),
-  ];
-}
-
-// ─────────────────────────────────────────────
-//  DASHBOARD SCREEN
+//  DASHBOARD SCREEN  (tab host)
 // ─────────────────────────────────────────────
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -126,18 +28,17 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0;
-  final GetStorage _box = GetStorage();
+  int _tab = 0;
+  final _box = GetStorage();
+
+  // Register controllers once for the whole app session
+  final CartController _cart = Get.put(CartController());
+  final AdminPriceController _adminPrices = Get.put(AdminPriceController());
 
   List<RicePrice> _prices = [];
   bool _loadingPrices = true;
-
-  final TextEditingController _searchController = TextEditingController();
+  final _searchCtrl = TextEditingController();
   String _searchQuery = '';
-
-  static const Color _darkGreen = Color(0xFF1A2820);
-  static const Color _lightGreen = Color(0xFF5A8A6E);
-  static const Color _golden = Color(0xFF9D7E3F);
 
   @override
   void initState() {
@@ -147,196 +48,157 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadPrices() async {
     setState(() => _loadingPrices = true);
-    final prices = await RicePriceService.fetchPrices();
+    final p = await RicePriceService.fetchPrices();
     setState(() {
-      _prices = prices;
+      _prices = p;
       _loadingPrices = false;
     });
   }
 
   List<Widget> get _pages => [
-    _HomeContent(
+    _HomeTab(
       prices: _prices,
-      loadingPrices: _loadingPrices,
-      searchController: _searchController,
+      loading: _loadingPrices,
+      searchCtrl: _searchCtrl,
       searchQuery: _searchQuery,
-      onSearchChanged: (v) => setState(() => _searchQuery = v),
+      onSearch: (v) => setState(() => _searchQuery = v),
       onRefresh: _loadPrices,
       userName: _box.read('userName') ?? 'User',
+      cart: _cart,
     ),
-    const ShopsScreen(),
-    const CreateScreen(),
+    MyShopScreen(),
+    CreateShopScreen(),
     ProfileScreen(),
     AdminScreen(),
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_lightGreen, _golden],
-          ),
-        ),
-        child: _pages[_currentIndex],
-      ),
-      bottomNavigationBar: _BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    body: Container(
+      decoration: AppDecorations.gradientBackground,
+      child: _pages[_tab],
+    ),
+    bottomNavigationBar: _BottomNav(
+      current: _tab,
+      onTap: (i) => setState(() => _tab = i),
+    ),
+  );
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 }
 
 // ─────────────────────────────────────────────
-//  BOTTOM NAVIGATION BAR  ← RESPONSIVE FIX
+//  BOTTOM NAV  (matches screenshot)
 // ─────────────────────────────────────────────
-class _BottomNavBar extends StatelessWidget {
-  final int currentIndex;
+class _BottomNav extends StatelessWidget {
+  final int current;
   final ValueChanged<int> onTap;
+  const _BottomNav({required this.current, required this.onTap});
 
-  static const Color _darkGreen = Color(0xFF1A2820);
-  static const Color _lightGreen = Color(0xFF5A8A6E);
-  static const Color _golden = Color(0xFF9D7E3F);
-  static const Color _cream = Color(0xFFD4C9A8);
-
-  const _BottomNavBar({required this.currentIndex, required this.onTap});
+  static const _items = [
+    _NI(icon: Icons.home_outlined, active: Icons.home, label: 'Home'),
+    _NI(
+      icon: Icons.storefront_outlined,
+      active: Icons.storefront,
+      label: 'Shops',
+    ),
+    _NI(
+      icon: Icons.add_circle_outline,
+      active: Icons.add_circle,
+      label: 'Create',
+      center: true,
+    ),
+    _NI(icon: Icons.person_outline, active: Icons.person, label: 'Profile'),
+    _NI(icon: Icons.shield_outlined, active: Icons.shield, label: 'Admin'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    // FIX: use MediaQuery for responsive sizing instead of hardcoded values
-    final screenWidth = MediaQuery.of(context).size.width;
-    final iconSize = (screenWidth * 0.055).clamp(18.0, 26.0);
-    final fontSize = (screenWidth * 0.028).clamp(9.0, 13.0);
-    final centerBtnSize = (screenWidth * 0.095).clamp(34.0, 46.0);
-
-    final items = [
-      _NavItem(
-        icon: Icons.home_outlined,
-        activeIcon: Icons.home,
-        label: 'Home',
-      ),
-      _NavItem(
-        icon: Icons.storefront_outlined,
-        activeIcon: Icons.storefront,
-        label: 'Shops',
-      ),
-      _NavItem(
-        icon: Icons.add_circle_outline,
-        activeIcon: Icons.add_circle,
-        label: 'Create',
-        isCenter: true,
-      ),
-      _NavItem(
-        icon: Icons.person_outline,
-        activeIcon: Icons.person,
-        label: 'Profile',
-      ),
-      _NavItem(
-        icon: Icons.shield_outlined,
-        activeIcon: Icons.shield,
-        label: 'Admin',
-      ),
-    ];
+    final sw = MediaQuery.of(context).size.width;
+    final ico = (sw * 0.055).clamp(18.0, 26.0);
+    final fs = (sw * 0.028).clamp(9.0, 13.0);
+    final cs = (sw * 0.095).clamp(34.0, 46.0);
 
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
+          colors: [AppColors.lightGreen, AppColors.golden],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [_lightGreen, _golden],
         ),
         boxShadow: [
           BoxShadow(
-            color: _darkGreen.withOpacity(0.25),
+            color: AppColors.darkGreen.withOpacity(0.25),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
         ],
       ),
-      // FIX: SafeArea wraps the inner content so bottom padding is handled
-      // correctly on notched devices (iPhone, Android gesture nav)
       child: SafeArea(
         top: false,
         child: Padding(
-          // FIX: vertical padding scales with screen so items never get clipped
           padding: EdgeInsets.symmetric(
             vertical: MediaQuery.of(context).size.height * 0.008,
           ),
           child: Row(
-            children: List.generate(items.length, (i) {
-              final item = items[i];
-              final selected = i == currentIndex;
+            children: List.generate(_items.length, (i) {
+              final item = _items[i];
+              final sel = i == current;
               return Expanded(
                 child: GestureDetector(
                   onTap: () => onTap(i),
                   behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (item.isCenter)
-                          // FIX: center button size is now responsive
-                          Container(
-                            width: centerBtnSize,
-                            height: centerBtnSize,
-                            decoration: BoxDecoration(
-                              color: selected
-                                  ? _cream
-                                  : _cream.withOpacity(0.30),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: _cream.withOpacity(0.7),
-                                width: 1.5,
-                              ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (item.center)
+                        Container(
+                          width: cs,
+                          height: cs,
+                          decoration: BoxDecoration(
+                            color: sel
+                                ? AppColors.cream
+                                : AppColors.cream.withOpacity(0.30),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.cream.withOpacity(0.7),
+                              width: 1.5,
                             ),
-                            child: Icon(
-                              selected ? item.activeIcon : item.icon,
-                              color: selected
-                                  ? _darkGreen
-                                  : _darkGreen.withOpacity(0.75),
-                              size: iconSize,
+                          ),
+                          child: Icon(
+                            sel ? item.active : item.icon,
+                            color: AppColors.darkGreen.withOpacity(
+                              sel ? 1 : 0.75,
                             ),
-                          )
-                        else
-                          Icon(
-                            selected ? item.activeIcon : item.icon,
-                            color: selected
-                                ? _cream
-                                : _darkGreen.withOpacity(0.8),
-                            size: iconSize,
+                            size: ico,
                           ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: selected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: selected
-                                ? _cream
-                                : _darkGreen.withOpacity(0.8),
-                            letterSpacing: 0.2,
-                          ),
-                          // FIX: prevent label overflow on narrow screens
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                        )
+                      else
+                        Icon(
+                          sel ? item.active : item.icon,
+                          color: sel
+                              ? AppColors.cream
+                              : AppColors.darkGreen.withOpacity(0.8),
+                          size: ico,
                         ),
-                      ],
-                    ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.label,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: fs,
+                          fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                          color: sel
+                              ? AppColors.cream
+                              : AppColors.darkGreen.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -348,133 +210,132 @@ class _BottomNavBar extends StatelessWidget {
   }
 }
 
-class _NavItem {
-  final IconData icon, activeIcon;
+class _NI {
+  final IconData icon, active;
   final String label;
-  final bool isCenter;
-  _NavItem({
+  final bool center;
+  const _NI({
     required this.icon,
-    required this.activeIcon,
+    required this.active,
     required this.label,
-    this.isCenter = false,
+    this.center = false,
   });
 }
 
 // ─────────────────────────────────────────────
-//  HOME CONTENT
+//  HOME TAB CONTENT  (matches screenshot layout)
 // ─────────────────────────────────────────────
-class _HomeContent extends StatelessWidget {
+class _HomeTab extends StatelessWidget {
   final List<RicePrice> prices;
-  final bool loadingPrices;
-  final TextEditingController searchController;
+  final bool loading;
+  final TextEditingController searchCtrl;
   final String searchQuery;
-  final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String> onSearch;
   final VoidCallback onRefresh;
   final String userName;
+  final CartController cart;
 
-  static const Color _darkGreen = Color(0xFF1A2820);
-  static const Color _lightGreen = Color(0xFF5A8A6E);
-  static const Color _golden = Color(0xFF9D7E3F);
-  static const Color _cream = Color(0xFFD4C9A8);
-  static const Color _border = Color(0xFFB8A97A);
-
-  const _HomeContent({
+  const _HomeTab({
     required this.prices,
-    required this.loadingPrices,
-    required this.searchController,
+    required this.loading,
+    required this.searchCtrl,
     required this.searchQuery,
-    required this.onSearchChanged,
+    required this.onSearch,
     required this.onRefresh,
     required this.userName,
+    required this.cart,
   });
 
   List<RicePrice> get _filtered => prices
       .where((p) => p.name.toLowerCase().contains(searchQuery.toLowerCase()))
       .toList();
 
+  List<RiceProduct> get _riceList => RiceProduct.fromRegisteredShops();
+
   @override
   Widget build(BuildContext context) {
-    // FIX: responsive sizing for hero banner and product cards
-    final screenWidth = MediaQuery.of(context).size.width;
-    final bannerHeight = (screenWidth * 0.42).clamp(130.0, 200.0);
-    final cardWidth = (screenWidth * 0.38).clamp(130.0, 170.0);
-    final cardImageHeight = (cardWidth * 0.65).clamp(80.0, 110.0);
+    final sw = MediaQuery.of(context).size.width;
+    final bannerH = (sw * 0.42).clamp(130.0, 200.0);
+    final cardW = (sw * 0.38).clamp(130.0, 170.0);
+    final cardImgH = (cardW * 0.65).clamp(80.0, 110.0);
 
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async => onRefresh(),
-        color: _golden,
-        backgroundColor: _cream,
+        color: AppColors.golden,
+        backgroundColor: AppColors.cream,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Top Bar ────────────────────────────────
+              // ── Header row (matches screenshot) ────────────
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
-                ),
+                padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
                 child: Row(
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Rice Mart',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: _darkGreen,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                        Text(
-                          'Hello, $userName 👋',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            color: _darkGreen.withOpacity(0.75),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // App name
+                    Text('Rice Mart', style: AppTextStyles.heading2),
                     const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
+
+                    // Notification bell
+                    _HdrBtn(
+                      icon: Icons.notifications_outlined,
+                      onTap: () => Get.toNamed(AppRoutes.notifications),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Chat
+                    _HdrBtn(
+                      icon: Icons.chat_bubble_outline,
+                      onTap: () => Get.toNamed(AppRoutes.chat),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Cart with badge
+                    Obx(
+                      () => _HdrBtn(
+                        icon: Icons.shopping_cart_outlined,
+                        badge: cart.totalCount,
+                        onTap: () => Get.toNamed(AppRoutes.cart),
                       ),
-                      decoration: BoxDecoration(
-                        color: _cream.withOpacity(0.30),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: _border.withOpacity(0.5)),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // اردو toggle
+                    TextButton.icon(
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppColors.overlayLight,
+                        foregroundColor: AppColors.darkGreen,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        minimumSize: Size.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: AppColors.borderGold.withOpacity(0.5),
+                          ),
+                        ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.language,
-                            size: 15,
-                            color: _darkGreen,
-                          ),
-                          const SizedBox(width: 5),
-                          const Text(
-                            'اردو',
-                            style: TextStyle(
-                              color: _darkGreen,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                      icon: const Icon(
+                        Icons.language,
+                        size: 14,
+                        color: AppColors.darkGreen,
+                      ),
+                      label: Text(
+                        'اردو',
+                        style: AppTextStyles.label.copyWith(fontSize: 12),
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 14),
 
-              // ── Hero Banner ── FIX: responsive height + asset image ──
+              // ── Hero banner ─────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: ClipRRect(
@@ -482,50 +343,41 @@ class _HomeContent extends StatelessWidget {
                   child: Stack(
                     children: [
                       SizedBox(
-                        height: bannerHeight,
+                        height: bannerH,
                         width: double.infinity,
-                        // FIX: AssetImage with proper cacheWidth for performance;
-                        // errorBuilder shows gradient fallback if asset is missing
                         child: Image.asset(
                           'assets/images/home_screen.jpeg',
                           fit: BoxFit.cover,
-                          // cacheWidth helps Flutter decode at the right resolution
-                          cacheWidth:
-                              (screenWidth *
-                                      MediaQuery.of(context).devicePixelRatio)
-                                  .round(),
-                          errorBuilder: (_, error, __) {
-                            // Only shown if asset is genuinely missing from pubspec.yaml
-                            return Container(
-                              height: bannerHeight,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    _lightGreen.withOpacity(0.8),
-                                    _golden.withOpacity(0.8),
-                                  ],
-                                ),
+                          errorBuilder: (_, __, ___) => Container(
+                            height: bannerH,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.lightGreen,
+                                  AppColors.golden,
+                                ],
                               ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.grain,
-                                  size: 64,
-                                  color: Colors.white54,
-                                ),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.grain,
+                                size: 64,
+                                color: Colors.white54,
                               ),
-                            );
-                          },
+                            ),
+                          ),
                         ),
                       ),
+                      // Overlay
                       Container(
-                        height: bannerHeight,
+                        height: bannerH,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topRight,
                             end: Alignment.bottomLeft,
                             colors: [
                               Colors.transparent,
-                              _darkGreen.withOpacity(0.65),
+                              AppColors.darkGreen.withOpacity(0.65),
                             ],
                           ),
                         ),
@@ -559,42 +411,35 @@ class _HomeContent extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
-              // ── Search ─────────────────────────────────
+              // ── Search bar ──────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: _cream.withOpacity(0.30),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _border.withOpacity(0.55)),
-                  ),
+                  decoration: AppDecorations.inputField,
                   child: TextField(
-                    controller: searchController,
-                    onChanged: onSearchChanged,
-                    style: const TextStyle(color: _darkGreen, fontSize: 14),
+                    controller: searchCtrl,
+                    onChanged: onSearch,
+                    style: AppTextStyles.bodyLarge,
                     decoration: InputDecoration(
                       hintText: 'Search for rice varieties, shops...',
-                      hintStyle: TextStyle(
-                        color: _darkGreen.withOpacity(0.55),
-                        fontSize: 13.5,
-                      ),
+                      hintStyle: AppTextStyles.hint,
                       prefixIcon: Icon(
                         Icons.search,
-                        color: _darkGreen.withOpacity(0.75),
+                        color: AppColors.iconMuted,
                         size: 20,
                       ),
                       suffixIcon: searchQuery.isNotEmpty
                           ? GestureDetector(
                               onTap: () {
-                                searchController.clear();
-                                onSearchChanged('');
+                                searchCtrl.clear();
+                                onSearch('');
                               },
                               child: Icon(
                                 Icons.close,
                                 size: 18,
-                                color: _darkGreen.withOpacity(0.6),
+                                color: AppColors.iconMuted,
                               ),
                             )
                           : null,
@@ -607,53 +452,67 @@ class _HomeContent extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
-              // ── AI Buttons ─────────────────────────────
+              // ── AI buttons (two side-by-side) ───────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Column(
+                child: Row(
                   children: [
-                    _AiFeatureButton(
-                      icon: Icons.camera_alt_outlined,
-                      title: 'AI Detection & Suggestion',
-                      subtitle: 'Analyze rice quality',
-                      onTap: () => Get.to(
-                        () => const AiDetectionScreen(),
-                        transition: Transition.rightToLeft,
-                        duration: const Duration(milliseconds: 300),
+                    Expanded(
+                      child: _AiBtn(
+                        icon: Icons.camera_alt_outlined,
+                        title: 'AI Detection & Suggestion',
+                        subtitle: 'Analyze rice quality',
+                        onTap: () => Get.toNamed(AppRoutes.aiDetection),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    _AiFeatureButton(
-                      icon: Icons.auto_awesome_outlined,
-                      title: 'AI Recommendation',
-                      subtitle: 'Rice for recipes',
-                      onTap: () => Get.to(
-                        () => const AiRecommendationScreen(),
-                        transition: Transition.rightToLeft,
-                        duration: const Duration(milliseconds: 300),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _AiBtn(
+                        icon: Icons.auto_awesome_outlined,
+                        title: 'AI Recommendation',
+                        subtitle: 'Rice for recipes',
+                        onTap: () => Get.toNamed(AppRoutes.aiRecommendation),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
-              // ── Real-Time Prices ───────────────────────
+              // ── Rice Market Prices (admin-set) ──────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
                   children: [
-                    const Icon(Icons.trending_up, size: 18, color: _darkGreen),
+                    const Icon(
+                      Icons.trending_up,
+                      size: 16,
+                      color: AppColors.darkGreen,
+                    ),
                     const SizedBox(width: 6),
-                    const Text(
-                      'Real-Time Rice Prices',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: _darkGreen,
-                        letterSpacing: 0.2,
+                    Text('Rice Market Prices', style: AppTextStyles.heading4),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.golden.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: AppColors.golden.withOpacity(0.4),
+                        ),
+                      ),
+                      child: Text(
+                        'Admin set',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontSize: 10,
+                          color: AppColors.golden,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -661,65 +520,61 @@ class _HomeContent extends StatelessWidget {
                       onTap: onRefresh,
                       child: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: _cream.withOpacity(0.30),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: _border.withOpacity(0.5)),
-                        ),
+                        decoration: AppDecorations.iconButton,
                         child: Icon(
                           Icons.refresh,
                           size: 16,
-                          color: _darkGreen.withOpacity(0.8),
+                          color: AppColors.darkGreen.withOpacity(0.8),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
+              // Price table
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: _cream.withOpacity(0.20),
+                    color: AppColors.cardFill,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: _border.withOpacity(0.4)),
+                    border: Border.all(color: AppColors.cardBorder),
                   ),
-                  child: loadingPrices
+                  child: loading
                       ? const Padding(
                           padding: EdgeInsets.all(24),
                           child: Center(
                             child: CircularProgressIndicator(
-                              color: Color(0xFF9D7E3F),
+                              color: AppColors.golden,
                               strokeWidth: 2.5,
                             ),
                           ),
                         )
                       : Column(
                           children: [
+                            // Table header
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 11,
                               ),
                               decoration: BoxDecoration(
-                                color: _darkGreen.withOpacity(0.15),
+                                color: AppColors.darkGreen.withOpacity(0.12),
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(14),
                                   topRight: Radius.circular(14),
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 children: [
                                   Expanded(
-                                    flex: 5,
+                                    flex: 6,
                                     child: Text(
                                       'Rice Name',
-                                      style: TextStyle(
+                                      style: AppTextStyles.label.copyWith(
                                         fontSize: 12.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: _darkGreen,
                                       ),
                                     ),
                                   ),
@@ -727,28 +582,15 @@ class _HomeContent extends StatelessWidget {
                                     flex: 4,
                                     child: Text(
                                       'Price (Rs/kg)',
-                                      style: TextStyle(
+                                      style: AppTextStyles.label.copyWith(
                                         fontSize: 12.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: _darkGreen,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      'Change',
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: _darkGreen,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            // Rows
                             ..._filtered.asMap().entries.map(
                               (e) => _PriceRow(
                                 rice: e.value,
@@ -759,55 +601,59 @@ class _HomeContent extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Text(
-                                  'No results found',
-                                  style: TextStyle(
-                                    color: _darkGreen.withOpacity(0.6),
-                                    fontSize: 13.5,
-                                  ),
+                                  'No results',
+                                  style: AppTextStyles.bodySmall,
                                 ),
                               ),
                           ],
                         ),
                 ),
               ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 20),
 
-              // ── Products ── FIX: responsive card width & image height ──
+              // ── Rice List (registered shops only) ───────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.shopping_bag_outlined,
-                      size: 18,
-                      color: _darkGreen,
+                      size: 16,
+                      color: AppColors.darkGreen,
                     ),
                     const SizedBox(width: 6),
-                    const Text(
-                      'Products',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: _darkGreen,
-                        letterSpacing: 0.2,
+                    Text('Rice List', style: AppTextStyles.heading4),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: AppColors.success.withOpacity(0.35),
+                        ),
+                      ),
+                      child: Text(
+                        '${_riceList.length} available',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontSize: 10,
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     const Spacer(),
-                    TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
+                    GestureDetector(
+                      onTap: () => Get.toNamed(AppRoutes.shops),
+                      child: Text(
                         'See All',
-                        style: TextStyle(
-                          color: _darkGreen,
-                          fontWeight: FontWeight.w600,
+                        style: AppTextStyles.label.copyWith(
                           fontSize: 12.5,
                           decoration: TextDecoration.underline,
-                          decorationColor: _darkGreen,
+                          decorationColor: AppColors.darkGreen,
                         ),
                       ),
                     ),
@@ -816,21 +662,50 @@ class _HomeContent extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              SizedBox(
-                // FIX: image + name(18) + shop(16) + price(18) + paddings(~30) + shadow(4)
-                height: cardImageHeight + 104,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(left: 18, right: 8),
-                  itemCount: RiceProduct.samples().length,
-                  itemBuilder: (context, i) => _ProductCard(
-                    product: RiceProduct.samples()[i],
-                    cardWidth: cardWidth,
-                    imageHeight: cardImageHeight,
+              if (_riceList.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: AppDecorations.card,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.store_mall_directory_outlined,
+                          size: 40,
+                          color: AppColors.darkGreen.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'No products yet\nRegister a shop to list rice here',
+                          style: AppTextStyles.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SizedBox(
+                  height: cardImgH + 104,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(left: 18, right: 8),
+                    itemCount: _riceList.length,
+                    itemBuilder: (_, i) => _ProductCard(
+                      product: _riceList[i],
+                      cardWidth: cardW,
+                      imgHeight: cardImgH,
+                      cart: cart,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 28),
             ],
           ),
         ),
@@ -840,17 +715,58 @@ class _HomeContent extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  REUSABLE WIDGETS
+//  HEADER BUTTON  (bell, chat, cart)
 // ─────────────────────────────────────────────
-class _AiFeatureButton extends StatelessWidget {
+class _HdrBtn extends StatelessWidget {
+  final IconData icon;
+  final int badge;
+  final VoidCallback onTap;
+  const _HdrBtn({required this.icon, required this.onTap, this.badge = 0});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(7),
+          decoration: AppDecorations.iconButton,
+          child: Icon(icon, size: 19, color: AppColors.darkGreen),
+        ),
+        if (badge > 0)
+          Positioned(
+            top: -4,
+            right: -4,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: const BoxDecoration(
+                color: AppColors.golden,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '$badge',
+                style: const TextStyle(
+                  fontSize: 9,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────
+//  AI FEATURE BUTTON  (side-by-side layout)
+// ─────────────────────────────────────────────
+class _AiBtn extends StatelessWidget {
   final IconData icon;
   final String title, subtitle;
   final VoidCallback onTap;
-  static const Color _darkGreen = Color(0xFF1A2820);
-  static const Color _cream = Color(0xFFD4C9A8);
-  static const Color _border = Color(0xFFB8A97A);
-
-  const _AiFeatureButton({
+  const _AiBtn({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -858,187 +774,143 @@ class _AiFeatureButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: BoxDecoration(
-          color: _cream.withOpacity(0.25),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _border.withOpacity(0.5)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _cream.withOpacity(0.30),
-                shape: BoxShape.circle,
-                border: Border.all(color: _border.withOpacity(0.5)),
-              ),
-              child: Icon(icon, size: 20, color: _darkGreen),
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: AppDecorations.card,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: AppColors.overlayLight,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.borderGold.withOpacity(0.5)),
             ),
-            const SizedBox(width: 14),
-            Column(
+            child: Icon(icon, size: 17, color: AppColors.darkGreen),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: _darkGreen,
-                  ),
+                  style: AppTextStyles.label.copyWith(fontSize: 12),
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: _darkGreen.withOpacity(0.7),
-                  ),
+                  style: AppTextStyles.bodySmall.copyWith(fontSize: 10.5),
                 ),
               ],
             ),
-            const Spacer(),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: _darkGreen.withOpacity(0.6),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
+// ─────────────────────────────────────────────
+//  PRICE ROW  (no Change column, matches screenshot)
+// ─────────────────────────────────────────────
 class _PriceRow extends StatelessWidget {
   final RicePrice rice;
   final bool isLast;
-  static const Color _darkGreen = Color(0xFF1A2820);
-  static const Color _border = Color(0xFFB8A97A);
-
   const _PriceRow({required this.rice, required this.isLast});
 
   @override
-  Widget build(BuildContext context) {
-    final isPositive = rice.change > 0;
-    final isNeutral = rice.change == 0;
-    final changeColor = isNeutral
-        ? _darkGreen.withOpacity(0.55)
-        : isPositive
-        ? const Color(0xFF2E7D32)
-        : const Color(0xFFC62828);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-      decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(
-                bottom: BorderSide(color: _border.withOpacity(0.25), width: 1),
-              ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 5,
-            child: Text(
-              rice.name,
-              style: const TextStyle(
-                fontSize: 13,
-                color: _darkGreen,
-                fontWeight: FontWeight.w500,
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(
+      border: isLast
+          ? null
+          : Border(
+              bottom: BorderSide(
+                color: AppColors.borderGold.withOpacity(0.2),
+                width: 1,
               ),
             ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Text(
-              'Rs ${rice.price.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 13, color: _darkGreen),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          flex: 6,
+          child: Text(
+            rice.name,
+            style: AppTextStyles.bodyLarge.copyWith(
+              fontWeight: FontWeight.w400,
+              fontSize: 13,
             ),
           ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              isNeutral
-                  ? '0%'
-                  : '${isPositive ? '+' : ''}${rice.change.toStringAsFixed(0)}%',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: changeColor,
-              ),
-            ),
+        ),
+        Expanded(
+          flex: 4,
+          child: Text(
+            'Rs ${rice.price.toStringAsFixed(0)}',
+            style: AppTextStyles.bodyLarge.copyWith(fontSize: 13),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 }
 
-// FIX: _ProductCard now accepts responsive cardWidth and imageHeight
+// ─────────────────────────────────────────────
+//  PRODUCT CARD  (Rice List)
+// ─────────────────────────────────────────────
 class _ProductCard extends StatelessWidget {
   final RiceProduct product;
-  final double cardWidth;
-  final double imageHeight;
-
-  static const Color _darkGreen = Color(0xFF1A2820);
-  static const Color _cream = Color(0xFFD4C9A8);
-  static const Color _border = Color(0xFFB8A97A);
-
+  final double cardWidth, imgHeight;
+  final CartController cart;
   const _ProductCard({
     required this.product,
     required this.cardWidth,
-    required this.imageHeight,
+    required this.imgHeight,
+    required this.cart,
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => GestureDetector(
+    // Tapping the card navigates to the corresponding shop
+    onTap: () => Get.toNamed(
+      AppRoutes.shops,
+      arguments: {'highlightShopId': product.shopId},
+    ),
+    child: Container(
       width: cardWidth,
       margin: const EdgeInsets.only(right: 12, bottom: 4),
-      decoration: BoxDecoration(
-        color: _cream.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _border.withOpacity(0.45)),
-        boxShadow: [
-          BoxShadow(
-            color: _darkGreen.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: AppDecorations.card,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Image
           ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(14),
               topRight: Radius.circular(14),
             ),
             child: SizedBox(
-              height: imageHeight,
+              height: imgHeight,
               width: double.infinity,
-              // FIX: Image.asset with errorBuilder; asset must be in pubspec.yaml
               child: Image.asset(
                 product.imagePath,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
-                  color: _cream.withOpacity(0.4),
-                  child: const Center(
-                    child: Icon(Icons.grain, size: 36, color: Colors.white54),
+                  color: AppColors.cream.withOpacity(0.4),
+                  child: const Icon(
+                    Icons.grain,
+                    size: 36,
+                    color: Colors.white54,
                   ),
                 ),
               ),
             ),
           ),
+          // Info
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Column(
@@ -1046,38 +918,61 @@ class _ProductCard extends StatelessWidget {
               children: [
                 Text(
                   product.name,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: _darkGreen,
-                  ),
+                  style: AppTextStyles.heading4.copyWith(fontSize: 13),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   product.shop,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    color: _darkGreen.withOpacity(0.65),
-                  ),
+                  style: AppTextStyles.bodySmall.copyWith(fontSize: 10.5),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 5),
-                Text(
-                  'Rs ${product.price.toStringAsFixed(0)}/kg',
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: _darkGreen,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Rs ${product.price.toStringAsFixed(0)}/kg',
+                      style: AppTextStyles.label.copyWith(fontSize: 12),
+                    ),
+                    // + / check button
+                    Obx(
+                      () => GestureDetector(
+                        onTap: () {
+                          cart.add(product);
+                          Get.snackbar(
+                            'Added',
+                            '${product.name} added to cart',
+                            snackPosition: SnackPosition.BOTTOM,
+                            duration: const Duration(seconds: 2),
+                          );
+                        },
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: cart.contains(product)
+                                ? AppColors.golden
+                                : AppColors.success,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            cart.contains(product) ? Icons.check : Icons.add,
+                            size: 15,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }
