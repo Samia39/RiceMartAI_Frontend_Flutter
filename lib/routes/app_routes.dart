@@ -17,7 +17,7 @@ import 'package:flutter_repo/screens/dashboard_screen/admin screen/content_manag
 import '../screens/dashboard_screen/profile screen/change_password_screen.dart';
 import '../screens/dashboard_screen/profile screen/notification_settings_screen.dart';
 
-//import 'auth_middleware.dart';
+import 'auth_middleware.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -44,7 +44,7 @@ class AppRoutes {
     GetPage(
       name: dashboard,
       page: () => DashboardScreen(),
-      //  middlewares: [AuthMiddleware()],
+      middlewares: [AuthMiddleware()],
     ),
 
     GetPage(name: forgotPassword, page: () => ForgotPasswordScreen()),

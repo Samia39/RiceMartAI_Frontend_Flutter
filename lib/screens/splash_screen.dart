@@ -1,7 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 
 import 'package:flutter_repo/routes/app_routes.dart';
+import '/core/utils/themes.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,7 +16,6 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  
 
   @override
   void initState() {
@@ -23,7 +25,6 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
     )..repeat();
 
-    // ✅ FIXED: Simple 3 second delay then go to login
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.login);
@@ -41,13 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF5A8A6E), Color(0xFF9D7E3F)],
-          ),
-        ),
+        decoration: AppDecorations.gradientBackground,
         child: Stack(
           children: [
             // Animated rice falling
@@ -70,37 +65,16 @@ class _SplashScreenState extends State<SplashScreen>
                     painter: WheatPainter(),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Rice Mart',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 56,
-                      fontWeight: FontWeight.w300,
-                      color: Color(0xFF1A2820),
-                      letterSpacing: 2,
-                    ),
-                  ),
+                  const Text('Rice Mart', style: AppTextStyles.splashTitle),
                   const SizedBox(height: 8),
                   const Text(
                     'AI Detection and Suggestion',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF1A2820),
-                      letterSpacing: 0.5,
-                    ),
+                    style: AppTextStyles.splashSubtitle,
                   ),
                   const SizedBox(height: 80),
                   const Text(
                     'Loading.....',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF1A2820),
-                      letterSpacing: 1,
-                    ),
+                    style: AppTextStyles.splashLoading,
                   ),
                 ],
               ),
@@ -162,14 +136,14 @@ class WheatPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF1A2820)
+      ..color = AppColors.darkGreen
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < 3; i++) {
       double xOffset = size.width / 4 + (i * size.width / 4);
 
       final stemPaint = Paint()
-        ..color = const Color(0xFF1A2820)
+        ..color = AppColors.darkGreen
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5
         ..strokeCap = StrokeCap.round;

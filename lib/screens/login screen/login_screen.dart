@@ -38,7 +38,13 @@ class _LoginScreenState extends State<LoginScreen> {
       _emailController.text,
       _passwordController.text,
     );
-
+    if (!_acceptedTerms) {
+      Get.snackbar(
+        "Error",
+        "Please accept the Terms & Conditions and Privacy Policy",
+      );
+      return;
+    }
     setState(() => _isLoading = false);
 
     if (result['success']) {
