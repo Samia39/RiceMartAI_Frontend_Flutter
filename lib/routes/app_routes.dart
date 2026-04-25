@@ -9,7 +9,6 @@ import '../screens/login screen/login_screen.dart';
 import '../screens/register_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/dashboard.dart';
 import 'package:flutter_repo/screens/dashboard_screen/create_shops.dart';
-import 'package:flutter_repo/screens/dashboard_screen/create_shops.dart';
 import 'package:flutter_repo/screens/dashboard_screen/my_shop.dart';
 import 'package:flutter_repo/screens/dashboard_screen/profile%20screen/profile_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/admin%20screen/admin_screen.dart';
@@ -20,6 +19,10 @@ import '../screens/dashboard_screen/profile screen/change_password_screen.dart';
 import '../screens/dashboard_screen/profile screen/notification_settings_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/cart_screen.dart';
 import 'package:flutter_repo/screens/dashboard_screen/chat_screen.dart';
+import 'package:flutter_repo/screens/dashboard_screen/profile screen/my_orders_screen.dart';
+import 'package:flutter_repo/screens/dashboard_screen/profile screen/privacy_security_screen.dart';
+import 'package:flutter_repo/screens/dashboard_screen/profile screen/feedback_screen.dart';
+import 'package:flutter_repo/screens/dashboard_screen/profile screen/edit_profile_screen.dart';
 import 'auth_middleware.dart';
 
 class AppRoutes {
@@ -53,6 +56,10 @@ class AppRoutes {
   static const String changepassword = '/change-password';
   static const String notification = '/notification';
   static const String contentManagement = '/content-management';
+  static const String myOrders = '/my-orders';
+  static const String privacySecurity = '/privacy-security';
+  static const String feedback = '/feedback';
+  static const String editProfile = '/edit-profile';
 
   // ── AI Aliases (for backward compatibility) ────────────────
   static const String recommendation = '/recommendation';
@@ -98,7 +105,11 @@ class AppRoutes {
 
     // ── Profile Sub-routes ─────────────────────────────────
     GetPage(name: changepassword, page: () => ChangePasswordScreen()),
-    GetPage(name: notification, page: () => ContentManagementScreen()),
+    GetPage(name: notification, page: () => NotificationSettingsScreen()),
     GetPage(name: contentManagement, page: () => ContentManagementScreen()),
+    GetPage(name: myOrders, page: () => MyOrdersScreen()),
+    GetPage(name: privacySecurity, page: () => PrivacySecurityScreen()),
+    GetPage(name: feedback, page: () => FeedbackScreen()),
+    GetPage(name: editProfile, page: () => EditProfileScreen()),
   ];
 }
