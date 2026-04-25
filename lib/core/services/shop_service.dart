@@ -1,10 +1,12 @@
-import 'dart:io';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
 
 class ShopService {
-  static const String _baseUrl = 'localhost:8000/api';
+  // ✅ FIXED: localhost → 10.0.2.2 for Android emulator
+  // For real device, use your PC IP: http://192.168.1.X:8000/api
+  static const String _baseUrl = 'http://localhost:8000/api';
 
   static Map<String, String> get _authHeaders {
     final token = GetStorage().read('token') ?? '';
@@ -16,7 +18,7 @@ class ShopService {
   // ─────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> createShop({
     required String cnicNumber,
-    cnicImage,
+    required Uint8List cnicImageBytes,
     required String shopName,
     required String ownerName,
     required String phone,
@@ -31,6 +33,16 @@ class ShopService {
       );
 
       request.headers.addAll(_authHeaders);
+
+      // ✅ CNIC image bytes attach
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'cnic_image',
+          cnicImageBytes,
+          filename: 'cnic_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        ),
+      );
+
       request.fields['cnic_number'] = cnicNumber;
       request.fields['shop_name'] = shopName;
       request.fields['owner_name'] = ownerName;
@@ -38,14 +50,6 @@ class ShopService {
       request.fields['address'] = address;
       request.fields['description'] = description;
       request.fields['rice_categories'] = jsonEncode(riceCategories);
-
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'cnic_image',
-          cnicImage.path,
-          filename: 'cnic_${DateTime.now().millisecondsSinceEpoch}.jpg',
-        ),
-      );
 
       final streamed = await request.send().timeout(
         const Duration(seconds: 30),
@@ -59,9 +63,8 @@ class ShopService {
       return {
         'success': false,
         'message': data['message'] ?? 'Failed to create shop',
+        'errors': data['errors'] ?? {},
       };
-    } on SocketException {
-      return {'success': false, 'message': 'No internet connection'};
     } catch (e) {
       return {'success': false, 'message': 'An error occurred: $e'};
     }
@@ -77,7 +80,10 @@ class ShopService {
           .timeout(const Duration(seconds: 30));
 
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200) return {'success': true, 'data': data};
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': data};
+      }
       return {
         'success': false,
         'message': data['message'] ?? 'Failed to fetch shop',
@@ -98,7 +104,7 @@ class ShopService {
     required String address,
     required String description,
     required List<Map<String, dynamic>> riceCategories,
-    File? cnicImage,
+    Uint8List? cnicImageBytes, // ✅ optional — only if user changes image
   }) async {
     try {
       final request = http.MultipartRequest(
@@ -107,7 +113,7 @@ class ShopService {
       );
 
       request.headers.addAll(_authHeaders);
-      request.fields['_method'] = 'PUT'; // Laravel method spoofing
+      request.fields['_method'] = 'PUT';
       request.fields['shop_name'] = shopName;
       request.fields['owner_name'] = ownerName;
       request.fields['phone'] = phone;
@@ -115,11 +121,12 @@ class ShopService {
       request.fields['description'] = description;
       request.fields['rice_categories'] = jsonEncode(riceCategories);
 
-      if (cnicImage != null) {
+      // ✅ Only attach image if user picked a new one
+      if (cnicImageBytes != null) {
         request.files.add(
-          await http.MultipartFile.fromPath(
+          http.MultipartFile.fromBytes(
             'cnic_image',
-            cnicImage.path,
+            cnicImageBytes,
             filename: 'cnic_${DateTime.now().millisecondsSinceEpoch}.jpg',
           ),
         );
@@ -131,10 +138,14 @@ class ShopService {
       final response = await http.Response.fromStream(streamed);
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200) return {'success': true, 'data': data};
-      return {'success': false, 'message': data['message'] ?? 'Update failed'};
-    } on SocketException {
-      return {'success': false, 'message': 'No internet connection'};
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': data};
+      }
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Update failed',
+        'errors': data['errors'] ?? {},
+      };
     } catch (e) {
       return {'success': false, 'message': 'An error occurred: $e'};
     }
@@ -150,10 +161,9 @@ class ShopService {
           .timeout(const Duration(seconds: 30));
 
       final data = jsonDecode(response.body);
+
       if (response.statusCode == 200) return {'success': true};
       return {'success': false, 'message': data['message'] ?? 'Delete failed'};
-    } on SocketException {
-      return {'success': false, 'message': 'No internet connection'};
     } catch (e) {
       return {'success': false, 'message': 'An error occurred: $e'};
     }

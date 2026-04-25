@@ -28,8 +28,9 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final GetStorage _box = GetStorage();
   int _tab = 0;
-  final _box = GetStorage();
+  bool get _hasShop => _box.read('has_shop') == true;
 
   // Register controllers once for the whole app session
   final CartController _cart = Get.put(CartController());
@@ -55,8 +56,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  List<Widget> get _pages => [
-    _HomeTab(
+  void _onShopCreated() {
+    setState(() => _tab = 1);
+  }
+
+  List<Widget> get _pages {
+    final home = _HomeTab(
       prices: _prices,
       loading: _loadingPrices,
       searchCtrl: _searchCtrl,
@@ -65,12 +70,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onRefresh: _loadPrices,
       userName: _box.read('userName') ?? 'User',
       cart: _cart,
-    ),
-    MyShopScreen(),
-    CreateShopScreen(),
-    ProfileScreen(),
-    AdminScreen(),
-  ];
+    );
+    if (_hasShop) {
+      return [home, MyShopScreen(), ProfileScreen(), AdminScreen()];
+    }
+    return [
+      home,
+      MyShopScreen(),
+      CreateShopScreen(onShopCreated: _onShopCreated),
+      ProfileScreen(),
+      AdminScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -80,6 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ),
     bottomNavigationBar: _BottomNav(
       current: _tab,
+      hasShop: _hasShop,
       onTap: (i) => setState(() => _tab = i),
     ),
   );
@@ -96,10 +108,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 // ─────────────────────────────────────────────
 class _BottomNav extends StatelessWidget {
   final int current;
+  final bool hasShop;
   final ValueChanged<int> onTap;
-  const _BottomNav({required this.current, required this.onTap});
+  const _BottomNav({
+    required this.current,
+    required this.hasShop,
+    required this.onTap,
+  });
 
-  static const _items = [
+  static const _itemsNoShop = [
     _NI(icon: Icons.home_outlined, active: Icons.home, label: 'Home'),
     _NI(
       icon: Icons.storefront_outlined,
@@ -115,6 +132,19 @@ class _BottomNav extends StatelessWidget {
     _NI(icon: Icons.person_outline, active: Icons.person, label: 'Profile'),
     _NI(icon: Icons.shield_outlined, active: Icons.shield, label: 'Admin'),
   ];
+
+  static const _itemsHasShop = [
+    _NI(icon: Icons.home_outlined, active: Icons.home, label: 'Home'),
+    _NI(
+      icon: Icons.storefront_outlined,
+      active: Icons.storefront,
+      label: 'My Shop',
+    ),
+    _NI(icon: Icons.person_outline, active: Icons.person, label: 'Profile'),
+    _NI(icon: Icons.shield_outlined, active: Icons.shield, label: 'Admin'),
+  ];
+
+  List<_NI> get _items => hasShop ? _itemsHasShop : _itemsNoShop;
 
   @override
   Widget build(BuildContext context) {

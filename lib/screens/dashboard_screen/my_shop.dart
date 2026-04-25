@@ -102,6 +102,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
     setState(() => _isSaving = true);
 
+    var _cnicImageBytes;
     final result = await ShopService.updateShop(
       shopId: _shopData['id'].toString(),
       shopName: _shopNameCtrl.text.trim(),
@@ -110,7 +111,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
       address: _addressCtrl.text.trim(),
       description: _descriptionCtrl.text.trim(),
       riceCategories: _categories,
-      cnicImage: _cnicImage,
+      cnicImageBytes: _cnicImageBytes!,
     );
 
     setState(() => _isSaving = false);

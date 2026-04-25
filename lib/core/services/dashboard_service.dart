@@ -354,4 +354,4 @@ class CartController extends GetxController {
   int get totalCount => items.fold(0, (s, e) => s + e.qty);
   double get totalPrice =>
       items.fold(0.0, (s, e) => s + e.product.price * e.qty);
-} // TODO Implement this library.
+} //

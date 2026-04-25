@@ -1,15 +1,17 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: prefer_typing_uninitialized_variables, deprecated_member_use
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/utils/themes.dart';
 import '../../core/services/shop_service.dart';
+import 'package:get_storage/get_storage.dart';
+import 'dart:typed_data';
 
 class CreateShopScreen extends StatefulWidget {
-  const CreateShopScreen({super.key});
+  final VoidCallback? onShopCreated;
+  const CreateShopScreen({super.key, this.onShopCreated});
 
   @override
   State<CreateShopScreen> createState() => _CreateShopScreenState();
@@ -26,8 +28,8 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final _addressController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  File? _cnicImage;
   bool _isLoading = false;
+  Uint8List? _cnicImageBytes; // ✅ bytes only — works on Web + Mobile
   final List<Map<String, dynamic>> _riceCategories = [];
 
   final ImagePicker _picker = ImagePicker();
@@ -38,7 +40,10 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
       source: ImageSource.gallery,
       imageQuality: 85,
     );
-    if (file != null) setState(() => _cnicImage = File(file.path));
+    if (file != null) {
+      final bytes = await file.readAsBytes();
+      setState(() => _cnicImageBytes = bytes);
+    }
   }
 
   // ── Add rice category dialog ───────────────────────────────
@@ -117,43 +122,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
-  // ── Submit ─────────────────────────────────────────────────
-  Future<void> _createShop() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    // if (_cnicImage == null) {
-    //   Get.snackbar('Error', 'Please upload your CNIC image');
-    //   return;
-    //}
-
-    if (_riceCategories.isEmpty) {
-      Get.snackbar('Error', 'Please add at least one rice category');
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    final result = await ShopService.createShop(
-      cnicNumber: _cnicController.text.trim(),
-      cnicImage: _cnicImage!,
-      shopName: _shopNameController.text.trim(),
-      ownerName: _ownerNameController.text.trim(),
-      phone: _phoneController.text.trim(),
-      address: _addressController.text.trim(),
-      description: _descriptionController.text.trim(),
-      riceCategories: _riceCategories,
-    );
-
-    setState(() => _isLoading = false);
-
-    if (result['success']) {
-      Get.snackbar('Success', 'Your shop has been created!');
-      Get.offAllNamed('/dashboard');
-    } else {
-      Get.snackbar('Error', result['message'] ?? 'Something went wrong');
-    }
-  }
-
   // ── Input field builder ────────────────────────────────────
   Widget _buildField({
     required TextEditingController controller,
@@ -227,6 +195,45 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     padding: const EdgeInsets.only(bottom: 6),
     child: Text(text, style: AppTextStyles.labelMuted),
   );
+
+  // ── Submit ─────────────────────────────────────────────────
+  Future<void> _createShop() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    // ✅ Check bytes, not File
+    if (_cnicImageBytes == null) {
+      Get.snackbar('Error', 'Please upload your CNIC image');
+      return;
+    }
+
+    if (_riceCategories.isEmpty) {
+      Get.snackbar('Error', 'Please add at least one rice category');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await ShopService.createShop(
+      cnicNumber: _cnicController.text.trim(),
+      cnicImageBytes: _cnicImageBytes!, // ✅ safe — guarded by null check above
+      shopName: _shopNameController.text.trim(),
+      ownerName: _ownerNameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      address: _addressController.text.trim(),
+      description: _descriptionController.text.trim(),
+      riceCategories: _riceCategories,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (result['success']) {
+      GetStorage().write('has_shop', true);
+      Get.snackbar('Success', 'Your shop has been created!');
+      widget.onShopCreated?.call();
+    } else {
+      Get.snackbar('Error', result['message'] ?? 'Something went wrong');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -332,13 +339,14 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                                       color: AppColors.inputBorder,
                                     ),
                                   ),
-                                  child: _cnicImage != null
+                                  // ✅ Use _cnicImageBytes with Image.memory
+                                  child: _cnicImageBytes != null
                                       ? ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                             9,
                                           ),
-                                          child: Image.file(
-                                            _cnicImage!,
+                                          child: Image.memory(
+                                            _cnicImageBytes!,
                                             fit: BoxFit.cover,
                                           ),
                                         )
