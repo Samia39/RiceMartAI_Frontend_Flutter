@@ -2,14 +2,58 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '/core/utils/themes.dart';
-import '/core/services/dashboard_service.dart';
 
-class CartScreen extends StatelessWidget {
-  const CartScreen({Key? key}) : super(key: key);
+class CartItem {
+  final String id;
+  final String name;
+  final String weight;
+  final double price;
+  int quantity;
+
+  CartItem({
+    required this.id,
+    required this.name,
+    required this.weight,
+    required this.price,
+    this.quantity = 1,
+  });
+}
+
+class CartScreen extends StatefulWidget {
+  const CartScreen({super.key});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  // Dummy cart items — replace with GetX controller / real data
+  final List<CartItem> _items = [
+    CartItem(id: '1', name: 'Basmati Rice', weight: '5kg', price: 1200),
+    CartItem(id: '2', name: 'Super Kernel Rice', weight: '10kg', price: 2400),
+    CartItem(id: '3', name: 'Brown Rice', weight: '2kg', price: 650),
+  ];
+
+  double get _subtotal =>
+      _items.fold(0, (sum, item) => sum + item.price * item.quantity);
+  double get _shipping => _items.isEmpty ? 0 : 150;
+  double get _total => _subtotal + _shipping;
+
+  void _increment(CartItem item) => setState(() => item.quantity++);
+  void _decrement(CartItem item) {
+    if (item.quantity > 1) {
+      setState(() => item.quantity--);
+    } else {
+      _remove(item);
+    }
+  }
+
+  void _remove(CartItem item) {
+    setState(() => _items.remove(item));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final CartController cart = Get.find<CartController>();
     return Scaffold(
       body: Container(
         decoration: AppDecorations.gradientBackground,
@@ -18,231 +62,232 @@ class CartScreen extends StatelessWidget {
             children: [
               // AppBar
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 10, 16, 0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 18,
-                        color: AppColors.darkGreen,
-                      ),
-                      onPressed: () => Get.back(),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        'My Cart',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.heading3,
+                    GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: AppDecorations.iconButton,
+                        child: const Icon(Icons.arrow_back_ios_new, size: 16),
                       ),
                     ),
-                    const SizedBox(width: 44),
+                    const SizedBox(width: 12),
+                    Text('My Cart', style: AppTextStyles.heading3),
+                    const Spacer(),
+                    Text(
+                      '${_items.length} items',
+                      style: AppTextStyles.bodySmall,
+                    ),
                   ],
                 ),
               ),
+
               Expanded(
-                child: Obx(() {
-                  if (cart.items.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.shopping_cart_outlined,
-                            size: 72,
-                            color: AppColors.darkGreen.withOpacity(0.25),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Your cart is empty',
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                          const SizedBox(height: 10),
-                          TextButton(
-                            onPressed: () => Get.back(),
-                            child: Text(
-                              'Browse Products',
-                              style: AppTextStyles.label.copyWith(
-                                decoration: TextDecoration.underline,
-                                decorationColor: AppColors.darkGreen,
+                child: _items.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 64,
+                              color: AppColors.darkGreen.withOpacity(0.3),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Your cart is empty',
+                              style: AppTextStyles.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        itemCount: _items.length,
+                        itemBuilder: (context, index) {
+                          final item = _items[index];
+                          return Dismissible(
+                            key: Key(item.id),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) => _remove(item),
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              decoration: BoxDecoration(
+                                color: AppColors.error.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Icon(
+                                Icons.delete_outline,
+                                color: AppColors.error,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(18),
-                    itemCount: cart.items.length,
-                    itemBuilder: (_, i) {
-                      final item = cart.items[i];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: AppDecorations.card,
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: Image.asset(
-                                    item.product.imagePath,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
-                                      color: AppColors.cream.withOpacity(0.4),
-                                      child: const Icon(
-                                        Icons.grain,
-                                        size: 28,
-                                        color: Colors.white54,
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(14),
+                              decoration: AppDecorations.card,
+                              child: Row(
+                                children: [
+                                  // Icon placeholder
+                                  Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.lightGreen.withOpacity(
+                                        0.30,
                                       ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.grain,
+                                      color: AppColors.darkGreen,
+                                      size: 26,
                                     ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.product.name,
-                                      style: AppTextStyles.heading4,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item.name,
+                                          style: AppTextStyles.heading4,
+                                        ),
+                                        Text(
+                                          item.weight,
+                                          style: AppTextStyles.bodySmall,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'PKR ${(item.price * item.quantity).toStringAsFixed(0)}',
+                                          style: AppTextStyles.label.copyWith(
+                                            color: AppColors.golden,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      item.product.shop,
-                                      style: AppTextStyles.bodySmall,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Rs ${item.product.price.toStringAsFixed(0)}/kg',
-                                      style: AppTextStyles.label.copyWith(
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                children: [
+                                  ),
+                                  // Quantity
                                   Row(
                                     children: [
-                                      _QBtn(
+                                      _qtyButton(
                                         icon: Icons.remove,
-                                        onTap: () => cart.decrement(item),
+                                        onTap: () => _decrement(item),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 10,
                                         ),
                                         child: Text(
-                                          '${item.qty}',
+                                          '${item.quantity}',
                                           style: AppTextStyles.label,
                                         ),
                                       ),
-                                      _QBtn(
+                                      _qtyButton(
                                         icon: Icons.add,
-                                        onTap: () => cart.increment(item),
+                                        onTap: () => _increment(item),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 6),
-                                  GestureDetector(
-                                    onTap: () => cart.remove(item.product),
-                                    child: Text(
-                                      'Remove',
-                                      style: AppTextStyles.bodySmall.copyWith(
-                                        color: AppColors.error,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }),
+                            ),
+                          );
+                        },
+                      ),
               ),
-              Obx(() {
-                if (cart.items.isEmpty) return const SizedBox.shrink();
-                return Container(
+
+              // Summary
+              if (_items.isNotEmpty)
+                Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: AppColors.cardFill,
+                    color: AppColors.cream.withOpacity(0.25),
                     border: Border(
-                      top: BorderSide(color: AppColors.cardBorder),
+                      top: BorderSide(
+                        color: AppColors.borderGold.withOpacity(0.40),
+                      ),
                     ),
                   ),
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total (${cart.totalCount} items)',
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                          Text(
-                            'Rs ${cart.totalPrice.toStringAsFixed(0)}',
-                            style: AppTextStyles.heading4,
-                          ),
-                        ],
+                      _summaryRow(
+                        'Subtotal',
+                        'PKR ${_subtotal.toStringAsFixed(0)}',
+                      ),
+                      const SizedBox(height: 6),
+                      _summaryRow(
+                        'Shipping',
+                        'PKR ${_shipping.toStringAsFixed(0)}',
+                      ),
+                      Divider(color: AppColors.divider, height: 18),
+                      _summaryRow(
+                        'Total',
+                        'PKR ${_total.toStringAsFixed(0)}',
+                        bold: true,
                       ),
                       const SizedBox(height: 14),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () => Get.snackbar(
-                            'Order Placed',
-                            'Your order has been placed!',
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.snackbar(
+                            'Order Placed!',
+                            'Your order has been placed successfully.',
+                            backgroundColor: AppColors.cream.withOpacity(0.95),
+                            colorText: AppColors.darkGreen,
                             snackPosition: SnackPosition.BOTTOM,
-                          ),
-                          style: AppButtonStyles.primary,
-                          child: const Text(
-                            'Proceed to Checkout',
-                            style: AppTextStyles.button,
-                          ),
-                        ),
+                          );
+                        },
+                        child: const Text('Proceed to Checkout'),
                       ),
                     ],
                   ),
-                );
-              }),
+                ),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class _QBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _QBtn({required this.icon, required this.onTap});
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: AppColors.overlayLight,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.borderGold.withOpacity(0.5)),
+  Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: AppColors.cream.withOpacity(0.35),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.borderGold.withOpacity(0.50)),
+        ),
+        child: Icon(icon, size: 15, color: AppColors.darkGreen),
       ),
-      child: Icon(icon, size: 16, color: AppColors.darkGreen),
-    ),
-  );
-} // TODO Implement this library.
+    );
+  }
 
-// TODO Implement this library.
+  Widget _summaryRow(String label, String value, {bool bold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: bold ? AppTextStyles.heading4 : AppTextStyles.bodyLarge,
+        ),
+        Text(
+          value,
+          style: bold
+              ? AppTextStyles.heading4.copyWith(color: AppColors.golden)
+              : AppTextStyles.bodyLarge,
+        ),
+      ],
+    );
+  }
+}

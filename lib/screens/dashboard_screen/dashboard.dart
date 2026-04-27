@@ -1,11 +1,12 @@
-// ignore_for_file: unused_import
+// ignore_for_file: unused_import, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '/core/utils/themes.dart';
 
 import '/core/services/dashboard_service.dart';
+import '/core/services/shop_service.dart';
+import '/core/utils/themes.dart';
 import '/routes/app_routes.dart';
 
 import 'my_shop.dart';
@@ -16,6 +17,7 @@ import 'ai screen/ai_detection.dart';
 import 'ai screen/ai_suggestion.dart';
 import 'cart_screen.dart';
 import 'chat_screen.dart';
+import 'package:flutter_repo/screens/dashboard_screen/shops_screen.dart';
 
 // ─────────────────────────────────────────────
 //  DASHBOARD SCREEN  (tab host)
@@ -30,57 +32,140 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final GetStorage _box = GetStorage();
   int _tab = 0;
-  bool get _hasShop => _box.read('has_shop') == true;
 
-  // Register controllers once for the whole app session
+  bool _hasShop = false;
+
   final CartController _cart = Get.put(CartController());
   final AdminPriceController _adminPrices = Get.put(AdminPriceController());
 
   List<RicePrice> _prices = [];
   bool _loadingPrices = true;
+
   final _searchCtrl = TextEditingController();
   String _searchQuery = '';
+
+  List<Map<String, dynamic>> _apiShops = [];
+  bool _loadingApiShops = true;
+  String _shopsError = '';
 
   @override
   void initState() {
     super.initState();
+    _hasShop = _box.read('has_shop') == true;
     _loadPrices();
+    _loadApiShops();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadPrices() async {
     setState(() => _loadingPrices = true);
     final p = await RicePriceService.fetchPrices();
+    if (mounted) {
+      setState(() {
+        _prices = p;
+        _loadingPrices = false;
+      });
+    }
+  }
+
+  Future<void> _loadApiShops() async {
+    if (!mounted) return;
     setState(() {
-      _prices = p;
-      _loadingPrices = false;
+      _loadingApiShops = true;
+      _shopsError = '';
     });
+
+    final result = await ShopService.getAllShops();
+
+    if (!mounted) return;
+
+    if (result['success'] == true) {
+      final raw = result['shops'];
+      final shops = raw is List
+          ? raw.map((e) => Map<String, dynamic>.from(e as Map)).toList()
+          : <Map<String, dynamic>>[];
+      setState(() {
+        _apiShops = shops;
+        _loadingApiShops = false;
+        _shopsError = '';
+      });
+    } else {
+      setState(() {
+        _apiShops = [];
+        _loadingApiShops = false;
+        _shopsError = result['message'] ?? 'Failed to load shops';
+      });
+      Get.snackbar(
+        'Shops Error',
+        _shopsError,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 5),
+        backgroundColor: Colors.red.withOpacity(0.85),
+        colorText: Colors.white,
+      );
+    }
   }
 
   void _onShopCreated() {
-    setState(() => _tab = 1);
+    _box.write('has_shop', true);
+    if (!mounted) return;
+    setState(() {
+      _hasShop = true;
+      _tab = 1;
+    });
+    _loadApiShops();
   }
 
+  void _onShopDeleted() {
+    _box.remove('has_shop');
+    if (!mounted) return;
+    setState(() {
+      _hasShop = false;
+      _tab = 0;
+    });
+    _loadApiShops();
+  }
+
+  // ── 5 pages now (Home · My Shop/Create · Shops · Profile · Admin) ──
   List<Widget> get _pages {
     final home = _HomeTab(
       prices: _prices,
-      loading: _loadingPrices,
+      loadingPrices: _loadingPrices,
       searchCtrl: _searchCtrl,
       searchQuery: _searchQuery,
       onSearch: (v) => setState(() => _searchQuery = v),
-      onRefresh: _loadPrices,
-      userName: _box.read('userName') ?? 'User',
+      onRefresh: () {
+        _loadPrices();
+        _loadApiShops();
+      },
       cart: _cart,
+      apiShops: _apiShops,
+      loadingApiShops: _loadingApiShops,
+      shopsError: _shopsError,
     );
+
     if (_hasShop) {
-      return [home, MyShopScreen(), ProfileScreen(), AdminScreen()];
+      return [
+        home,
+        MyShopScreen(onShopDeleted: _onShopDeleted),
+        ShopsScreen(), // ← NEW
+        ProfileScreen(),
+        AdminScreen(),
+      ];
+    } else {
+      return [
+        home,
+        CreateShopScreen(onShopCreated: _onShopCreated),
+        ShopsScreen(), // ← NEW
+        ProfileScreen(),
+        AdminScreen(),
+      ];
     }
-    return [
-      home,
-      MyShopScreen(),
-      CreateShopScreen(onShopCreated: _onShopCreated),
-      ProfileScreen(),
-      AdminScreen(),
-    ];
   }
 
   @override
@@ -95,21 +180,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onTap: (i) => setState(() => _tab = i),
     ),
   );
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
 }
 
 // ─────────────────────────────────────────────
-//  BOTTOM NAV  (matches screenshot)
+//  BOTTOM NAV  (now 5 items)
 // ─────────────────────────────────────────────
 class _BottomNav extends StatelessWidget {
   final int current;
   final bool hasShop;
   final ValueChanged<int> onTap;
+
   const _BottomNav({
     required this.current,
     required this.hasShop,
@@ -119,27 +199,28 @@ class _BottomNav extends StatelessWidget {
   static const _itemsNoShop = [
     _NI(icon: Icons.home_outlined, active: Icons.home, label: 'Home'),
     _NI(
-      icon: Icons.storefront_outlined,
-      active: Icons.storefront,
-      label: 'Shops',
-    ),
-    _NI(
       icon: Icons.add_circle_outline,
       active: Icons.add_circle,
       label: 'Create',
       center: true,
     ),
+    _NI(
+      icon: Icons.storefront_outlined,
+      active: Icons.storefront,
+      label: 'Shops',
+    ), // ← NEW
     _NI(icon: Icons.person_outline, active: Icons.person, label: 'Profile'),
     _NI(icon: Icons.shield_outlined, active: Icons.shield, label: 'Admin'),
   ];
 
   static const _itemsHasShop = [
     _NI(icon: Icons.home_outlined, active: Icons.home, label: 'Home'),
+    _NI(icon: Icons.store_outlined, active: Icons.store, label: 'My Shop'),
     _NI(
       icon: Icons.storefront_outlined,
       active: Icons.storefront,
-      label: 'My Shop',
-    ),
+      label: 'Shops',
+    ), // ← NEW
     _NI(icon: Icons.person_outline, active: Icons.person, label: 'Profile'),
     _NI(icon: Icons.shield_outlined, active: Icons.shield, label: 'Admin'),
   ];
@@ -149,9 +230,9 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
-    final ico = (sw * 0.055).clamp(18.0, 26.0);
-    final fs = (sw * 0.028).clamp(9.0, 13.0);
-    final cs = (sw * 0.095).clamp(34.0, 46.0);
+    final ico = (sw * 0.050).clamp(16.0, 24.0); // slightly smaller for 5 items
+    final fs = (sw * 0.024).clamp(8.0, 11.5);
+    final cs = (sw * 0.085).clamp(30.0, 42.0);
 
     return Container(
       decoration: BoxDecoration(
@@ -253,34 +334,55 @@ class _NI {
 }
 
 // ─────────────────────────────────────────────
-//  HOME TAB CONTENT  (matches screenshot layout)
+//  HOME TAB  (unchanged)
 // ─────────────────────────────────────────────
 class _HomeTab extends StatelessWidget {
   final List<RicePrice> prices;
-  final bool loading;
+  final bool loadingPrices;
   final TextEditingController searchCtrl;
   final String searchQuery;
   final ValueChanged<String> onSearch;
   final VoidCallback onRefresh;
-  final String userName;
   final CartController cart;
+  final List<Map<String, dynamic>> apiShops;
+  final bool loadingApiShops;
+  final String shopsError;
 
   const _HomeTab({
     required this.prices,
-    required this.loading,
+    required this.loadingPrices,
     required this.searchCtrl,
     required this.searchQuery,
     required this.onSearch,
     required this.onRefresh,
-    required this.userName,
     required this.cart,
+    required this.apiShops,
+    required this.loadingApiShops,
+    required this.shopsError,
   });
 
-  List<RicePrice> get _filtered => prices
+  List<RicePrice> get _filteredPrices => prices
       .where((p) => p.name.toLowerCase().contains(searchQuery.toLowerCase()))
       .toList();
 
-  List<RiceProduct> get _riceList => RiceProduct.fromRegisteredShops();
+  List<RiceProduct> get _riceList {
+    final result = <RiceProduct>[];
+    for (final shop in apiShops) {
+      final cats = (shop['rice_categories'] as List?) ?? [];
+      for (final cat in cats) {
+        result.add(
+          RiceProduct(
+            name: cat['name'] ?? 'Rice',
+            shop: shop['shop_name'] ?? 'Unknown Shop',
+            shopId: shop['id']?.toString() ?? '',
+            imagePath: 'assets/images/rice.jpeg',
+            price: (cat['price_per_kg'] ?? 0).toDouble(),
+          ),
+        );
+      }
+    }
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,6 +390,7 @@ class _HomeTab extends StatelessWidget {
     final bannerH = (sw * 0.42).clamp(130.0, 200.0);
     final cardW = (sw * 0.38).clamp(130.0, 170.0);
     final cardImgH = (cardW * 0.65).clamp(80.0, 110.0);
+    final riceList = _riceList;
 
     return SafeArea(
       child: RefreshIndicator(
@@ -299,30 +402,23 @@ class _HomeTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header row (matches screenshot) ────────────
+              // ── Header ─────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
                 child: Row(
                   children: [
-                    // App name
                     Text('Rice Mart', style: AppTextStyles.heading2),
                     const Spacer(),
-
-                    // Notification bell
                     _HdrBtn(
                       icon: Icons.notifications_outlined,
                       onTap: () => Get.toNamed(AppRoutes.notifications),
                     ),
                     const SizedBox(width: 8),
-
-                    // Chat
                     _HdrBtn(
                       icon: Icons.chat_bubble_outline,
                       onTap: () => Get.toNamed(AppRoutes.chat),
                     ),
                     const SizedBox(width: 8),
-
-                    // Cart with badge
                     Obx(
                       () => _HdrBtn(
                         icon: Icons.shopping_cart_outlined,
@@ -331,8 +427,6 @@ class _HomeTab extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-
-                    // اردو toggle
                     TextButton.icon(
                       onPressed: () {},
                       style: TextButton.styleFrom(
@@ -398,7 +492,6 @@ class _HomeTab extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Overlay
                       Container(
                         height: bannerH,
                         decoration: BoxDecoration(
@@ -443,7 +536,7 @@ class _HomeTab extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              // ── Search bar ──────────────────────────────────
+              // ── Search ──────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Container(
@@ -484,7 +577,7 @@ class _HomeTab extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // ── AI buttons (two side-by-side) ───────────────
+              // ── AI buttons ──────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
@@ -511,7 +604,7 @@ class _HomeTab extends StatelessWidget {
               ),
               const SizedBox(height: 18),
 
-              // ── Rice Market Prices (admin-set) ──────────────
+              // ── Market Prices ───────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
@@ -572,7 +665,7 @@ class _HomeTab extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: AppColors.cardBorder),
                   ),
-                  child: loading
+                  child: loadingPrices
                       ? const Padding(
                           padding: EdgeInsets.all(24),
                           child: Center(
@@ -584,7 +677,6 @@ class _HomeTab extends StatelessWidget {
                         )
                       : Column(
                           children: [
-                            // Table header
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -620,14 +712,13 @@ class _HomeTab extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            // Rows
-                            ..._filtered.asMap().entries.map(
+                            ..._filteredPrices.asMap().entries.map(
                               (e) => _PriceRow(
                                 rice: e.value,
-                                isLast: e.key == _filtered.length - 1,
+                                isLast: e.key == _filteredPrices.length - 1,
                               ),
                             ),
-                            if (_filtered.isEmpty)
+                            if (_filteredPrices.isEmpty)
                               Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Text(
@@ -641,7 +732,7 @@ class _HomeTab extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // ── Rice List (registered shops only) ───────────
+              // ── Rice List header ────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
@@ -667,10 +758,16 @@ class _HomeTab extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        '${_riceList.length} available',
+                        loadingApiShops
+                            ? 'Loading...'
+                            : shopsError.isNotEmpty
+                            ? 'Error'
+                            : '${riceList.length} available',
                         style: AppTextStyles.bodySmall.copyWith(
                           fontSize: 10,
-                          color: AppColors.success,
+                          color: shopsError.isNotEmpty
+                              ? AppColors.error
+                              : AppColors.success,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -692,7 +789,60 @@ class _HomeTab extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              if (_riceList.isEmpty)
+              // ── Rice List body ──────────────────────────────
+              if (loadingApiShops)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.golden,
+                      strokeWidth: 2.5,
+                    ),
+                  ),
+                )
+              else if (shopsError.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: AppDecorations.card,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.wifi_off_outlined,
+                          size: 36,
+                          color: AppColors.darkGreen.withOpacity(0.4),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          shopsError,
+                          style: AppTextStyles.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: onRefresh,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
+                            decoration: AppDecorations.pill,
+                            child: Text(
+                              'Retry',
+                              style: AppTextStyles.label.copyWith(fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (riceList.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 18,
@@ -711,7 +861,7 @@ class _HomeTab extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'No products yet\nRegister a shop to list rice here',
+                          'No products yet.\nApproved shop products appear here.',
                           style: AppTextStyles.bodyMedium,
                           textAlign: TextAlign.center,
                         ),
@@ -725,9 +875,9 @@ class _HomeTab extends StatelessWidget {
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.only(left: 18, right: 8),
-                    itemCount: _riceList.length,
+                    itemCount: riceList.length,
                     itemBuilder: (_, i) => _ProductCard(
-                      product: _riceList[i],
+                      product: riceList[i],
                       cardWidth: cardW,
                       imgHeight: cardImgH,
                       cart: cart,
@@ -745,7 +895,7 @@ class _HomeTab extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  HEADER BUTTON  (bell, chat, cart)
+//  HEADER BUTTON
 // ─────────────────────────────────────────────
 class _HdrBtn extends StatelessWidget {
   final IconData icon;
@@ -790,7 +940,7 @@ class _HdrBtn extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  AI FEATURE BUTTON  (side-by-side layout)
+//  AI BUTTON
 // ─────────────────────────────────────────────
 class _AiBtn extends StatelessWidget {
   final IconData icon;
@@ -845,7 +995,7 @@ class _AiBtn extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  PRICE ROW  (no Change column, matches screenshot)
+//  PRICE ROW
 // ─────────────────────────────────────────────
 class _PriceRow extends StatelessWidget {
   final RicePrice rice;
@@ -890,7 +1040,7 @@ class _PriceRow extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  PRODUCT CARD  (Rice List)
+//  PRODUCT CARD
 // ─────────────────────────────────────────────
 class _ProductCard extends StatelessWidget {
   final RiceProduct product;
@@ -905,7 +1055,6 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-    // Tapping the card navigates to the corresponding shop
     onTap: () => Get.toNamed(
       AppRoutes.shops,
       arguments: {'highlightShopId': product.shopId},
@@ -917,7 +1066,6 @@ class _ProductCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image
           ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(14),
@@ -940,7 +1088,6 @@ class _ProductCard extends StatelessWidget {
               ),
             ),
           ),
-          // Info
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Column(
@@ -967,7 +1114,6 @@ class _ProductCard extends StatelessWidget {
                       'Rs ${product.price.toStringAsFixed(0)}/kg',
                       style: AppTextStyles.label.copyWith(fontSize: 12),
                     ),
-                    // + / check button
                     Obx(
                       () => GestureDetector(
                         onTap: () {

@@ -1,21 +1,18 @@
 // ignore_for_file: unused_import, deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'dart:typed_data';
 import '/core/utils/themes.dart';
 import '/core/services/shop_service.dart';
 import '/routes/app_routes.dart';
-import 'create_shops.dart';
 
-// ─────────────────────────────────────────────
-//  MY SHOP SCREEN
-// ─────────────────────────────────────────────
 class MyShopScreen extends StatefulWidget {
-  const MyShopScreen({Key? key}) : super(key: key);
+  // ✅ Callback so Dashboard knows when shop is deleted → shows Create tab
+  final VoidCallback? onShopDeleted;
+  const MyShopScreen({Key? key, this.onShopDeleted}) : super(key: key);
 
   @override
   State<MyShopScreen> createState() => _MyShopScreenState();
@@ -29,17 +26,16 @@ class _MyShopScreenState extends State<MyShopScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
 
-  // Controllers — match CreateShopScreen fields exactly
   final _shopNameCtrl = TextEditingController();
   final _ownerNameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
 
-  File? _cnicImage;
+  // ✅ Uint8List — Web + Mobile compatible, never a File
+  Uint8List? _cnicImageBytes;
   List<Map<String, dynamic>> _categories = [];
 
-  // ── Load ────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
@@ -51,46 +47,50 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
     final result = await ShopService.getMyShop();
 
-    if (result['success']) {
-      final shop = result['data']['data'] ?? result['data'];
+    if (result['success'] == true) {
+      // ✅ ShopService.getMyShop() now returns result['shop'] (not result['data'])
+      final shop = (result['shop'] as Map?)?.cast<String, dynamic>() ?? {};
       setState(() {
         _shopData = shop;
-        _shopNameCtrl.text = shop['shop_name'] ?? '';
-        _ownerNameCtrl.text = shop['owner_name'] ?? '';
-        _phoneCtrl.text = shop['phone'] ?? '';
-        _addressCtrl.text = shop['address'] ?? '';
-        _descriptionCtrl.text = shop['description'] ?? '';
+        _shopNameCtrl.text = (shop['shop_name'] as String?) ?? '';
+        _ownerNameCtrl.text = (shop['owner_name'] as String?) ?? '';
+        _phoneCtrl.text = (shop['phone'] as String?) ?? '';
+        _addressCtrl.text = (shop['address'] as String?) ?? '';
+        _descriptionCtrl.text = (shop['description'] as String?) ?? '';
 
-        // rice_categories comes as a list from the API
-        if (shop['rice_categories'] != null) {
-          _categories = List<Map<String, dynamic>>.from(
-            (shop['rice_categories'] as List).map(
-              (c) => {
-                'id': c['id'],
-                'name': c['name'] ?? '',
-                'price_per_kg': c['price_per_kg'] ?? 0,
-              },
-            ),
-          );
+        if (shop['rice_categories'] is List) {
+          _categories = (shop['rice_categories'] as List)
+              .map(
+                (c) => {
+                  'id': c['id'],
+                  'name': (c['name'] as String?) ?? '',
+                  'price_per_kg': c['price_per_kg'] ?? 0,
+                },
+              )
+              .toList()
+              .cast<Map<String, dynamic>>();
         }
       });
     } else {
-      Get.snackbar('Error', result['message'] ?? 'Failed to load shop');
+      final msg = (result['message'] as String?) ?? 'Failed to load shop';
+      Get.snackbar('Error', msg);
     }
 
     setState(() => _isLoading = false);
   }
 
-  // ── Pick new CNIC image ──────────────────────────────────────
   Future<void> _pickImage() async {
     final XFile? file = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
     );
-    if (file != null) setState(() => _cnicImage = File(file.path));
+    if (file != null) {
+      final bytes = await file.readAsBytes();
+      setState(() => _cnicImageBytes = bytes);
+    }
   }
 
-  // ── Save / update ────────────────────────────────────────────
+  // ✅ cnicImageBytes is optional — null means "keep existing"
   Future<void> _saveChanges() async {
     if (_shopNameCtrl.text.isEmpty ||
         _ownerNameCtrl.text.isEmpty ||
@@ -102,7 +102,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
     setState(() => _isSaving = true);
 
-    var _cnicImageBytes;
     final result = await ShopService.updateShop(
       shopId: _shopData['id'].toString(),
       shopName: _shopNameCtrl.text.trim(),
@@ -111,21 +110,24 @@ class _MyShopScreenState extends State<MyShopScreen> {
       address: _addressCtrl.text.trim(),
       description: _descriptionCtrl.text.trim(),
       riceCategories: _categories,
-      cnicImageBytes: _cnicImageBytes!,
+      cnicImageBytes: _cnicImageBytes, // null = don't change image
     );
 
     setState(() => _isSaving = false);
 
-    if (result['success']) {
-      setState(() => _isEditing = false);
+    if (result['success'] == true) {
+      setState(() {
+        _isEditing = false;
+        _cnicImageBytes = null;
+      });
       Get.snackbar('Success', 'Shop updated successfully!');
       _loadShopData();
     } else {
-      Get.snackbar('Error', result['message'] ?? 'Update failed');
+      final msg = (result['message'] as String?) ?? 'Update failed';
+      Get.snackbar('Error', msg);
     }
   }
 
-  // ── Delete shop ──────────────────────────────────────────────
   void _deleteShop() {
     Get.defaultDialog(
       title: 'Delete Shop?',
@@ -138,16 +140,19 @@ class _MyShopScreenState extends State<MyShopScreen> {
       onConfirm: () async {
         Get.back();
         final result = await ShopService.deleteShop(_shopData['id'].toString());
-        if (result['success']) {
-          Get.offAllNamed(AppRoutes.createshops);
+        if (result['success'] == true) {
+          // ✅ Clear storage flag
+          GetStorage().remove('has_shop');
+          // ✅ Notify Dashboard so it swaps tab
+          widget.onShopDeleted?.call();
         } else {
-          Get.snackbar('Error', result['message'] ?? 'Delete failed');
+          final msg = (result['message'] as String?) ?? 'Delete failed';
+          Get.snackbar('Error', msg);
         }
       },
     );
   }
 
-  // ── Add category dialog ──────────────────────────────────────
   void _showAddCategoryDialog() {
     final nameCtrl = TextEditingController();
     final priceCtrl = TextEditingController();
@@ -202,12 +207,11 @@ class _MyShopScreenState extends State<MyShopScreen> {
     );
   }
 
-  // ── Edit category dialog ─────────────────────────────────────
   void _showEditCategoryDialog(int index) {
     final cat = _categories[index];
-    final nameCtrl = TextEditingController(text: cat['name']);
+    final nameCtrl = TextEditingController(text: cat['name']?.toString());
     final priceCtrl = TextEditingController(
-      text: cat['price_per_kg'].toString(),
+      text: cat['price_per_kg']?.toString(),
     );
     showDialog(
       context: context,
@@ -287,7 +291,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
     );
   }
 
-  // ── Section card ─────────────────────────────────────────────
   Widget _sectionCard({
     required String title,
     IconData? icon,
@@ -315,13 +318,11 @@ class _MyShopScreenState extends State<MyShopScreen> {
     );
   }
 
-  // ── Label ────────────────────────────────────────────────────
   Widget _label(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
     child: Text(text, style: AppTextStyles.labelMuted),
   );
 
-  // ── Input field ──────────────────────────────────────────────
   Widget _buildField({
     required TextEditingController controller,
     required String hint,
@@ -355,7 +356,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
     );
   }
 
-  // ── Info row (view mode) ─────────────────────────────────────
   Widget _infoRow(IconData icon, String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 10),
     child: Row(
@@ -363,24 +363,26 @@ class _MyShopScreenState extends State<MyShopScreen> {
       children: [
         Icon(icon, size: 18, color: AppColors.golden),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.bodySmall.copyWith(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              value,
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: AppTextStyles.bodyLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     ),
@@ -391,9 +393,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
     child: Divider(height: 1, color: AppColors.divider),
   );
 
-  // ════════════════════════════════════════════
-  //  BUILD
-  // ════════════════════════════════════════════
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -413,7 +412,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // ── AppBar ───────────────────────────────────────
+              // ── AppBar ──────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -475,13 +474,13 @@ class _MyShopScreenState extends State<MyShopScreen> {
                 ),
               ),
 
-              // ── Body ─────────────────────────────────────────
+              // ── Body ────────────────────────────────────────
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
                   child: Column(
                     children: [
-                      // ── CNIC Section ────────────────────────
+                      // ── CNIC ──────────────────────────────
                       _sectionCard(
                         title: 'CNIC Information',
                         icon: Icons.credit_card_outlined,
@@ -489,15 +488,14 @@ class _MyShopScreenState extends State<MyShopScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (_isEditing) ...[
-                              // CNIC number is not editable for security
                               _infoRow(
                                 Icons.badge_outlined,
                                 'CNIC Number',
-                                _shopData['cnic_number'] ?? 'N/A',
+                                (_shopData['cnic_number'] as String?) ?? 'N/A',
                               ),
                               _divider(),
                               const SizedBox(height: 10),
-                              _label('CNIC Image'),
+                              _label('CNIC Image (tap to update)'),
                               GestureDetector(
                                 onTap: _pickImage,
                                 child: Container(
@@ -510,13 +508,13 @@ class _MyShopScreenState extends State<MyShopScreen> {
                                       color: AppColors.inputBorder,
                                     ),
                                   ),
-                                  child: _cnicImage != null
+                                  child: _cnicImageBytes != null
                                       ? ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                             9,
                                           ),
-                                          child: Image.file(
-                                            _cnicImage!,
+                                          child: Image.memory(
+                                            _cnicImageBytes!,
                                             fit: BoxFit.cover,
                                           ),
                                         )
@@ -527,7 +525,8 @@ class _MyShopScreenState extends State<MyShopScreen> {
                                               borderRadius:
                                                   BorderRadius.circular(9),
                                               child: Image.network(
-                                                _shopData['cnic_image'],
+                                                _shopData['cnic_image']
+                                                    as String,
                                                 fit: BoxFit.cover,
                                                 width: double.infinity,
                                                 height: 110,
@@ -572,7 +571,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
                               _infoRow(
                                 Icons.badge_outlined,
                                 'CNIC Number',
-                                _shopData['cnic_number'] ?? 'N/A',
+                                (_shopData['cnic_number'] as String?) ?? 'N/A',
                               ),
                               _divider(),
                               const SizedBox(height: 10),
@@ -581,7 +580,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
                                   child: Image.network(
-                                    _shopData['cnic_image'],
+                                    _shopData['cnic_image'] as String,
                                     height: 110,
                                     width: double.infinity,
                                     fit: BoxFit.cover,
@@ -608,7 +607,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // ── Shop Information ─────────────────────
+                      // ── Shop Info ──────────────────────────
                       _sectionCard(
                         title: 'Shop Information',
                         icon: Icons.storefront_outlined,
@@ -659,31 +658,34 @@ class _MyShopScreenState extends State<MyShopScreen> {
                                   _infoRow(
                                     Icons.store_outlined,
                                     'Shop Name',
-                                    _shopData['shop_name'] ?? 'N/A',
+                                    (_shopData['shop_name'] as String?) ??
+                                        'N/A',
                                   ),
                                   _divider(),
                                   _infoRow(
                                     Icons.person_outline,
                                     'Owner Name',
-                                    _shopData['owner_name'] ?? 'N/A',
+                                    (_shopData['owner_name'] as String?) ??
+                                        'N/A',
                                   ),
                                   _divider(),
                                   _infoRow(
                                     Icons.phone_outlined,
                                     'Phone',
-                                    _shopData['phone'] ?? 'N/A',
+                                    (_shopData['phone'] as String?) ?? 'N/A',
                                   ),
                                   _divider(),
                                   _infoRow(
                                     Icons.location_on_outlined,
                                     'Address',
-                                    _shopData['address'] ?? 'N/A',
+                                    (_shopData['address'] as String?) ?? 'N/A',
                                   ),
                                   _divider(),
                                   _infoRow(
                                     Icons.info_outline,
                                     'Description',
-                                    _shopData['description'] ?? 'N/A',
+                                    (_shopData['description'] as String?) ??
+                                        'N/A',
                                   ),
                                   _divider(),
                                   _infoRow(
@@ -699,7 +701,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // ── Rice Categories ──────────────────────
+                      // ── Rice Categories ────────────────────
                       _sectionCard(
                         title: 'Rice Categories',
                         icon: Icons.grain,
@@ -779,7 +781,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
                                 child: Center(
                                   child: Text(
                                     _isEditing
-                                        ? 'No categories yet. Tap "Add Category" to start.'
+                                        ? 'No categories yet. Tap "Add Category".'
                                         : 'No rice categories added.',
                                     textAlign: TextAlign.center,
                                     style: AppTextStyles.bodySmall,
@@ -811,7 +813,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
-                                            cat['name'] ?? '',
+                                            cat['name']?.toString() ?? '',
                                             style: AppTextStyles.bodyLarge,
                                           ),
                                         ),
@@ -887,15 +889,18 @@ class _MyShopScreenState extends State<MyShopScreen> {
                       ),
                       const SizedBox(height: 24),
 
-                      // ── Action buttons ───────────────────────
+                      // ── Buttons ────────────────────────────
                       if (_isEditing)
                         Row(
                           children: [
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  setState(() => _isEditing = false);
-                                  _loadShopData(); // reset
+                                  setState(() {
+                                    _isEditing = false;
+                                    _cnicImageBytes = null;
+                                  });
+                                  _loadShopData();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.cream.withOpacity(

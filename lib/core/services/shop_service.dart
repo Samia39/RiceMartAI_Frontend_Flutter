@@ -4,8 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 class ShopService {
-  // ✅ FIXED: localhost → 10.0.2.2 for Android emulator
-  // For real device, use your PC IP: http://192.168.1.X:8000/api
+  // For Android emulator use 10.0.2.2 — for real device use your PC LAN IP
   static const String _baseUrl = 'http://localhost:8000/api';
 
   static Map<String, String> get _authHeaders {
@@ -15,6 +14,9 @@ class ShopService {
 
   // ─────────────────────────────────────────────────────────
   //  CREATE SHOP
+  //  POST /api/shops
+  //  Laravel returns: { success, message, data: shop }
+  //  Flutter reads:   result['success'], result['data']
   // ─────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> createShop({
     required String cnicNumber,
@@ -31,10 +33,8 @@ class ShopService {
         'POST',
         Uri.parse('$_baseUrl/shops'),
       );
-
       request.headers.addAll(_authHeaders);
 
-      // ✅ CNIC image bytes attach
       request.files.add(
         http.MultipartFile.fromBytes(
           'cnic_image',
@@ -55,15 +55,15 @@ class ShopService {
         const Duration(seconds: 30),
       );
       final response = await http.Response.fromStream(streamed);
-      final data = jsonDecode(response.body);
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return {'success': true, 'data': data};
+        return {'success': true, 'data': body['data']};
       }
       return {
         'success': false,
-        'message': data['message'] ?? 'Failed to create shop',
-        'errors': data['errors'] ?? {},
+        'message': body['message'] ?? 'Failed to create shop',
+        'errors': body['errors'] ?? {},
       };
     } catch (e) {
       return {'success': false, 'message': 'An error occurred: $e'};
@@ -72,6 +72,12 @@ class ShopService {
 
   // ─────────────────────────────────────────────────────────
   //  GET MY SHOP
+  //  GET /api/shops/my-shop
+  //  Laravel returns: { success, data: { id, shop_name, owner_name,
+  //                     phone, address, description, cnic_number,
+  //                     cnic_image (full URL), is_approved,
+  //                     rice_categories: [{id, name, price_per_kg}] } }
+  //  Flutter reads:   result['success'], result['shop']
   // ─────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getMyShop() async {
     try {
@@ -79,14 +85,55 @@ class ShopService {
           .get(Uri.parse('$_baseUrl/shops/my-shop'), headers: _authHeaders)
           .timeout(const Duration(seconds: 30));
 
-      final data = jsonDecode(response.body);
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200) {
-        return {'success': true, 'data': data};
+        return {'success': true, 'shop': body['data']};
       }
       return {
         'success': false,
-        'message': data['message'] ?? 'Failed to fetch shop',
+        'message': body['message'] ?? 'Failed to fetch shop',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'An error occurred: $e'};
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  //  GET ALL SHOPS
+  //  GET /api/shops           → ShopController@index  (paginated)
+  //  GET /api/shops/search?q= → ShopController@search (paginated)
+  //
+  //  Laravel returns:
+  //    { success: true, data: { current_page, data: [ ...shops ], ... } }
+  //                                            ^^^^^ shop array is HERE
+  //
+  //  Flutter reads:   result['success'], result['shops']  (List)
+  // ─────────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> getAllShops({String? query}) async {
+    try {
+      final uri = (query != null && query.isNotEmpty)
+          ? Uri.parse('$_baseUrl/shops/search?q=${Uri.encodeComponent(query)}')
+          : Uri.parse('$_baseUrl/shops');
+
+      final response = await http
+          .get(uri, headers: _authHeaders)
+          .timeout(const Duration(seconds: 30));
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200) {
+        // body['data']         = Laravel LengthAwarePaginator object
+        // body['data']['data'] = the actual shop array
+        final paginator = body['data'] as Map<String, dynamic>;
+        final shops = (paginator['data'] as List<dynamic>)
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+        return {'success': true, 'shops': shops};
+      }
+      return {
+        'success': false,
+        'message': body['message'] ?? 'Failed to fetch shops',
       };
     } catch (e) {
       return {'success': false, 'message': 'An error occurred: $e'};
@@ -95,6 +142,9 @@ class ShopService {
 
   // ─────────────────────────────────────────────────────────
   //  UPDATE SHOP
+  //  POST /api/shops/{id}  with _method=PUT
+  //  Laravel returns: { success, message, data: shop }
+  //  Flutter reads:   result['success']
   // ─────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> updateShop({
     required String shopId,
@@ -104,14 +154,13 @@ class ShopService {
     required String address,
     required String description,
     required List<Map<String, dynamic>> riceCategories,
-    Uint8List? cnicImageBytes, // ✅ optional — only if user changes image
+    Uint8List? cnicImageBytes, // null = keep existing image unchanged
   }) async {
     try {
       final request = http.MultipartRequest(
-        'POST', // POST + _method=PUT for Laravel
+        'POST',
         Uri.parse('$_baseUrl/shops/$shopId'),
       );
-
       request.headers.addAll(_authHeaders);
       request.fields['_method'] = 'PUT';
       request.fields['shop_name'] = shopName;
@@ -121,7 +170,6 @@ class ShopService {
       request.fields['description'] = description;
       request.fields['rice_categories'] = jsonEncode(riceCategories);
 
-      // ✅ Only attach image if user picked a new one
       if (cnicImageBytes != null) {
         request.files.add(
           http.MultipartFile.fromBytes(
@@ -136,15 +184,15 @@ class ShopService {
         const Duration(seconds: 30),
       );
       final response = await http.Response.fromStream(streamed);
-      final data = jsonDecode(response.body);
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200) {
-        return {'success': true, 'data': data};
+        return {'success': true, 'data': body['data']};
       }
       return {
         'success': false,
-        'message': data['message'] ?? 'Update failed',
-        'errors': data['errors'] ?? {},
+        'message': body['message'] ?? 'Update failed',
+        'errors': body['errors'] ?? {},
       };
     } catch (e) {
       return {'success': false, 'message': 'An error occurred: $e'};
@@ -153,6 +201,8 @@ class ShopService {
 
   // ─────────────────────────────────────────────────────────
   //  DELETE SHOP
+  //  DELETE /api/shops/{id}
+  //  Laravel returns: { success, message }
   // ─────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> deleteShop(String shopId) async {
     try {
@@ -160,10 +210,10 @@ class ShopService {
           .delete(Uri.parse('$_baseUrl/shops/$shopId'), headers: _authHeaders)
           .timeout(const Duration(seconds: 30));
 
-      final data = jsonDecode(response.body);
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200) return {'success': true};
-      return {'success': false, 'message': data['message'] ?? 'Delete failed'};
+      return {'success': false, 'message': body['message'] ?? 'Delete failed'};
     } catch (e) {
       return {'success': false, 'message': 'An error occurred: $e'};
     }
