@@ -20,7 +20,7 @@ class CreateShopScreen extends StatefulWidget {
 class _CreateShopScreenState extends State<CreateShopScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
+  // Controllers – shop info
   final _cnicController = TextEditingController();
   final _shopNameController = TextEditingController();
   final _ownerNameController = TextEditingController();
@@ -29,12 +29,16 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final _descriptionController = TextEditingController();
 
   bool _isLoading = false;
-  Uint8List? _cnicImageBytes; // ✅ bytes only — works on Web + Mobile
-  final List<Map<String, dynamic>> _riceCategories = [];
+  Uint8List? _cnicImageBytes;
 
   final ImagePicker _picker = ImagePicker();
 
-  // ── Pick CNIC image ────────────────────────────────────────
+  // ── Rice categories ──────────────────────────────────────────────────────
+  // Each entry: { 'name': String, 'price_per_kg': double, 'stock_kg': double,
+  //               'imageBytes': Uint8List? }
+  final List<Map<String, dynamic>> _riceCategories = [];
+
+  // ── Pick CNIC image ──────────────────────────────────────────────────────
   Future<void> _pickCnicImage() async {
     final XFile? file = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -46,83 +50,88 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     }
   }
 
-  // ── Add rice category dialog ───────────────────────────────
-  void _showAddCategoryDialog() {
-    final nameCtrl = TextEditingController();
-    final priceCtrl = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFFD4C9A8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Add Rice Category', style: AppTextStyles.heading3),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _dialogField(nameCtrl, 'Category Name (e.g. Basmati)', Icons.grain),
-            const SizedBox(height: 10),
-            _dialogField(
-              priceCtrl,
-              'Price per kg (PKR)',
-              Icons.currency_rupee,
-              type: TextInputType.number,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: AppTextStyles.labelMuted),
-          ),
-          ElevatedButton(
-            style: AppButtonStyles.primary.copyWith(
-              minimumSize: WidgetStateProperty.all(const Size(80, 40)),
-            ),
-            onPressed: () {
-              if (nameCtrl.text.isNotEmpty && priceCtrl.text.isNotEmpty) {
-                setState(() {
-                  _riceCategories.add({
-                    'name': nameCtrl.text.trim(),
-                    'price_per_kg': double.tryParse(priceCtrl.text) ?? 0,
-                  });
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add', style: AppTextStyles.button),
-          ),
-        ],
-      ),
+  // ── Pick rice category image ─────────────────────────────────────────────
+  Future<void> _pickCategoryImage(int index) async {
+    final XFile? file = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
     );
+    if (file != null) {
+      final bytes = await file.readAsBytes();
+      setState(() => _riceCategories[index]['imageBytes'] = bytes);
+    }
   }
 
-  Widget _dialogField(
-    TextEditingController ctrl,
-    String hint,
-    IconData icon, {
-    TextInputType type = TextInputType.text,
-  }) {
-    return Container(
-      decoration: AppDecorations.inputField,
-      child: TextField(
-        controller: ctrl,
-        keyboardType: type,
-        style: AppTextStyles.bodyLarge,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: AppTextStyles.hint,
-          prefixIcon: Icon(icon, color: AppColors.iconMuted, size: 18),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 13,
-          ),
-        ),
-      ),
-    );
+  // ── Add blank category ───────────────────────────────────────────────────
+  void _addCategory() {
+    setState(() {
+      _riceCategories.add({
+        'name': '',
+        'price_per_kg': 0.0,
+        'stock_kg': 0.0,
+        'imageBytes': null,
+      });
+    });
   }
 
-  // ── Input field builder ────────────────────────────────────
+  // ── Remove category ──────────────────────────────────────────────────────
+  void _removeCategory(int index) {
+    setState(() => _riceCategories.removeAt(index));
+  }
+
+  // ── Submit ───────────────────────────────────────────────────────────────
+  Future<void> _createShop() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_cnicImageBytes == null) {
+      Get.snackbar('Error', 'Please upload your CNIC image');
+      return;
+    }
+
+    if (_riceCategories.isEmpty) {
+      Get.snackbar('Error', 'Please add at least one rice category');
+      return;
+    }
+
+    // Validate each category has a name
+    for (int i = 0; i < _riceCategories.length; i++) {
+      if ((_riceCategories[i]['name'] as String).trim().isEmpty) {
+        Get.snackbar('Error', 'Category ${i + 1} needs a name');
+        return;
+      }
+    }
+
+    setState(() => _isLoading = true);
+
+    final result = await ShopService.createShop(
+      cnicNumber: _cnicController.text.trim(),
+      cnicImageBytes: _cnicImageBytes!,
+      shopName: _shopNameController.text.trim(),
+      ownerName: _ownerNameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      address: _addressController.text.trim(),
+      description: _descriptionController.text.trim(),
+      riceCategories: _riceCategories,
+    );
+
+    setState(() => _isLoading = false);
+
+    if (result['success'] == true) {
+      GetStorage().write('has_shop', true);
+      Get.snackbar('Success', 'Your shop has been created!');
+      widget.onShopCreated?.call();
+    } else {
+      Get.snackbar('Error', result['message'] ?? 'Something went wrong');
+    }
+  }
+
+  // ── Builders ─────────────────────────────────────────────────────────────
+
+  Widget _label(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Text(text, style: AppTextStyles.labelMuted),
+  );
+
   Widget _buildField({
     required TextEditingController controller,
     required String hint,
@@ -162,7 +171,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
-  // ── Section card wrapper ───────────────────────────────────
   Widget _sectionCard({
     required String title,
     required Widget child,
@@ -190,51 +198,194 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
-  // ── Label above a field ────────────────────────────────────
-  Widget _label(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Text(text, style: AppTextStyles.labelMuted),
-  );
+  // ── Single category card (matches Figma) ─────────────────────────────────
+  Widget _buildCategoryCard(int index) {
+    final cat = _riceCategories[index];
+    final nameCtrl = TextEditingController(text: cat['name']?.toString() ?? '');
+    final priceCtrl = TextEditingController(
+      text: cat['price_per_kg']?.toString() ?? '',
+    );
+    final stockCtrl = TextEditingController(
+      text: cat['stock_kg']?.toString() ?? '',
+    );
+    final imageBytes = cat['imageBytes'] as Uint8List?;
 
-  // ── Submit ─────────────────────────────────────────────────
-  Future<void> _createShop() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    // ✅ Check bytes, not File
-    if (_cnicImageBytes == null) {
-      Get.snackbar('Error', 'Please upload your CNIC image');
-      return;
-    }
-
-    if (_riceCategories.isEmpty) {
-      Get.snackbar('Error', 'Please add at least one rice category');
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    final result = await ShopService.createShop(
-      cnicNumber: _cnicController.text.trim(),
-      cnicImageBytes: _cnicImageBytes!, // ✅ safe — guarded by null check above
-      shopName: _shopNameController.text.trim(),
-      ownerName: _ownerNameController.text.trim(),
-      phone: _phoneController.text.trim(),
-      address: _addressController.text.trim(),
-      description: _descriptionController.text.trim(),
-      riceCategories: _riceCategories,
+    // Keep controllers synced to state on change
+    nameCtrl.addListener(() => _riceCategories[index]['name'] = nameCtrl.text);
+    priceCtrl.addListener(
+      () => _riceCategories[index]['price_per_kg'] =
+          double.tryParse(priceCtrl.text) ?? 0.0,
+    );
+    stockCtrl.addListener(
+      () => _riceCategories[index]['stock_kg'] =
+          double.tryParse(stockCtrl.text) ?? 0.0,
     );
 
-    setState(() => _isLoading = false);
+    return Container(
+      decoration: AppDecorations.card,
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Category ${index + 1}', style: AppTextStyles.heading4),
+              GestureDetector(
+                onTap: () => _removeCategory(index),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(Icons.close, size: 16, color: AppColors.error),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
 
-    if (result['success']) {
-      GetStorage().write('has_shop', true);
-      Get.snackbar('Success', 'Your shop has been created!');
-      widget.onShopCreated?.call();
-    } else {
-      Get.snackbar('Error', result['message'] ?? 'Something went wrong');
-    }
+          // Rice Name
+          _label('Rice Name'),
+          Container(
+            decoration: AppDecorations.inputField,
+            child: TextField(
+              controller: nameCtrl,
+              style: AppTextStyles.bodyLarge,
+              decoration: InputDecoration(
+                hintText: 'e.g. Basmati, Super Kernel...',
+                hintStyle: AppTextStyles.hint,
+                prefixIcon: Icon(
+                  Icons.grain,
+                  color: AppColors.iconMuted,
+                  size: 18,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 13,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Rice Image
+          _label('Rice Image'),
+          GestureDetector(
+            onTap: () => _pickCategoryImage(index),
+            child: Container(
+              height: 110,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.inputFill,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.inputBorder,
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: imageBytes != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(9),
+                      child: Image.memory(imageBytes, fit: BoxFit.cover),
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.upload_outlined,
+                          size: 28,
+                          color: AppColors.iconMuted,
+                        ),
+                        const SizedBox(height: 6),
+                        Text('Upload image', style: AppTextStyles.labelMuted),
+                      ],
+                    ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Stock + Price in a row
+          Row(
+            children: [
+              // Stock (kg)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label('Stock (kg)'),
+                    Container(
+                      decoration: AppDecorations.inputField,
+                      child: TextField(
+                        controller: stockCtrl,
+                        keyboardType: TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        style: AppTextStyles.bodyLarge,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*'),
+                          ),
+                        ],
+                        decoration: InputDecoration(
+                          hintText: '0',
+                          hintStyle: AppTextStyles.hint,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Price (Rs/kg)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _label('Price (Rs/kg)'),
+                    Container(
+                      decoration: AppDecorations.inputField,
+                      child: TextField(
+                        controller: priceCtrl,
+                        keyboardType: TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        style: AppTextStyles.bodyLarge,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*'),
+                          ),
+                        ],
+                        decoration: InputDecoration(
+                          hintText: '0',
+                          hintStyle: AppTextStyles.hint,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
+  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -243,7 +394,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // ── AppBar ──────────────────────────────────────
+              // AppBar
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -292,7 +443,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                 ),
               ),
 
-              // ── Scrollable body ─────────────────────────────
+              // Scrollable body
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -300,7 +451,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        // ── CNIC Section ──────────────────────
+                        // ── CNIC Section ──────────────────────────────────
                         _sectionCard(
                           title: 'CNIC Information',
                           icon: Icons.credit_card_outlined,
@@ -339,7 +490,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                                       color: AppColors.inputBorder,
                                     ),
                                   ),
-                                  // ✅ Use _cnicImageBytes with Image.memory
                                   child: _cnicImageBytes != null
                                       ? ClipRRect(
                                           borderRadius: BorderRadius.circular(
@@ -373,7 +523,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                         ),
                         const SizedBox(height: 14),
 
-                        // ── Shop Information ──────────────────
+                        // ── Shop Information ──────────────────────────────
                         _sectionCard(
                           title: 'Shop Information',
                           icon: Icons.storefront_outlined,
@@ -423,7 +573,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                         ),
                         const SizedBox(height: 14),
 
-                        // ── Rice Categories ───────────────────
+                        // ── Rice Categories ───────────────────────────────
                         _sectionCard(
                           title: 'Rice Categories',
                           icon: Icons.grain,
@@ -438,7 +588,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                                     style: AppTextStyles.labelMuted,
                                   ),
                                   GestureDetector(
-                                    onTap: _showAddCategoryDialog,
+                                    onTap: _addCategory,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
@@ -466,13 +616,14 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                                 ],
                               ),
                               const SizedBox(height: 12),
+
                               if (_riceCategories.isEmpty)
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(20),
                                   child: Center(
                                     child: Text(
-                                      'No rice categories added yet. Click "Add Category" to start.',
+                                      'No rice categories added yet.\nTap "Add Category" to start.',
                                       textAlign: TextAlign.center,
                                       style: AppTextStyles.bodySmall,
                                     ),
@@ -484,57 +635,15 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                                   physics: const NeverScrollableScrollPhysics(),
                                   itemCount: _riceCategories.length,
                                   separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 8),
-                                  itemBuilder: (_, i) {
-                                    final cat = _riceCategories[i];
-                                    return Container(
-                                      decoration: AppDecorations.inputField,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 12,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.grain,
-                                            size: 18,
-                                            color: AppColors.golden,
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: Text(
-                                              cat['name'],
-                                              style: AppTextStyles.bodyLarge,
-                                            ),
-                                          ),
-                                          Text(
-                                            'PKR ${cat['price_per_kg']}',
-                                            style: AppTextStyles.label.copyWith(
-                                              color: AppColors.golden,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          GestureDetector(
-                                            onTap: () => setState(
-                                              () => _riceCategories.removeAt(i),
-                                            ),
-                                            child: const Icon(
-                                              Icons.close,
-                                              size: 18,
-                                              color: AppColors.error,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (_, i) => _buildCategoryCard(i),
                                 ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 24),
 
-                        // ── Submit button ─────────────────────
+                        // ── Submit button ─────────────────────────────────
                         SizedBox(
                           width: double.infinity,
                           height: 52,
