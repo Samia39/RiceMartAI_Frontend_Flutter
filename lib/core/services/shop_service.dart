@@ -15,8 +15,8 @@ class ShopService {
   //  CREATE SHOP
   //  POST /api/shops  (multipart)
   //
-  //  rice_categories  →  JSON string: [{name, price_per_kg, stock_kg}, ...]
-  //  rice_image_0..N  →  one file field per category (if image chosen)
+  //  rice_categories  → JSON: [{name, price_per_kg, stock_kg}]
+  //  rice_image_0..N  → one file field per category
   // ─────────────────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> createShop({
     required String cnicNumber,
@@ -53,7 +53,7 @@ class ShopService {
       request.fields['address'] = address;
       request.fields['description'] = description;
 
-      // Build JSON list (without imageBytes — that goes as a file)
+      // Categories JSON (no imageBytes — those go as files)
       final categoriesJson = riceCategories
           .map(
             (cat) => {
@@ -65,7 +65,7 @@ class ShopService {
           .toList();
       request.fields['rice_categories'] = jsonEncode(categoriesJson);
 
-      // One file per category  →  rice_image_0, rice_image_1, ...
+      // Category images → rice_image_0, rice_image_1 ...
       for (int i = 0; i < riceCategories.length; i++) {
         final bytes = riceCategories[i]['imageBytes'] as Uint8List?;
         if (bytes != null) {
@@ -102,6 +102,9 @@ class ShopService {
   // ─────────────────────────────────────────────────────────────────────────
   //  GET MY SHOP
   //  GET /api/shops/my-shop
+  //
+  //  Response rice_categories: [{ name, price_per_kg, stock_kg,
+  //                               image (raw path), image_url (full URL) }]
   // ─────────────────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> getMyShop() async {
     try {
@@ -157,16 +160,11 @@ class ShopService {
 
   // ─────────────────────────────────────────────────────────────────────────
   //  UPDATE SHOP
-  //  POST /api/shops/{id}  (with _method=PUT)
+  //  POST /api/shops/{id}  (_method=PUT)
   //
-  //  rice_categories →  JSON: [{name, price_per_kg, stock_kg,
-  //                              existing_image?}]
-  //                     existing_image = raw storage path (NOT full URL),
-  //                     sent when the user did NOT pick a new image so the
-  //                     backend can keep the old file.
-  //  rice_image_N    →  new image bytes (only when user re-picked)
-  //  cnicImageBytes  →  null = keep existing
-  //  cnicNumber      →  null = keep existing
+  //  rice_categories → JSON: [{ name, price_per_kg, stock_kg,
+  //                              image?: rawStoragePath (keep existing) }]
+  //  rice_image_N    → new image bytes (only when user re-picked)
   // ─────────────────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> updateShop({
     required String shopId,
@@ -177,7 +175,7 @@ class ShopService {
     required String description,
     // Each map: { 'name', 'price_per_kg', 'stock_kg',
     //             'imageBytes': Uint8List?,   ← new pick
-    //             'existingImage': String? }  ← raw storage path kept
+    //             'existingImage': String? }  ← raw path to keep
     required List<Map<String, dynamic>> riceCategories,
     Uint8List? cnicImageBytes,
     String? cnicNumber,
@@ -209,22 +207,22 @@ class ShopService {
         );
       }
 
-      // Build JSON list
+      // Build categories JSON
+      // 'image' = raw storage path → backend keeps it if no new file uploaded
       final categoriesJson = riceCategories.map((cat) {
         final map = <String, dynamic>{
           'name': cat['name'],
           'price_per_kg': cat['price_per_kg'],
           'stock_kg': cat['stock_kg'] ?? 0,
         };
-        // Pass raw storage path so backend can retain old image
         if (cat['existingImage'] != null) {
-          map['existing_image'] = cat['existingImage'];
+          map['image'] = cat['existingImage']; // raw path kept
         }
         return map;
       }).toList();
       request.fields['rice_categories'] = jsonEncode(categoriesJson);
 
-      // Attach new images
+      // New category images
       for (int i = 0; i < riceCategories.length; i++) {
         final bytes = riceCategories[i]['imageBytes'] as Uint8List?;
         if (bytes != null) {
