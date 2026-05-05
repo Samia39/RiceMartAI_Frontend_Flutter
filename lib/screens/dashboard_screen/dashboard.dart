@@ -21,7 +21,7 @@ import 'chat_screen.dart';
 //  DASHBOARD SCREEN  (tab host)
 // ─────────────────────────────────────────────
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -348,7 +348,7 @@ class _HomeTab extends StatelessWidget {
                         child: Image.asset(
                           'assets/images/home_screen.jpeg',
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             height: bannerH,
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
@@ -899,7 +899,7 @@ class _ProductCard extends StatelessWidget {
               child: Image.asset(
                 product.imagePath,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   color: AppColors.cream.withOpacity(0.4),
                   child: const Icon(
                     Icons.grain,
