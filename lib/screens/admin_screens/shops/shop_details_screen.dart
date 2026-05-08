@@ -10,9 +10,6 @@ class ShopDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List riceCategories =
-        shop["rice_categories"] ?? shop["riceCategories"] ?? [];
-
     String cnicImage = "";
     if (shop["cnic_image"] != null &&
         shop["cnic_image"].toString().isNotEmpty) {
@@ -129,75 +126,6 @@ class ShopDetailsScreen extends StatelessWidget {
                       )
                     : const Center(child: Text("No CNIC image")),
               ),
-
-              const SizedBox(height: 20),
-
-              // RICE
-              sectionTitle("Rice Categories"),
-
-              if (riceCategories.isEmpty)
-                const Text("No rice categories found")
-              else
-                ...riceCategories.map<Widget>((rice) {
-                  String riceImage = "";
-
-                  if (rice["image"] != null &&
-                      rice["image"].toString().isNotEmpty) {
-                    riceImage =
-                        "http://127.0.0.1:8000/storage/${rice["image"]}";
-                  }
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 15),
-                    padding: const EdgeInsets.all(16),
-                    decoration: AppDecorations.card,
-
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          rice["name"] ?? "-",
-                          style: AppTextStyles.heading4,
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                child: Text("Stock: ${rice["stock"]} Kg"),
-                              ),
-                            ),
-
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                child: Text("Price: Rs ${rice["price"]}"),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        if (riceImage.isNotEmpty)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              riceImage,
-                              height: 180,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        else
-                          const Text("No rice image"),
-                      ],
-                    ),
-                  );
-                }).toList(),
 
               const SizedBox(height: 30),
 

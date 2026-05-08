@@ -1,9 +1,9 @@
-import 'package:frontend/screens/dashboard_screen.dart';
+import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import 'package:get/get.dart';
-import '../screens/login_screen.dart';
+import '../screens/auth/login_screen.dart';
 import '../screens/splash_screen.dart';
 import '../middleware/auth_middleware.dart';
-import '../screens/register_screen.dart';
+import '../screens/auth/register_screen.dart';
 import '../screens/admin_screens/dashboard/admin_dashboard.dart';
 
 class AppRoutes {
@@ -24,14 +24,5 @@ class AppRoutes {
       middlewares: [AuthMiddleware()],
     ),
     GetPage(name: adminDashboard, page: () => const AdminDashboard()),
-
-    // Example protected route (later)
-    /*
-    GetPage(
-      name: '/home',
-      page: () => HomeScreen(),
-      middlewares: [AuthMiddleware()],
-    ),
-    */
   ];
 }

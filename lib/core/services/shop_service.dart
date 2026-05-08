@@ -13,9 +13,6 @@ class ShopService {
     required String phone,
     required String address,
     required String description,
-
-    // NEW
-    required List<Map<String, dynamic>> riceCategories,
   }) async {
     final response = await http.post(
       Uri.parse("$baseUrl/shops"),
@@ -33,12 +30,8 @@ class ShopService {
         "phone": phone,
         "address": address,
         "description": description,
-
         "status": "pending",
         "is_approved": 0,
-
-        // send rice categories
-        "rice_categories": riceCategories,
       }),
     );
 

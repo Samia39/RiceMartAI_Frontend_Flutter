@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/create_shop_screen.dart';
+import 'package:frontend/screens/seller/shop/create_shop_screen.dart';
 import 'package:frontend/screens/admin_screens/analytics/analytics_screen.dart';
 import 'package:frontend/screens/admin_screens/notifications/admin_notifications_screen.dart';
 import 'package:frontend/screens/admin_screens/search/admin_search_results_screen.dart';

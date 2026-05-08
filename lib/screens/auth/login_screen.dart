@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '../core/utils/themes.dart';
-import '../core/services/auth_service.dart';
+import '../../core/utils/themes.dart';
+import '../../core/services/auth_service.dart';
+
+import '../buyer/dashboard/buyer_dashboard_screen.dart';
+import '../seller/dashboard/seller_dashboard_screen.dart';
+import '../admin_screens/dashboard/admin_dashboard.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -15,8 +18,8 @@ class LoginScreen extends StatelessWidget {
   final box = GetStorage();
 
   void login() async {
-    String email = emailController.text;
-    String password = passwordController.text;
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       Get.snackbar("Error", "Please fill all fields");
@@ -27,15 +30,45 @@ class LoginScreen extends StatelessWidget {
       var response = await _authService.login(email, password);
 
       if (response['token'] != null) {
+        // SAVE TOKEN
         box.write('token', response['token']);
+
+        // SAVE ROLE
+        box.write('role', response['role']);
+
+        // SAVE SHOP STATUS
+        box.write('has_shop', response['has_shop']);
 
         Get.snackbar("Success", "Login successful");
 
-        Get.offNamed(AppRoutes.adminDashboard);
+        String role = response['role'] ?? "user";
+
+        bool hasShop = response['has_shop'] ?? false;
+
+        // =========================
+        // ADMIN
+        // =========================
+        if (role == "admin") {
+          Get.offAll(() => const AdminDashboard());
+        }
+        // =========================
+        // SELLER
+        // =========================
+        else if (hasShop == true) {
+          Get.offAll(() => const SellerDashboardScreen());
+        }
+        // =========================
+        // BUYER
+        // =========================
+        else {
+          Get.offAll(() => const BuyerDashboardScreen());
+        }
       } else {
-        Get.snackbar("Error", response['message']);
+        Get.snackbar("Error", response['message'] ?? "Login failed");
       }
     } catch (e) {
+      print(e);
+
       Get.snackbar("Error", "Server error");
     }
   }

@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/create_shop_screen.dart';
-import '../core/utils/themes.dart';
-import '../core/constants/app_icons.dart';
 
-class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+import '../../../core/utils/themes.dart';
+import '../../../core/constants/app_icons.dart';
+
+// SELLER SCREEN
+import '../../seller/dashboard/seller_dashboard_screen.dart';
+
+class BuyerDashboardScreen extends StatefulWidget {
+  const BuyerDashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<BuyerDashboardScreen> createState() => _BuyerDashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   int currentIndex = 0;
 
-  final screens = [
+  final List<Widget> screens = [
+    // HOME
     Center(child: Text("Home", style: AppTextStyles.heading2)),
+
+    // SHOPS
     Center(child: Text("Shops", style: AppTextStyles.heading2)),
-    CreateShopScreen(),
+
+    // BECOME SELLER / CREATE SHOP
+    const SellerDashboardScreen(),
+
+    // CHAT
     Center(child: Text("Chat", style: AppTextStyles.heading2)),
+
+    // PROFILE
     Center(child: Text("Profile", style: AppTextStyles.heading2)),
   ];
 
@@ -25,13 +37,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.gradientBackground,
+
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
         body: screens[currentIndex],
 
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: AppColors.cream,
+
           currentIndex: currentIndex,
+
           onTap: (index) {
             setState(() {
               currentIndex = index;
@@ -39,13 +55,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
 
           selectedItemColor: AppColors.darkGreen,
+
           unselectedItemColor: AppColors.darkGreen.withOpacity(0.5),
+
+          type: BottomNavigationBarType.fixed,
 
           items: const [
             BottomNavigationBarItem(icon: Icon(AppIcons.home), label: "Home"),
+
             BottomNavigationBarItem(icon: Icon(AppIcons.shops), label: "Shops"),
-            BottomNavigationBarItem(icon: Icon(AppIcons.add), label: "Add"),
+
+            BottomNavigationBarItem(icon: Icon(AppIcons.add), label: "Sell"),
+
             BottomNavigationBarItem(icon: Icon(AppIcons.chat), label: "Chat"),
+
             BottomNavigationBarItem(
               icon: Icon(AppIcons.profile),
               label: "Profile",

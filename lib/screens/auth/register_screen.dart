@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../core/utils/themes.dart';
-import '../core/services/auth_service.dart';
+import '../../core/utils/themes.dart';
+import '../../core/services/auth_service.dart';
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
