@@ -78,4 +78,24 @@ class RiceService {
 
     return jsonDecode(response.body);
   }
+
+  // =========================
+  // FETCH ALL RICE
+  // =========================
+  Future<List<Map<String, dynamic>>> fetchAllRice() async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/all-rice"),
+
+      headers: {"Accept": "application/json"},
+    );
+
+    print(response.statusCode);
+    print(response.body);
+
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    }
+
+    return [];
+  }
 }

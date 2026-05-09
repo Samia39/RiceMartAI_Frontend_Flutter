@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/buyer/profile/profile_screen.dart';
+
+import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
+import 'package:frontend/screens/buyer/shops/shops_screen.dart';
 
 import '../../../core/utils/themes.dart';
 import '../../../core/constants/app_icons.dart';
-
-// SELLER SCREEN
-import '../../seller/dashboard/seller_dashboard_screen.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
   const BuyerDashboardScreen({super.key});
@@ -20,17 +21,17 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
     // HOME
     Center(child: Text("Home", style: AppTextStyles.heading2)),
 
-    // SHOPS
-    Center(child: Text("Shops", style: AppTextStyles.heading2)),
+    // RICE MARKETPLACE
+    const AllRiceScreen(),
 
-    // BECOME SELLER / CREATE SHOP
-    const SellerDashboardScreen(),
+    // SHOPS
+    const ShopsScreen(),
 
     // CHAT
     Center(child: Text("Chat", style: AppTextStyles.heading2)),
 
     // PROFILE
-    Center(child: Text("Profile", style: AppTextStyles.heading2)),
+    const ProfileScreen(),
   ];
 
   @override
@@ -63,9 +64,9 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           items: const [
             BottomNavigationBarItem(icon: Icon(AppIcons.home), label: "Home"),
 
-            BottomNavigationBarItem(icon: Icon(AppIcons.shops), label: "Shops"),
+            BottomNavigationBarItem(icon: Icon(AppIcons.rice), label: "Rice"),
 
-            BottomNavigationBarItem(icon: Icon(AppIcons.add), label: "Sell"),
+            BottomNavigationBarItem(icon: Icon(AppIcons.shops), label: "Shops"),
 
             BottomNavigationBarItem(icon: Icon(AppIcons.chat), label: "Chat"),
 

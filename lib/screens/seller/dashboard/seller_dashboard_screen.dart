@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/shop_service.dart';
 import 'package:get_storage/get_storage.dart';
 
-import '../shop/create_shop_screen.dart';
 import '../rice/add_rice_screen.dart';
+import '../shop/create_shop_screen.dart';
+import '../shop/my_shop_screen.dart';
+
+import '../../../core/utils/themes.dart';
+import '../../../core/constants/app_icons.dart';
 
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
@@ -14,15 +17,14 @@ class SellerDashboardScreen extends StatefulWidget {
 
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   bool hasShop = false;
-  bool isApproved = false;
+
+  int currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
 
     loadSellerData();
-
-    checkApprovalStatus();
   }
 
   void loadSellerData() {
@@ -30,29 +32,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
 
     hasShop = box.read("has_shop") ?? false;
 
-    isApproved = box.read("shop_approved") ?? false;
-
     setState(() {});
-  }
-
-  Future<void> checkApprovalStatus() async {
-    final box = GetStorage();
-
-    int? savedShopId = box.read("shop_id");
-
-    if (savedShopId == null) return;
-
-    final shops = await ShopService().fetchApprovedShops();
-
-    bool approved = shops.any((shop) => shop["id"] == savedShopId);
-
-    if (approved) {
-      box.write("shop_approved", true);
-
-      isApproved = true;
-
-      setState(() {});
-    }
   }
 
   @override
@@ -62,14 +42,66 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       return const CreateShopScreen();
     }
 
-    // PENDING APPROVAL
-    if (hasShop && !isApproved) {
-      return const Scaffold(
-        body: Center(child: Text("Your shop is pending admin approval")),
-      );
-    }
+    // SELLER SCREENS
+    final List<Widget> screens = [
+      // HOME
+      Center(child: Text("Seller Home", style: AppTextStyles.heading2)),
 
-    // APPROVED
-    return const AddRiceScreen();
+      // RICE
+      const AddRiceScreen(),
+
+      // MY SHOP
+      const MyShopScreen(),
+
+      // ORDERS
+      Center(child: Text("Orders", style: AppTextStyles.heading2)),
+
+      // PROFILE
+      Center(child: Text("Profile", style: AppTextStyles.heading2)),
+    ];
+
+    return Container(
+      decoration: AppDecorations.gradientBackground,
+
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+
+        body: screens[currentIndex],
+
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: currentIndex,
+
+          onTap: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+
+          selectedItemColor: AppColors.darkGreen,
+
+          unselectedItemColor: AppColors.darkGreen.withOpacity(0.5),
+
+          type: BottomNavigationBarType.fixed,
+
+          items: const [
+            BottomNavigationBarItem(icon: Icon(AppIcons.home), label: "Home"),
+
+            BottomNavigationBarItem(icon: Icon(Icons.rice_bowl), label: "Rice"),
+
+            BottomNavigationBarItem(icon: Icon(Icons.store), label: "My Shop"),
+
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_bag),
+              label: "Orders",
+            ),
+
+            BottomNavigationBarItem(
+              icon: Icon(AppIcons.profile),
+              label: "Profile",
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

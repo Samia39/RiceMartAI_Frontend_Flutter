@@ -94,4 +94,59 @@ class ShopService {
 
     return jsonDecode(response.body);
   }
+
+  // =========================
+  // UPDATE SHOP
+  // =========================
+  Future<Map<String, dynamic>> updateShop({
+    required String token,
+    required int shopId,
+    required String shopName,
+    required String ownerName,
+    required String phone,
+    required String address,
+    required String description,
+  }) async {
+    final response = await http.put(
+      Uri.parse("$baseUrl/shops/$shopId"),
+
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+
+      body: jsonEncode({
+        "shop_name": shopName,
+        "owner_name": ownerName,
+        "phone": phone,
+        "address": address,
+        "description": description,
+      }),
+    );
+
+    print(response.statusCode);
+    print(response.body);
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // DELETE SHOP
+  // =========================
+  Future<Map<String, dynamic>> deleteShop({
+    required String token,
+    required int shopId,
+  }) async {
+    final response = await http.delete(
+      Uri.parse("$baseUrl/shops/$shopId/delete"),
+
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    print(response.statusCode);
+    print(response.body);
+
+    return jsonDecode(response.body);
+  }
 }

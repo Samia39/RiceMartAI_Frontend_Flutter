@@ -89,6 +89,12 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         box.write("shop_approved", false);
 
         box.write("shop_id", result["shop"]["id"]);
+        // SAVE SHOP DATA
+        box.write("shop_name", _shopController.text);
+        box.write("owner_name", _ownerController.text);
+        box.write("phone", _phoneController.text);
+        box.write("address", _addressController.text);
+        box.write("description", _descController.text);
 
         Get.snackbar("Success", "Shop sent for approval");
       } else {
