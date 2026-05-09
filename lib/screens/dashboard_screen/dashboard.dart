@@ -426,34 +426,6 @@ class _HomeTab extends StatelessWidget {
                         onTap: () => Get.toNamed(AppRoutes.cart),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    TextButton.icon(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        backgroundColor: AppColors.overlayLight,
-                        foregroundColor: AppColors.darkGreen,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 7,
-                        ),
-                        minimumSize: Size.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(
-                            color: AppColors.borderGold.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                      icon: const Icon(
-                        Icons.language,
-                        size: 14,
-                        color: AppColors.darkGreen,
-                      ),
-                      label: Text(
-                        'اردو',
-                        style: AppTextStyles.label.copyWith(fontSize: 12),
-                      ),
-                    ),
                   ],
                 ),
               ),

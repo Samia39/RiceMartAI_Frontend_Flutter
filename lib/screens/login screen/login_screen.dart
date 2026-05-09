@@ -112,38 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // ── Language toggle button ──────────────────
-                Align(
-                  alignment: Alignment.topRight,
-                  child: TextButton.icon(
-                    onPressed: () {
-                      // TODO: implement language switching
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.overlayLight,
-                      foregroundColor: AppColors.darkGreen,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                          color: AppColors.borderGold.withOpacity(0.50),
-                        ),
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.language,
-                      size: 15,
-                      color: AppColors.darkGreen,
-                    ),
-                    label: Text(
-                      'اردو',
-                      style: AppTextStyles.label.copyWith(fontSize: 13),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 32),
 
                 const Text('Welcome Back', style: AppTextStyles.heading1),
