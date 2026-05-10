@@ -14,12 +14,11 @@ class AllRiceScreen extends StatefulWidget {
 
 class _AllRiceScreenState extends State<AllRiceScreen> {
   List<Map<String, dynamic>> riceList = [];
-
   List<Map<String, dynamic>> filteredRice = [];
 
   bool isLoading = true;
 
-  final TextEditingController searchController = TextEditingController();
+  final searchController = TextEditingController();
 
   @override
   void initState() {
@@ -28,30 +27,128 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
     fetchRice();
   }
 
+  // =========================
   // FETCH ALL RICE
+  // =========================
   Future<void> fetchRice() async {
     final data = await RiceService().fetchAllRice();
 
     setState(() {
       riceList = data;
-
       filteredRice = data;
-
       isLoading = false;
     });
   }
 
+  // =========================
   // SEARCH
+  // =========================
   void searchRice(String value) {
-    final results = riceList.where((rice) {
+    final result = riceList.where((rice) {
       final name = rice["name"].toString().toLowerCase();
 
       return name.contains(value.toLowerCase());
     }).toList();
 
     setState(() {
-      filteredRice = results;
+      filteredRice = result;
     });
+  }
+
+  // =========================
+  // PRODUCT CARD
+  // =========================
+  Widget riceCard(Map<String, dynamic> rice) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+
+          MaterialPageRoute(builder: (_) => RiceDetailScreen(rice: rice)),
+        );
+      },
+
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+
+          borderRadius: BorderRadius.circular(18),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+
+          children: [
+            // IMAGE
+            Container(
+              height: 130,
+              width: double.infinity,
+
+              decoration: BoxDecoration(
+                color: AppColors.cream,
+
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(18),
+                ),
+              ),
+
+              child: const Icon(
+                Icons.rice_bowl,
+                size: 60,
+                color: AppColors.darkGreen,
+              ),
+            ),
+
+            // CONTENT
+            Padding(
+              padding: const EdgeInsets.all(12),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Text(
+                    rice["name"] ?? "",
+
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+
+                    style: AppTextStyles.heading4,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    "Rs ${rice["price"]}/KG",
+
+                    style: AppTextStyles.heading3.copyWith(
+                      color: AppColors.darkGreen,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    "Stock: ${rice["stock"]} KG",
+
+                    style: AppTextStyles.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -64,13 +161,13 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
 
         appBar: AppBar(title: const Text("Rice Marketplace")),
 
-        body: Padding(
-          padding: const EdgeInsets.all(16),
+        body: Column(
+          children: [
+            // SEARCH BAR
+            Padding(
+              padding: const EdgeInsets.all(16),
 
-          child: Column(
-            children: [
-              // SEARCH
-              Container(
+              child: Container(
                 decoration: AppDecorations.inputField,
 
                 child: TextField(
@@ -84,115 +181,37 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                   ),
                 ),
               ),
+            ),
 
-              const SizedBox(height: 20),
+            // LOADING
+            if (isLoading)
+              const Expanded(child: Center(child: CircularProgressIndicator()))
+            // EMPTY
+            else if (filteredRice.isEmpty)
+              const Expanded(child: Center(child: Text("No rice found")))
+            // GRID
+            else
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16),
 
-              // LOADING
-              if (isLoading)
-                const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              // EMPTY
-              else if (filteredRice.isEmpty)
-                const Expanded(child: Center(child: Text("No rice found")))
-              // LIST
-              else
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredRice.length,
+                  itemCount: filteredRice.length,
 
-                    itemBuilder: (context, index) {
-                      final rice = filteredRice[index];
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
 
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
 
-                            MaterialPageRoute(
-                              builder: (_) => RiceDetailScreen(rice: rice),
-                            ),
-                          );
-                        },
-
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-
-                          padding: const EdgeInsets.all(16),
-
-                          decoration: AppDecorations.card,
-
-                          child: Row(
-                            children: [
-                              // ICON
-                              Container(
-                                width: 70,
-                                height: 70,
-
-                                decoration: BoxDecoration(
-                                  color: AppColors.cream,
-
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-
-                                child: const Icon(
-                                  Icons.rice_bowl,
-                                  size: 40,
-                                  color: AppColors.darkGreen,
-                                ),
-                              ),
-
-                              const SizedBox(width: 16),
-
-                              // INFO
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                                  children: [
-                                    Text(
-                                      rice["name"] ?? "",
-
-                                      style: AppTextStyles.heading4,
-                                    ),
-
-                                    const SizedBox(height: 8),
-
-                                    Text(
-                                      "Rs ${rice["price"]} / KG",
-
-                                      style: AppTextStyles.bodyLarge,
-                                    ),
-
-                                    const SizedBox(height: 6),
-
-                                    Text(
-                                      "Stock: ${rice["stock"]} KG",
-
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-
-                                    const SizedBox(height: 6),
-
-                                    Text(
-                                      rice["shop"]?["shop_name"] ?? "",
-
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const Icon(Icons.arrow_forward_ios, size: 18),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                    childAspectRatio: 0.68,
                   ),
+
+                  itemBuilder: (context, index) {
+                    return riceCard(filteredRice[index]);
+                  },
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

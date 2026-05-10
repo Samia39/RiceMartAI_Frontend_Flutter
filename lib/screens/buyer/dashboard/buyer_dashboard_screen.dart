@@ -6,6 +6,7 @@ import 'package:frontend/screens/buyer/shops/shops_screen.dart';
 
 import '../../../core/utils/themes.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../widgets/app_drawer.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
   const BuyerDashboardScreen({super.key});
@@ -41,6 +42,10 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
+
+        appBar: AppBar(title: const Text("Marketplace")),
+
+        drawer: const AppDrawer(),
 
         body: screens[currentIndex],
 

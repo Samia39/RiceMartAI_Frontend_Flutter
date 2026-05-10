@@ -1,15 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 
+import '../../../core/services/rice_service.dart';
 import '../../../core/utils/themes.dart';
 
-class ShopDetailsScreen extends StatelessWidget {
+class ShopDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> shop;
 
   const ShopDetailsScreen({super.key, required this.shop});
 
   @override
+  State<ShopDetailsScreen> createState() => _ShopDetailsScreenState();
+}
+
+class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
+  List<Map<String, dynamic>> riceList = [];
+
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchRice();
+  }
+
+  // =========================
+  // FETCH SHOP RICE
+  // =========================
+  Future<void> fetchRice() async {
+    String token = GetStorage().read("token") ?? "";
+
+    final data = await RiceService().fetchShopRice(
+      token: token,
+      shopId: widget.shop["id"],
+    );
+
+    setState(() {
+      riceList = data;
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final riceList = shop["rice_categories"] ?? [];
+    final shop = widget.shop;
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -38,6 +73,7 @@ class ShopDetailsScreen extends StatelessWidget {
                   children: [
                     Text(
                       shop["shop_name"] ?? "",
+
                       style: AppTextStyles.heading2,
                     ),
 
@@ -45,6 +81,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                     Text(
                       "Owner: ${shop["owner_name"]}",
+
                       style: AppTextStyles.bodyLarge,
                     ),
 
@@ -52,6 +89,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                     Text(
                       "Phone: ${shop["phone"]}",
+
                       style: AppTextStyles.bodyLarge,
                     ),
 
@@ -59,6 +97,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                     Text(
                       "Address: ${shop["address"]}",
+
                       style: AppTextStyles.bodyLarge,
                     ),
 
@@ -66,6 +105,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                     Text(
                       shop["description"] ?? "",
+
                       style: AppTextStyles.bodyLarge,
                     ),
                   ],
@@ -79,9 +119,14 @@ class ShopDetailsScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
+              // LOADING
+              if (isLoading) const Center(child: CircularProgressIndicator()),
+
               // EMPTY
-              if (riceList.isEmpty)
+              if (!isLoading && riceList.isEmpty)
                 Container(
+                  width: double.infinity,
+
                   padding: const EdgeInsets.all(16),
 
                   decoration: AppDecorations.card,
@@ -90,7 +135,7 @@ class ShopDetailsScreen extends StatelessWidget {
                 ),
 
               // RICE LIST
-              ...riceList.map<Widget>((rice) {
+              ...riceList.map((rice) {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 14),
 
@@ -108,6 +153,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       Text(
                         "Price: Rs ${rice["price"]}",
+
                         style: AppTextStyles.bodyLarge,
                       ),
 
@@ -115,6 +161,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       Text(
                         "Stock: ${rice["stock"]} KG",
+
                         style: AppTextStyles.bodyLarge,
                       ),
                     ],

@@ -2,20 +2,33 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/themes.dart';
 
-class RiceDetailScreen extends StatelessWidget {
+import '../shops/shop_details_screen.dart';
+
+class RiceDetailScreen extends StatefulWidget {
   final Map<String, dynamic> rice;
 
   const RiceDetailScreen({super.key, required this.rice});
 
   @override
+  State<RiceDetailScreen> createState() => _RiceDetailScreenState();
+}
+
+class _RiceDetailScreenState extends State<RiceDetailScreen> {
+  int quantity = 1;
+
+  @override
   Widget build(BuildContext context) {
+    final rice = widget.rice;
+
+    final shop = rice["shop"];
+
     return Container(
       decoration: AppDecorations.gradientBackground,
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        appBar: AppBar(title: Text(rice["name"] ?? "Rice Details")),
+        appBar: AppBar(title: Text(rice["name"] ?? "")),
 
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -24,26 +37,37 @@ class RiceDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
 
             children: [
-              // IMAGE
+              // PRODUCT IMAGE
               Container(
-                height: 220,
+                height: 280,
                 width: double.infinity,
 
-                decoration: AppDecorations.card,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+
+                  borderRadius: BorderRadius.circular(24),
+
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
 
                 child: const Icon(
                   Icons.rice_bowl,
-                  size: 100,
+                  size: 120,
                   color: AppColors.darkGreen,
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // RICE INFO
+              // PRODUCT INFO
               Container(
-                width: double.infinity,
-
                 padding: const EdgeInsets.all(18),
 
                 decoration: AppDecorations.card,
@@ -54,131 +78,163 @@ class RiceDetailScreen extends StatelessWidget {
                   children: [
                     Text(rice["name"] ?? "", style: AppTextStyles.heading2),
 
-                    const SizedBox(height: 14),
-
-                    Text(
-                      "Price: Rs ${rice["price"]}",
-                      style: AppTextStyles.heading4,
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      "Stock: ${rice["stock"]} KG",
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // SHOP INFO
-              Container(
-                width: double.infinity,
-
-                padding: const EdgeInsets.all(18),
-
-                decoration: AppDecorations.card,
-
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                  children: [
-                    Text("Seller Information", style: AppTextStyles.heading3),
-
                     const SizedBox(height: 16),
 
-                    infoTile(
-                      icon: Icons.store,
-                      title: "Shop",
-                      value: rice["shop"]["shop_name"] ?? "",
+                    Text(
+                      "Rs ${rice["price"]} / KG",
+
+                      style: AppTextStyles.heading2.copyWith(
+                        color: AppColors.darkGreen,
+                      ),
                     ),
 
-                    infoTile(
-                      icon: Icons.person,
-                      title: "Owner",
-                      value: rice["shop"]["owner_name"] ?? "",
+                    const SizedBox(height: 12),
+
+                    Text(
+                      "Available Stock: ${rice["stock"]} KG",
+
+                      style: AppTextStyles.bodyLarge,
                     ),
 
-                    infoTile(
-                      icon: Icons.phone,
-                      title: "Phone",
-                      value: rice["shop"]["phone"] ?? "",
-                    ),
+                    const SizedBox(height: 24),
 
-                    infoTile(
-                      icon: Icons.location_on,
-                      title: "Address",
-                      value: rice["shop"]["address"] ?? "",
+                    // QUANTITY
+                    Text("Quantity", style: AppTextStyles.heading4),
+
+                    const SizedBox(height: 14),
+
+                    Row(
+                      children: [
+                        // MINUS
+                        IconButton(
+                          onPressed: () {
+                            if (quantity > 1) {
+                              setState(() {
+                                quantity--;
+                              });
+                            }
+                          },
+
+                          icon: const Icon(
+                            Icons.remove_circle,
+                            size: 34,
+                            color: AppColors.darkGreen,
+                          ),
+                        ),
+
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+
+                          child: Text(
+                            quantity.toString(),
+
+                            style: AppTextStyles.heading4,
+                          ),
+                        ),
+
+                        // PLUS
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              quantity++;
+                            });
+                          },
+
+                          icon: const Icon(
+                            Icons.add_circle,
+                            size: 34,
+                            color: AppColors.darkGreen,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
-              // ACTION BUTTONS
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
+              // ADD TO CART
+              SizedBox(
+                width: double.infinity,
+                height: 55,
 
-                      icon: const Icon(Icons.call),
+                child: ElevatedButton.icon(
+                  onPressed: () {},
 
-                      label: const Text("Call"),
-                    ),
-                  ),
+                  icon: const Icon(Icons.shopping_cart),
 
-                  const SizedBox(width: 14),
+                  label: const Text("Add To Cart"),
+                ),
+              ),
 
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
+              const SizedBox(height: 14),
 
-                      icon: const Icon(Icons.chat),
+              // BUY NOW
+              SizedBox(
+                width: double.infinity,
+                height: 55,
 
-                      label: const Text("WhatsApp"),
-                    ),
-                  ),
-                ],
+                child: ElevatedButton.icon(
+                  onPressed: () {},
+
+                  icon: const Icon(Icons.flash_on),
+
+                  label: const Text("Buy Now"),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // CHAT SELLER
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+
+                child: ElevatedButton.icon(
+                  onPressed: () {},
+
+                  icon: const Icon(Icons.chat),
+
+                  label: const Text("Chat Seller"),
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // GO TO SHOP
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+
+                      MaterialPageRoute(
+                        builder: (_) => ShopDetailsScreen(shop: shop),
+                      ),
+                    );
+                  },
+
+                  icon: const Icon(Icons.store),
+
+                  label: const Text("Go To Shop"),
+                ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget infoTile({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.darkGreen),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                Text(title, style: AppTextStyles.bodyMedium),
-
-                const SizedBox(height: 4),
-
-                Text(value, style: AppTextStyles.bodyLarge),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

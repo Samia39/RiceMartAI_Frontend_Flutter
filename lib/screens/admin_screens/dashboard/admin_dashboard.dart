@@ -9,8 +9,10 @@ import 'package:frontend/screens/admin_screens/orders/orders_management_screen.d
 import 'package:frontend/screens/admin_screens/payments/payments_screen.dart';
 import 'package:frontend/screens/admin_screens/reports/reports_screen.dart';
 import 'package:frontend/screens/admin_screens/users/user_management_screen.dart';
+
 import '../../../core/utils/themes.dart';
 import '../shops/shop_approvals_screen.dart';
+import '../../../widgets/admin_drawer.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -22,6 +24,8 @@ class AdminDashboard extends StatelessWidget {
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
+
+        drawer: const AdminDrawer(),
 
         appBar: AppBar(
           title: const Text("Admin Dashboard"),

@@ -7,6 +7,7 @@ import '../shop/my_shop_screen.dart';
 
 import '../../../core/utils/themes.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../widgets/seller_drawer.dart';
 
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
@@ -65,6 +66,10 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
+
+        appBar: AppBar(title: const Text("Seller Dashboard")),
+
+        drawer: const SellerDrawer(),
 
         body: screens[currentIndex],
 
