@@ -4,7 +4,6 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../core/utils/themes.dart';
 import '../../core/services/auth_service.dart';
-import '../../core/services/shop_service.dart';
 
 import '../buyer/dashboard/buyer_dashboard_screen.dart';
 import '../seller/dashboard/seller_dashboard_screen.dart';
