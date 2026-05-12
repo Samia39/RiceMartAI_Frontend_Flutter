@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/themes.dart';
 
 import '../shops/shop_details_screen.dart';
+import '../../../core/services/cart_service.dart';
 
 class RiceDetailScreen extends StatefulWidget {
   final Map<String, dynamic> rice;
@@ -18,9 +19,9 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final rice = widget.rice;
+    final product = widget.rice;
 
-    final shop = rice["shop"];
+    final shop = product["shop"];
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -28,7 +29,7 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        appBar: AppBar(title: Text(rice["name"] ?? "")),
+        appBar: AppBar(title: Text(product["name"] ?? "")),
 
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -76,12 +77,12 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-                    Text(rice["name"] ?? "", style: AppTextStyles.heading2),
+                    Text(product["name"] ?? "", style: AppTextStyles.heading2),
 
                     const SizedBox(height: 16),
 
                     Text(
-                      "Rs ${rice["price"]} / KG",
+                      "Rs ${product["price"]} / KG",
 
                       style: AppTextStyles.heading2.copyWith(
                         color: AppColors.darkGreen,
@@ -91,7 +92,15 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                     const SizedBox(height: 12),
 
                     Text(
-                      "Available Stock: ${rice["stock"]} KG",
+                      "Available Stock: ${product["stock"]} KG",
+
+                      style: AppTextStyles.bodyLarge,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+                      "Category: ${product["rice_category"]?["name"] ?? "Rice"}",
 
                       style: AppTextStyles.bodyLarge,
                     ),
@@ -169,7 +178,13 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                 height: 55,
 
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    CartService().addToCart(rice: product, quantity: quantity);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Added to cart")),
+                    );
+                  },
 
                   icon: const Icon(Icons.shopping_cart),
 

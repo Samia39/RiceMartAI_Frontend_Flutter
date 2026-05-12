@@ -23,10 +23,12 @@ class LoginScreen extends StatelessWidget {
   // =========================
   void login() async {
     String email = emailController.text.trim();
+
     String password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       Get.snackbar("Error", "Please fill all fields");
+
       return;
     }
 
@@ -38,16 +40,40 @@ class LoginScreen extends StatelessWidget {
       if (response['token'] != null) {
         final box = GetStorage();
 
+        // CLEAR OLD DATA
+        box.erase();
+
         // SAVE TOKEN
         box.write('token', response['token']);
 
         // SAVE ROLE
         box.write('role', response['role']);
 
-        // SHOP STATUS
-        bool hasShop = response['has_shop'] ?? false;
+        // SAVE USER
+        box.write('user', response['user']);
 
-        box.write('has_shop', hasShop);
+        // SHOP DATA
+        final shop = response['shop'];
+
+        // SAVE SHOP STATUS
+        box.write('has_shop', shop != null);
+
+        // SAVE SHOP DATA
+        if (shop != null) {
+          box.write("shop_id", shop["id"]);
+
+          box.write("shop_name", shop["shop_name"]);
+
+          box.write("owner_name", shop["owner_name"]);
+
+          box.write("phone", shop["phone"]);
+
+          box.write("address", shop["address"]);
+
+          box.write("description", shop["description"]);
+
+          box.write("shop_approved", true);
+        }
 
         Get.snackbar("Success", "Login successful");
 
@@ -65,28 +91,7 @@ class LoginScreen extends StatelessWidget {
         // =========================
         // SELLER
         // =========================
-        if (hasShop == true) {
-          try {
-            final shops = await ShopService().fetchApprovedShops();
-
-            final sellerShop = shops.firstWhere(
-              (shop) => shop["user_id"] == response["user"]["id"],
-            );
-
-            // SAVE SHOP DATA
-            box.write("shop_id", sellerShop["id"]);
-
-            box.write("shop_name", sellerShop["shop_name"]);
-            box.write("owner_name", sellerShop["owner_name"]);
-            box.write("phone", sellerShop["phone"]);
-            box.write("address", sellerShop["address"]);
-            box.write("description", sellerShop["description"]);
-
-            box.write("shop_approved", true);
-          } catch (e) {
-            print(e);
-          }
-
+        if (shop != null) {
           Get.offAll(() => const SellerDashboardScreen());
 
           return;

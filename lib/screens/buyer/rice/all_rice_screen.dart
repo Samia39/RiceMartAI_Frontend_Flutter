@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/services/rice_service.dart';
+import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 
 import 'rice_detail_screen.dart';
@@ -13,8 +13,8 @@ class AllRiceScreen extends StatefulWidget {
 }
 
 class _AllRiceScreenState extends State<AllRiceScreen> {
-  List<Map<String, dynamic>> riceList = [];
-  List<Map<String, dynamic>> filteredRice = [];
+  List<Map<String, dynamic>> productList = [];
+  List<Map<String, dynamic>> filteredProducts = [];
 
   bool isLoading = true;
 
@@ -24,47 +24,51 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   void initState() {
     super.initState();
 
-    fetchRice();
+    fetchProducts();
   }
 
   // =========================
-  // FETCH ALL RICE
+  // FETCH ALL PRODUCTS
   // =========================
-  Future<void> fetchRice() async {
-    final data = await RiceService().fetchAllRice();
+  Future<void> fetchProducts() async {
+    final data = await ProductService().fetchAllProducts();
 
     setState(() {
-      riceList = data;
-      filteredRice = data;
+      productList = data;
+      filteredProducts = data;
       isLoading = false;
     });
   }
 
   // =========================
-  // SEARCH
+  // SEARCH PRODUCTS
   // =========================
-  void searchRice(String value) {
-    final result = riceList.where((rice) {
-      final name = rice["name"].toString().toLowerCase();
+  void searchProducts(String value) {
+    final result = productList.where((product) {
+      final name = product["name"].toString().toLowerCase();
 
-      return name.contains(value.toLowerCase());
+      final category =
+          product["rice_category"]?["name"].toString().toLowerCase() ?? "";
+
+      return name.contains(value.toLowerCase()) ||
+          category.contains(value.toLowerCase());
     }).toList();
 
     setState(() {
-      filteredRice = result;
+      filteredProducts = result;
     });
   }
 
   // =========================
   // PRODUCT CARD
   // =========================
-  Widget riceCard(Map<String, dynamic> rice) {
+  Widget productCard(Map<String, dynamic> product) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
 
-          MaterialPageRoute(builder: (_) => RiceDetailScreen(rice: rice)),
+          MaterialPageRoute(builder: (_) => RiceDetailScreen(rice: product)),
         );
       },
 
@@ -116,8 +120,9 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
+                  // PRODUCT NAME
                   Text(
-                    rice["name"] ?? "",
+                    product["name"] ?? "",
 
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -125,10 +130,22 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                     style: AppTextStyles.heading4,
                   ),
 
+                  const SizedBox(height: 4),
+
+                  // CATEGORY
+                  Text(
+                    "Category: ${product["rice_category"]?["name"] ?? ""}",
+
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: Colors.grey[700],
+                    ),
+                  ),
+
                   const SizedBox(height: 8),
 
+                  // PRICE
                   Text(
-                    "Rs ${rice["price"]}/KG",
+                    "Rs ${product["price"]}/KG",
 
                     style: AppTextStyles.heading3.copyWith(
                       color: AppColors.darkGreen,
@@ -137,8 +154,9 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
 
                   const SizedBox(height: 6),
 
+                  // STOCK
                   Text(
-                    "Stock: ${rice["stock"]} KG",
+                    "Stock: ${product["stock"]} KG",
 
                     style: AppTextStyles.bodyMedium,
                   ),
@@ -173,10 +191,10 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                 child: TextField(
                   controller: searchController,
 
-                  onChanged: searchRice,
+                  onChanged: searchProducts,
 
                   decoration: const InputDecoration(
-                    hintText: "Search rice...",
+                    hintText: "Search rice or category...",
                     prefixIcon: Icon(Icons.search),
                   ),
                 ),
@@ -187,15 +205,15 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
             if (isLoading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
             // EMPTY
-            else if (filteredRice.isEmpty)
-              const Expanded(child: Center(child: Text("No rice found")))
+            else if (filteredProducts.isEmpty)
+              const Expanded(child: Center(child: Text("No products found")))
             // GRID
             else
               Expanded(
                 child: GridView.builder(
                   padding: const EdgeInsets.all(16),
 
-                  itemCount: filteredRice.length,
+                  itemCount: filteredProducts.length,
 
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -207,7 +225,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                   ),
 
                   itemBuilder: (context, index) {
-                    return riceCard(filteredRice[index]);
+                    return productCard(filteredProducts[index]);
                   },
                 ),
               ),

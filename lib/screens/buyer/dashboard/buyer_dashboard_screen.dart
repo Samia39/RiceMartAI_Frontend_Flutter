@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/buyer/profile/profile_screen.dart';
 
+import 'package:frontend/screens/buyer/cart/cart_screen.dart';
+import 'package:frontend/screens/buyer/profile/profile_screen.dart';
 import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
 import 'package:frontend/screens/buyer/shops/shops_screen.dart';
 
-import '../../../core/utils/themes.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../core/utils/themes.dart';
 import '../../../widgets/app_drawer.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
@@ -43,12 +44,33 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        appBar: AppBar(title: const Text("Marketplace")),
+        // APP BAR
+        appBar: AppBar(
+          title: const Text("Marketplace"),
 
+          actions: [
+            // CART ICON
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+
+                  MaterialPageRoute(builder: (_) => const CartScreen()),
+                );
+              },
+
+              icon: const Icon(Icons.shopping_cart),
+            ),
+          ],
+        ),
+
+        // DRAWER
         drawer: const AppDrawer(),
 
+        // BODY
         body: screens[currentIndex],
 
+        // BOTTOM NAVIGATION
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: AppColors.cream,
 

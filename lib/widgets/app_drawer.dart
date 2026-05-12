@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../core/utils/themes.dart';
+import '../screens/buyer/cart/cart_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -74,6 +75,17 @@ class AppDrawer extends StatelessWidget {
                   Navigator.pop(context);
 
                   Get.to(() => const ShopsScreen());
+                },
+              ),
+              // Add to Cart
+              drawerItem(
+                icon: Icons.shopping_cart,
+                title: "My Cart",
+
+                onTap: () {
+                  Navigator.pop(context);
+
+                  Get.to(() => const CartScreen());
                 },
               ),
 

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-import '../../../core/services/rice_service.dart';
-import '../../../core/services/rice_type_service.dart';
+import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 
 class AddRiceScreen extends StatefulWidget {
@@ -16,69 +15,69 @@ class AddRiceScreen extends StatefulWidget {
 class _AddRiceScreenState extends State<AddRiceScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  final productNameController = TextEditingController();
+
   final priceController = TextEditingController();
+
   final stockController = TextEditingController();
 
   bool isLoading = false;
 
-  List<Map<String, dynamic>> riceList = [];
+  List<Map<String, dynamic>> productList = [];
 
-  List<Map<String, dynamic>> riceTypes = [];
+  List<Map<String, dynamic>> categories = [];
 
-  String? selectedRice;
+  int? selectedCategoryId;
+
+  String? selectedCategoryName;
 
   int? shopId;
 
-  // -------------------------
+  // =========================
   // LOAD SHOP ID
-  // -------------------------
+  // =========================
   Future<void> loadShopId() async {
     final box = GetStorage();
 
     shopId = box.read("shop_id");
 
     if (shopId != null) {
-      fetchRice();
+      fetchProducts();
     }
 
     setState(() {});
   }
 
-  // -------------------------
-  // LOAD RICE TYPES
-  // -------------------------
-  Future<void> loadRiceTypes() async {
-    final data = await RiceTypeService().fetchRiceTypes();
+  // =========================
+  // LOAD CATEGORIES
+  // =========================
+  Future<void> loadCategories() async {
+    final data = await ProductService().fetchCategories();
 
     setState(() {
-      riceTypes = data;
+      categories = data;
     });
   }
 
-  // -------------------------
-  // FETCH RICE
-  // -------------------------
-  Future<void> fetchRice() async {
-    String token = GetStorage().read("token") ?? "";
-
-    final data = await RiceService().fetchShopRice(
-      token: token,
-      shopId: shopId!,
-    );
+  // =========================
+  // FETCH PRODUCTS
+  // =========================
+  Future<void> fetchProducts() async {
+    final data = await ProductService().fetchShopProducts(shopId: shopId!);
 
     setState(() {
-      riceList = data;
+      productList = data;
     });
   }
 
-  // -------------------------
-  // ADD RICE
-  // -------------------------
-  Future<void> addRice() async {
+  // =========================
+  // ADD PRODUCT
+  // =========================
+  Future<void> addProduct() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (selectedRice == null) {
-      Get.snackbar("Error", "Select rice type");
+    if (selectedCategoryId == null) {
+      Get.snackbar("Error", "Select category");
 
       return;
     }
@@ -95,11 +94,17 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
     String token = GetStorage().read("token") ?? "";
 
-    final result = await RiceService().addRice(
+    final result = await ProductService().addProduct(
       token: token,
+
       shopId: shopId!,
-      name: selectedRice!,
+
+      riceCategoryId: selectedCategoryId!,
+
+      name: productNameController.text,
+
       price: priceController.text,
+
       stock: stockController.text,
     );
 
@@ -107,45 +112,48 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
       isLoading = false;
     });
 
-    if (result["success"] == true) {
-      Get.snackbar("Success", "Rice Added");
+    if (result["product"] != null) {
+      Get.snackbar("Success", "Product Added");
 
-      selectedRice = null;
+      selectedCategoryId = null;
+
+      selectedCategoryName = null;
+
+      productNameController.clear();
 
       priceController.clear();
+
       stockController.clear();
 
-      fetchRice();
+      fetchProducts();
 
       setState(() {});
     }
   }
 
-  // -------------------------
-  // DELETE RICE
-  // -------------------------
-  Future<void> deleteRice(int riceId) async {
+  // =========================
+  // DELETE PRODUCT
+  // =========================
+  Future<void> deleteProduct(int productId) async {
     String token = GetStorage().read("token") ?? "";
 
-    final result = await RiceService().deleteRice(token: token, riceId: riceId);
+    await ProductService().deleteProduct(token: token, productId: productId);
 
-    if (result["success"] == true) {
-      fetchRice();
+    fetchProducts();
 
-      Get.snackbar("Deleted", "Rice removed");
-    }
+    Get.snackbar("Deleted", "Product removed");
   }
 
-  // -------------------------
-  // EDIT RICE
-  // -------------------------
-  void editRiceDialog(Map<String, dynamic> rice) {
+  // =========================
+  // EDIT PRODUCT
+  // =========================
+  void editRiceDialog(Map<String, dynamic> product) {
     final editPriceController = TextEditingController(
-      text: rice["price"].toString(),
+      text: product["price"].toString(),
     );
 
     final editStockController = TextEditingController(
-      text: rice["stock"].toString(),
+      text: product["stock"].toString(),
     );
 
     showDialog(
@@ -154,10 +162,11 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
         return AlertDialog(
           backgroundColor: AppColors.cream,
 
-          title: const Text("Edit Rice", style: AppTextStyles.heading4),
+          title: const Text("Edit Product", style: AppTextStyles.heading4),
 
           content: Column(
             mainAxisSize: MainAxisSize.min,
+
             children: [
               Container(
                 decoration: AppDecorations.inputField,
@@ -204,20 +213,21 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
               onPressed: () async {
                 String token = GetStorage().read("token") ?? "";
 
-                final result = await RiceService().updateRice(
+                await ProductService().updateProduct(
                   token: token,
-                  riceId: rice["id"],
+
+                  productId: product["id"],
+
                   price: editPriceController.text,
+
                   stock: editStockController.text,
                 );
 
-                if (result["success"] == true) {
-                  Navigator.pop(context);
+                Navigator.pop(context);
 
-                  fetchRice();
+                fetchProducts();
 
-                  Get.snackbar("Success", "Rice Updated");
-                }
+                Get.snackbar("Success", "Product Updated");
               },
 
               child: const Text("Update"),
@@ -228,9 +238,9 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     );
   }
 
-  // -------------------------
+  // =========================
   // INPUT FIELD
-  // -------------------------
+  // =========================
   Widget inputField({
     required TextEditingController controller,
     required String hint,
@@ -248,6 +258,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
           if (v == null || v.isEmpty) {
             return "Required";
           }
+
           return null;
         },
 
@@ -262,16 +273,16 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     );
   }
 
-  // -------------------------
+  // =========================
   // INIT
-  // -------------------------
+  // =========================
   @override
   void initState() {
     super.initState();
 
     loadShopId();
 
-    loadRiceTypes();
+    loadCategories();
   }
 
   @override
@@ -282,7 +293,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        appBar: AppBar(title: const Text("Add Rice")),
+        appBar: AppBar(title: const Text("Add Product")),
 
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -292,6 +303,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
               // FORM
               Container(
                 padding: const EdgeInsets.all(16),
+
                 decoration: AppDecorations.card,
 
                 child: Form(
@@ -299,32 +311,38 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
                   child: Column(
                     children: [
-                      // DROPDOWN
+                      // CATEGORY DROPDOWN
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
 
                         decoration: AppDecorations.inputField,
 
-                        child: DropdownButtonFormField<String>(
-                          value: selectedRice,
+                        child: DropdownButtonFormField<int>(
+                          value: selectedCategoryId,
 
                           decoration: const InputDecoration(
                             border: InputBorder.none,
                           ),
 
-                          hint: const Text("Select Rice Type"),
+                          hint: const Text("Select Rice Category"),
 
-                          items: riceTypes.map((rice) {
-                            return DropdownMenuItem<String>(
-                              value: rice["name"],
+                          items: categories.map((category) {
+                            return DropdownMenuItem<int>(
+                              value: category["id"],
 
-                              child: Text(rice["name"]),
+                              child: Text(category["name"]),
                             );
                           }).toList(),
 
                           onChanged: (value) {
+                            final category = categories.firstWhere(
+                              (e) => e["id"] == value,
+                            );
+
                             setState(() {
-                              selectedRice = value;
+                              selectedCategoryId = value;
+
+                              selectedCategoryName = category["name"];
                             });
                           },
                         ),
@@ -332,6 +350,16 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
                       const SizedBox(height: 14),
 
+                      // PRODUCT NAME
+                      inputField(
+                        controller: productNameController,
+                        hint: "Product Name",
+                        icon: Icons.rice_bowl,
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // PRICE
                       inputField(
                         controller: priceController,
                         hint: "Price Per KG",
@@ -341,6 +369,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
                       const SizedBox(height: 14),
 
+                      // STOCK
                       inputField(
                         controller: stockController,
                         hint: "Stock KG",
@@ -355,13 +384,13 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
                         height: 50,
 
                         child: ElevatedButton(
-                          onPressed: isLoading ? null : addRice,
+                          onPressed: isLoading ? null : addProduct,
 
                           child: isLoading
                               ? const CircularProgressIndicator(
                                   color: AppColors.darkGreen,
                                 )
-                              : const Text("Add Rice"),
+                              : const Text("Add Product"),
                         ),
                       ),
                     ],
@@ -375,47 +404,53 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
               Align(
                 alignment: Alignment.centerLeft,
 
-                child: Text(
-                  "Your Rice Listings",
-                  style: AppTextStyles.heading3,
-                ),
+                child: Text("Your Products", style: AppTextStyles.heading3),
               ),
 
               const SizedBox(height: 14),
 
               // EMPTY
-              if (riceList.isEmpty)
+              if (productList.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(20),
+
                   decoration: AppDecorations.card,
 
-                  child: const Center(child: Text("No rice added yet")),
+                  child: const Center(child: Text("No products added yet")),
                 )
-              // LIST
+              // PRODUCTS
               else
-                ...riceList.map((rice) {
+                ...productList.map((product) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 14),
+
                     padding: const EdgeInsets.all(16),
+
                     decoration: AppDecorations.card,
 
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
 
                       children: [
-                        Text(rice["name"] ?? "", style: AppTextStyles.heading4),
+                        Text(
+                          product["name"] ?? "",
+
+                          style: AppTextStyles.heading4,
+                        ),
 
                         const SizedBox(height: 10),
 
                         Text(
-                          "Price: Rs ${rice["price"]}",
+                          "Price: Rs ${product["price"]}",
+
                           style: AppTextStyles.bodyLarge,
                         ),
 
                         const SizedBox(height: 6),
 
                         Text(
-                          "Stock: ${rice["stock"]} KG",
+                          "Stock: ${product["stock"]} KG",
+
                           style: AppTextStyles.bodyLarge,
                         ),
 
@@ -427,7 +462,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
                           children: [
                             IconButton(
                               onPressed: () {
-                                editRiceDialog(rice);
+                                editRiceDialog(product);
                               },
 
                               icon: const Icon(
@@ -438,7 +473,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
                             IconButton(
                               onPressed: () {
-                                deleteRice(rice["id"]);
+                                deleteProduct(product["id"]);
                               },
 
                               icon: const Icon(Icons.delete, color: Colors.red),
@@ -458,7 +493,10 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
   @override
   void dispose() {
+    productNameController.dispose();
+
     priceController.dispose();
+
     stockController.dispose();
 
     super.dispose();
