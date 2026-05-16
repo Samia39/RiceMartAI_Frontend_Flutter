@@ -16,15 +16,16 @@ class CartService {
   void addToCart({required Map<String, dynamic> rice, required int quantity}) {
     List cart = getCart();
 
-    // CHECK EXISTING ITEM
     int existingIndex = cart.indexWhere((item) => item["id"] == rice["id"]);
 
     if (existingIndex != -1) {
       cart[existingIndex]["quantity"] += quantity;
     } else {
-      rice["quantity"] = quantity;
+      // IMPORTANT: create COPY to avoid mutation bugs
+      Map<String, dynamic> newItem = Map<String, dynamic>.from(rice);
+      newItem["quantity"] = quantity;
 
-      cart.add(rice);
+      cart.add(newItem);
     }
 
     box.write("cart", cart);

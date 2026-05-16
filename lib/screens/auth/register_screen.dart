@@ -3,19 +3,25 @@ import 'package:get/get.dart';
 import '../../core/utils/themes.dart';
 import '../../core/services/auth_service.dart';
 
-class RegisterScreen extends StatelessWidget {
-  RegisterScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   final AuthService _authService = AuthService();
+  bool _obscurePassword = true;
 
   void register() async {
-    String name = nameController.text;
-    String email = emailController.text;
-    String password = passwordController.text;
+    String name = nameController.text.trim();
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       Get.snackbar("Error", "Please fill all fields");
@@ -27,7 +33,6 @@ class RegisterScreen extends StatelessWidget {
 
       if (response['user'] != null) {
         Get.snackbar("Success", "Registered successfully");
-
         Get.offNamed('/login');
       } else {
         Get.snackbar("Error", response['message']);
@@ -39,75 +44,116 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ─── Responsive values ───────────────────────────────
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final horizontalPadding = screenWidth * 0.06;
+    final verticalSpacing = screenHeight * 0.018;
+    final buttonHeight = screenHeight * 0.062;
+    final titleFontSize = screenWidth < 400 ? 18.0 : 20.0;
+    // ─────────────────────────────────────────────────────
+
     return Container(
-      decoration: AppDecorations.gradientBackground, // 🌈 gradient
+      decoration: AppDecorations.gradientBackground,
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        body: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
+
                 children: [
-                  // 🏷️ Title
-                  Text("Register", style: AppTextStyles.heading1),
+                  SizedBox(height: verticalSpacing * 2),
 
-                  const SizedBox(height: 30),
+                  // TITLE
+                  Text(
+                    "Create Account\nJoin Rice Mart Today!",
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.heading1.copyWith(
+                      fontSize: titleFontSize,
+                    ),
+                  ),
 
-                  // 👤 Name
+                  SizedBox(height: verticalSpacing * 1.5),
+
+                  // NAME
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
                       controller: nameController,
-                      decoration: const InputDecoration(hintText: "Name"),
+                      keyboardType: TextInputType.name,
+                      decoration: const InputDecoration(
+                        hintText: "Name",
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  SizedBox(height: verticalSpacing),
 
-                  // 📧 Email
+                  // EMAIL
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
                       controller: emailController,
-                      decoration: const InputDecoration(hintText: "Email"),
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        hintText: "Email",
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  SizedBox(height: verticalSpacing),
 
-                  // 🔒 Password
+                  // PASSWORD
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
                       controller: passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(hintText: "Password"),
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        hintText: "Password",
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 25),
+                  SizedBox(height: verticalSpacing * 1.5),
 
-                  // 🔘 Register Button (uses theme automatically)
+                  // REGISTER BUTTON
                   SizedBox(
                     width: double.infinity,
+                    height: buttonHeight,
                     child: ElevatedButton(
                       onPressed: register,
                       child: const Text("Register"),
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: verticalSpacing),
 
-                  // 🔁 Back to Login
+                  // LOGIN LINK
                   GestureDetector(
-                    onTap: () {
-                      Get.back();
-                    },
+                    onTap: () => Get.offNamed('/login'),
                     child: Text(
                       "Already have an account? Login",
                       style: AppTextStyles.bodyLarge.copyWith(
@@ -115,6 +161,8 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  SizedBox(height: verticalSpacing),
                 ],
               ),
             ),

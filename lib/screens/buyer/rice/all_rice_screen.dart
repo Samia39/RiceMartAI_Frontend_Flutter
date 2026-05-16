@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
+import '../../../core/services/cart_service.dart';
 
 import 'rice_detail_screen.dart';
 
 class AllRiceScreen extends StatefulWidget {
-  const AllRiceScreen({super.key});
+  final VoidCallback? onCartUpdated;
+
+  const AllRiceScreen({super.key, this.onCartUpdated});
 
   @override
   State<AllRiceScreen> createState() => _AllRiceScreenState();
@@ -62,14 +65,22 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   // =========================
   // PRODUCT CARD
   // =========================
-  Widget productCard(Map<String, dynamic> product) {
+  Widget productCard(Map<String, dynamic> product, double imageHeight) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      // OPEN DETAIL SCREEN
+      onTap: () async {
+        // WAIT FOR RETURN VALUE
+        final result = await Navigator.push(
           context,
 
           MaterialPageRoute(builder: (_) => RiceDetailScreen(rice: product)),
         );
+
+        // REFRESH UI WHEN CART UPDATED
+        if (result == true) {
+          setState(() {});
+          widget.onCartUpdated?.call();
+        }
       },
 
       child: Container(
@@ -94,7 +105,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
           children: [
             // IMAGE
             Container(
-              height: 130,
+              height: imageHeight,
               width: double.infinity,
 
               decoration: BoxDecoration(
@@ -107,60 +118,106 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
 
               child: const Icon(
                 Icons.rice_bowl,
-                size: 60,
+                size: 50,
                 color: AppColors.darkGreen,
               ),
             ),
 
             // CONTENT
-            Padding(
-              padding: const EdgeInsets.all(12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
 
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
-                children: [
-                  // PRODUCT NAME
-                  Text(
-                    product["name"] ?? "",
+                  children: [
+                    // PRODUCT NAME
+                    Text(
+                      product["name"] ?? "",
 
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
 
-                    style: AppTextStyles.heading4,
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  // CATEGORY
-                  Text(
-                    "Category: ${product["rice_category"]?["name"] ?? ""}",
-
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.grey[700],
+                      style: AppTextStyles.heading4.copyWith(fontSize: 15),
                     ),
-                  ),
 
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
-                  // PRICE
-                  Text(
-                    "Rs ${product["price"]}/KG",
+                    // CATEGORY
+                    Text(
+                      product["rice_category"]?["name"] ?? "",
 
-                    style: AppTextStyles.heading3.copyWith(
-                      color: AppColors.darkGreen,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: Colors.grey[700],
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 6),
+                    const Spacer(),
 
-                  // STOCK
-                  Text(
-                    "Stock: ${product["stock"]} KG",
+                    // PRICE + CART
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "Rs ${product["price"]}/KG",
 
-                    style: AppTextStyles.bodyMedium,
-                  ),
-                ],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+
+                            style: AppTextStyles.heading4.copyWith(
+                              color: AppColors.darkGreen,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+
+                        Container(
+                          height: 34,
+                          width: 34,
+
+                          decoration: BoxDecoration(
+                            color: AppColors.darkGreen,
+
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+
+                            onPressed: () {
+                              CartService().addToCart(
+                                rice: product,
+                                quantity: 1,
+                              );
+
+                              setState(() {});
+                              widget.onCartUpdated?.call();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "${product["name"]} added to cart",
+                                  ),
+                                ),
+                              );
+                            },
+
+                            icon: const Icon(
+                              Icons.shopping_cart_outlined,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -171,6 +228,27 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    int crossAxisCount = 2;
+
+    double childAspectRatio = 0.78;
+
+    double imageHeight = 110;
+
+    // MOBILE SMALL
+    if (width < 360) {
+      crossAxisCount = 2;
+      childAspectRatio = 0.72;
+      imageHeight = 90;
+    }
+    // TABLET
+    else if (width > 700) {
+      crossAxisCount = 3;
+      childAspectRatio = 0.85;
+      imageHeight = 140;
+    }
+
     return Container(
       decoration: AppDecorations.gradientBackground,
 
@@ -179,57 +257,64 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
 
         appBar: AppBar(title: const Text("Rice Marketplace")),
 
-        body: Column(
-          children: [
-            // SEARCH BAR
-            Padding(
-              padding: const EdgeInsets.all(16),
+        body: SafeArea(
+          child: Column(
+            children: [
+              // SEARCH BAR
+              Padding(
+                padding: const EdgeInsets.all(16),
 
-              child: Container(
-                decoration: AppDecorations.inputField,
+                child: Container(
+                  decoration: AppDecorations.inputField,
 
-                child: TextField(
-                  controller: searchController,
+                  child: TextField(
+                    controller: searchController,
 
-                  onChanged: searchProducts,
+                    onChanged: searchProducts,
 
-                  decoration: const InputDecoration(
-                    hintText: "Search rice or category...",
-                    prefixIcon: Icon(Icons.search),
+                    decoration: const InputDecoration(
+                      hintText: "Search rice or category...",
+                      prefixIcon: Icon(Icons.search),
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // LOADING
-            if (isLoading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
-            // EMPTY
-            else if (filteredProducts.isEmpty)
-              const Expanded(child: Center(child: Text("No products found")))
-            // GRID
-            else
-              Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(16),
+              // LOADING
+              if (isLoading)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              // EMPTY
+              else if (filteredProducts.isEmpty)
+                const Expanded(child: Center(child: Text("No products found")))
+              // GRID
+              else
+                Expanded(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
 
-                  itemCount: filteredProducts.length,
+                    itemCount: filteredProducts.length,
 
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
 
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
 
-                    childAspectRatio: 0.68,
+                      childAspectRatio: childAspectRatio,
+                    ),
+
+                    itemBuilder: (context, index) {
+                      return productCard(filteredProducts[index], imageHeight);
+                    },
                   ),
-
-                  itemBuilder: (context, index) {
-                    return productCard(filteredProducts[index]);
-                  },
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

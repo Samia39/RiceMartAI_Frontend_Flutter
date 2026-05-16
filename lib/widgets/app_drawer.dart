@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/buyer/orders/my_orders_screen.dart';
+import 'package:frontend/screens/buyer/profile/profile_screen.dart';
 import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
 import 'package:frontend/screens/buyer/shops/shops_screen.dart';
 import 'package:get/get.dart';
@@ -90,13 +92,23 @@ class AppDrawer extends StatelessWidget {
               ),
 
               // PROFILE
-              drawerItem(icon: Icons.person, title: "Profile", onTap: () {}),
+              drawerItem(
+                icon: Icons.person,
+                title: "Profile",
+                onTap: () {
+                  Navigator.pop(context);
+                  Get.to(() => const ProfileScreen());
+                },
+              ),
 
               // ORDERS
               drawerItem(
                 icon: Icons.shopping_bag,
-                title: "Orders",
-                onTap: () {},
+                title: "My Orders",
+                onTap: () {
+                  Navigator.pop(context);
+                  Get.to(() => const MyOrdersScreen());
+                },
               ),
 
               // NOTIFICATIONS

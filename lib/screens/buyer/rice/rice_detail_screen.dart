@@ -38,7 +38,9 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
 
             children: [
+              // =========================
               // PRODUCT IMAGE
+              // =========================
               Container(
                 height: 280,
                 width: double.infinity,
@@ -51,7 +53,6 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
-
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -67,7 +68,9 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 24),
 
+              // =========================
               // PRODUCT INFO
+              // =========================
               Container(
                 padding: const EdgeInsets.all(18),
 
@@ -77,10 +80,12 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
+                    // PRODUCT NAME
                     Text(product["name"] ?? "", style: AppTextStyles.heading2),
 
                     const SizedBox(height: 16),
 
+                    // PRICE
                     Text(
                       "Rs ${product["price"]} / KG",
 
@@ -91,30 +96,32 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                     const SizedBox(height: 12),
 
+                    // STOCK
                     Text(
                       "Available Stock: ${product["stock"]} KG",
-
                       style: AppTextStyles.bodyLarge,
                     ),
 
                     const SizedBox(height: 10),
 
+                    // CATEGORY
                     Text(
                       "Category: ${product["rice_category"]?["name"] ?? "Rice"}",
-
                       style: AppTextStyles.bodyLarge,
                     ),
 
                     const SizedBox(height: 24),
 
-                    // QUANTITY
+                    // =========================
+                    // QUANTITY SECTION
+                    // =========================
                     Text("Quantity", style: AppTextStyles.heading4),
 
                     const SizedBox(height: 14),
 
                     Row(
                       children: [
-                        // MINUS
+                        // MINUS BUTTON
                         IconButton(
                           onPressed: () {
                             if (quantity > 1) {
@@ -131,6 +138,7 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                           ),
                         ),
 
+                        // QUANTITY BOX
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -139,18 +147,16 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                           decoration: BoxDecoration(
                             color: Colors.white,
-
                             borderRadius: BorderRadius.circular(12),
                           ),
 
                           child: Text(
                             quantity.toString(),
-
                             style: AppTextStyles.heading4,
                           ),
                         ),
 
-                        // PLUS
+                        // PLUS BUTTON
                         IconButton(
                           onPressed: () {
                             setState(() {
@@ -172,18 +178,27 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 30),
 
-              // ADD TO CART
+              // =========================
+              // ADD TO CART BUTTON
+              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 55,
 
                 child: ElevatedButton.icon(
                   onPressed: () {
+                    // ADD ITEM TO CART
                     CartService().addToCart(rice: product, quantity: quantity);
 
+                    // SHOW MESSAGE
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Added to cart")),
+                      SnackBar(
+                        content: Text("${product["name"]} added to cart"),
+                      ),
                     );
+
+                    // GO BACK + REFRESH CART BADGE
+                    Navigator.pop(context, true);
                   },
 
                   icon: const Icon(Icons.shopping_cart),
@@ -194,7 +209,9 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 14),
 
-              // BUY NOW
+              // =========================
+              // BUY NOW BUTTON
+              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -210,7 +227,9 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 14),
 
-              // CHAT SELLER
+              // =========================
+              // CHAT SELLER BUTTON
+              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -226,7 +245,9 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 14),
 
-              // GO TO SHOP
+              // =========================
+              // GO TO SHOP BUTTON
+              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 55,

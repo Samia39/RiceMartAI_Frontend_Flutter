@@ -9,25 +9,29 @@ import '../buyer/dashboard/buyer_dashboard_screen.dart';
 import '../seller/dashboard/seller_dashboard_screen.dart';
 import '../admin_screens/dashboard/admin_dashboard.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   final AuthService _authService = AuthService();
+  bool _obscurePassword = true;
 
   // =========================
   // LOGIN
   // =========================
   void login() async {
     String email = emailController.text.trim();
-
     String password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       Get.snackbar("Error", "Please fill all fields");
-
       return;
     }
 
@@ -39,38 +43,21 @@ class LoginScreen extends StatelessWidget {
       if (response['token'] != null) {
         final box = GetStorage();
 
-        // CLEAR OLD DATA
         box.erase();
-
-        // SAVE TOKEN
         box.write('token', response['token']);
-
-        // SAVE ROLE
         box.write('role', response['role']);
-
-        // SAVE USER
         box.write('user', response['user']);
 
-        // SHOP DATA
         final shop = response['shop'];
-
-        // SAVE SHOP STATUS
         box.write('has_shop', shop != null);
 
-        // SAVE SHOP DATA
         if (shop != null) {
           box.write("shop_id", shop["id"]);
-
           box.write("shop_name", shop["shop_name"]);
-
           box.write("owner_name", shop["owner_name"]);
-
           box.write("phone", shop["phone"]);
-
           box.write("address", shop["address"]);
-
           box.write("description", shop["description"]);
-
           box.write("shop_approved", true);
         }
 
@@ -78,116 +65,124 @@ class LoginScreen extends StatelessWidget {
 
         String role = response['role'] ?? "user";
 
-        // =========================
-        // ADMIN
-        // =========================
         if (role == "admin") {
           Get.offAll(() => const AdminDashboard());
-
           return;
         }
 
-        // =========================
-        // SELLER
-        // =========================
         if (shop != null) {
           Get.offAll(() => const SellerDashboardScreen());
-
           return;
         }
 
-        // =========================
-        // BUYER
-        // =========================
         Get.offAll(() => const BuyerDashboardScreen());
       } else {
         Get.snackbar("Error", response['message'] ?? "Login failed");
       }
     } catch (e) {
       print(e);
-
       Get.snackbar("Error", "Server error");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // ─── Responsive values ───────────────────────────────
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final horizontalPadding = screenWidth * 0.06;
+    final verticalSpacing = screenHeight * 0.018;
+    final buttonHeight = screenHeight * 0.062;
+    final titleFontSize = screenWidth < 400 ? 18.0 : 20.0; // fixed, not % based
+    // ─────────────────────────────────────────────────────
+
     return Container(
       decoration: AppDecorations.gradientBackground,
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        body: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
 
                 children: [
+                  SizedBox(height: verticalSpacing * 2),
+
                   // TITLE
                   Text(
-                    "Login",
+                    "Welcome Back to Rice Mart\nLogin to Continue!",
+                    textAlign: TextAlign.center,
                     style: AppTextStyles.heading1.copyWith(
                       color: AppColors.darkGreen,
+                      fontSize: titleFontSize,
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  SizedBox(height: verticalSpacing * 1.5),
 
                   // EMAIL
                   Container(
                     decoration: AppDecorations.inputField,
-
                     child: TextField(
                       controller: emailController,
-
+                      keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         hintText: "Enter your email",
+                        prefixIcon: Icon(Icons.email_outlined),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  SizedBox(height: verticalSpacing),
 
                   // PASSWORD
                   Container(
                     decoration: AppDecorations.inputField,
-
                     child: TextField(
                       controller: passwordController,
-                      obscureText: true,
-
-                      decoration: const InputDecoration(
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
                         hintText: "Enter your password",
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 25),
+                  SizedBox(height: verticalSpacing * 1.5),
 
                   // LOGIN BUTTON
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
-
+                    height: buttonHeight,
                     child: ElevatedButton(
                       onPressed: login,
-
                       child: const Text("Login"),
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: verticalSpacing),
 
-                  // REGISTER
+                  // REGISTER LINK
                   GestureDetector(
-                    onTap: () {
-                      Get.toNamed('/register');
-                    },
-
+                    onTap: () => Get.toNamed('/register'),
                     child: Text(
                       "Don't have an account? Register",
                       style: AppTextStyles.bodyLarge.copyWith(
@@ -196,6 +191,8 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  SizedBox(height: verticalSpacing),
                 ],
               ),
             ),

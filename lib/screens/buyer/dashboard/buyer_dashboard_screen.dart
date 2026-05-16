@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'package:frontend/screens/buyer/cart/cart_screen.dart';
 import 'package:frontend/screens/buyer/profile/profile_screen.dart';
@@ -6,6 +7,7 @@ import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
 import 'package:frontend/screens/buyer/shops/shops_screen.dart';
 
 import '../../../core/constants/app_icons.dart';
+import '../../../core/services/cart_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../widgets/app_drawer.dart';
 
@@ -17,27 +19,27 @@ class BuyerDashboardScreen extends StatefulWidget {
 }
 
 class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
+  final box = GetStorage();
+  final CartService cartService = CartService();
   int currentIndex = 0;
-
-  final List<Widget> screens = [
-    // HOME
-    Center(child: Text("Home", style: AppTextStyles.heading2)),
-
-    // RICE MARKETPLACE
-    const AllRiceScreen(),
-
-    // SHOPS
-    const ShopsScreen(),
-
-    // CHAT
-    Center(child: Text("Chat", style: AppTextStyles.heading2)),
-
-    // PROFILE
-    const ProfileScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      Center(child: Text("Home", style: AppTextStyles.heading2)),
+
+      AllRiceScreen(
+        onCartUpdated: () {
+          setState(() {});
+        },
+      ),
+
+      const ShopsScreen(),
+
+      Center(child: Text("Chat", style: AppTextStyles.heading2)),
+
+      const ProfileScreen(),
+    ];
     return Container(
       decoration: AppDecorations.gradientBackground,
 
@@ -50,16 +52,52 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
           actions: [
             // CART ICON
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
+            Stack(
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CartScreen(
+                          onCartUpdated: () {
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                    );
 
-                  MaterialPageRoute(builder: (_) => const CartScreen()),
-                );
-              },
+                    setState(() {});
+                  },
 
-              icon: const Icon(Icons.shopping_cart),
+                  icon: const Icon(Icons.shopping_cart),
+                ),
+
+                if (cartService.getCart().isNotEmpty)
+                  Positioned(
+                    right: 5,
+                    top: 5,
+
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+
+                      child: Text(
+                        cartService.getCart().length.toString(),
+
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),

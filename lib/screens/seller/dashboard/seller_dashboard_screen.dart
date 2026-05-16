@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/seller/order/seller_orders_screen.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../rice/add_rice_screen.dart';
@@ -55,7 +56,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       const MyShopScreen(),
 
       // ORDERS
-      Center(child: Text("Orders", style: AppTextStyles.heading2)),
+      const SellerOrdersScreen(),
 
       // PROFILE
       Center(child: Text("Profile", style: AppTextStyles.heading2)),
