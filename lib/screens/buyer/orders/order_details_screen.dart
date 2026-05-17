@@ -1,25 +1,63 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 
-class OrderDetailsScreen extends StatelessWidget {
+class OrderDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> order;
 
   const OrderDetailsScreen({super.key, required this.order});
 
   @override
+  State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
+}
+
+class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
+  Map<String, dynamic>? order;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchOrder();
+  }
+
+  // =========================
+  // FETCH FRESH ORDER
+  // =========================
+  Future<void> fetchOrder() async {
+    try {
+      final data = await OrderService().getOrderDetails(widget.order["id"]);
+
+      if (!mounted) return;
+
+      setState(() {
+        order = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final items = order["items"] ?? [];
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final items = order?["items"] ?? [];
 
     return Container(
       decoration: AppDecorations.gradientBackground,
-
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
         // =========================
         // APP BAR
         // =========================
-        appBar: AppBar(title: Text("Order #${order["id"]}")),
+        appBar: AppBar(title: Text("Order #${order?["id"]}")),
 
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -28,7 +66,7 @@ class OrderDetailsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // =========================
-              // ORDER SUMMARY CARD
+              // ORDER SUMMARY
               // =========================
               Container(
                 padding: const EdgeInsets.all(16),
@@ -41,59 +79,16 @@ class OrderDetailsScreen extends StatelessWidget {
 
                     const SizedBox(height: 10),
 
-                    Text("Order ID: #${order["id"]}"),
+                    Text("Order ID: #${order?["id"]}"),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
 
-                    // =========================
-                    // ORDER STATUS
-                    // =========================
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
+                    Text("Payment: ${order?["payment_status"] ?? "pending"}"),
 
-                      decoration: BoxDecoration(
-                        color: order["status"] == "pending"
-                            ? Colors.orange.shade100
-                            : order["status"] == "processing"
-                            ? Colors.blue.shade100
-                            : order["status"] == "shipped"
-                            ? Colors.purple.shade100
-                            : order["status"] == "delivered"
-                            ? Colors.green.shade100
-                            : Colors.red.shade100,
-
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-
-                      child: Text(
-                        "Status: ${order["status"]}",
-
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-
-                          color: order["status"] == "pending"
-                              ? Colors.orange
-                              : order["status"] == "processing"
-                              ? Colors.blue
-                              : order["status"] == "shipped"
-                              ? Colors.purple
-                              : order["status"] == "delivered"
-                              ? Colors.green
-                              : Colors.red,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    Text("Payment: ${order["payment_status"] ?? "pending"}"),
-
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
 
                     Text(
-                      "Total: Rs ${order["total_price"]}",
+                      "Total: Rs ${order?["total_price"]}",
                       style: AppTextStyles.heading4,
                     ),
                   ],
@@ -102,9 +97,6 @@ class OrderDetailsScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // =========================
-              // ITEMS LIST TITLE
-              // =========================
               Text("Order Items", style: AppTextStyles.heading3),
 
               const SizedBox(height: 10),
@@ -128,7 +120,6 @@ class OrderDetailsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // PRODUCT NAME
                         Text(
                           item["product"]?["name"] ?? "Unknown Product",
                           style: AppTextStyles.heading4,
@@ -136,25 +127,44 @@ class OrderDetailsScreen extends StatelessWidget {
 
                         const SizedBox(height: 6),
 
-                        // SHOP INFO
                         Text(
                           "Shop: ${item["shop"]?["name"] ?? "Unknown Shop"}",
-                          style: AppTextStyles.bodyLarge,
                         ),
 
                         const SizedBox(height: 6),
 
-                        // PRICE + QTY
                         Text(
                           "Price: Rs ${item["price"]} × ${item["quantity"]}",
                         ),
 
                         const SizedBox(height: 6),
 
-                        // SUBTOTAL
                         Text(
                           "Subtotal: Rs ${(item["price"] * item["quantity"])}",
                           style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+
+                          decoration: BoxDecoration(
+                            color: _statusColor(item["status"]),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+
+                          child: Text(
+                            "Status: ${item["status"]}",
+
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: _statusTextColor(item["status"]),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -165,7 +175,7 @@ class OrderDetailsScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // =========================
-              // TOTAL BOX (BOTTOM)
+              // TOTAL
               // =========================
               Container(
                 padding: const EdgeInsets.all(16),
@@ -178,7 +188,7 @@ class OrderDetailsScreen extends StatelessWidget {
                     Text("Grand Total", style: AppTextStyles.heading3),
 
                     Text(
-                      "Rs ${order["total_price"]}",
+                      "Rs ${order?["total_price"]}",
                       style: AppTextStyles.heading3,
                     ),
                   ],
@@ -189,5 +199,38 @@ class OrderDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // =========================
+  // STATUS COLORS
+  // =========================
+  Color _statusColor(String? status) {
+    switch (status) {
+      case "pending":
+        return Colors.orange.shade100;
+      case "processing":
+        return Colors.blue.shade100;
+      case "shipped":
+        return Colors.purple.shade100;
+      case "delivered":
+        return Colors.green.shade100;
+      default:
+        return Colors.red.shade100;
+    }
+  }
+
+  Color _statusTextColor(String? status) {
+    switch (status) {
+      case "pending":
+        return Colors.orange;
+      case "processing":
+        return Colors.blue;
+      case "shipped":
+        return Colors.purple;
+      case "delivered":
+        return Colors.green;
+      default:
+        return Colors.red;
+    }
   }
 }

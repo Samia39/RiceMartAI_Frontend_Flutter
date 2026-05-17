@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/buyer/orders/order_details_screen.dart';
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
+import 'order_details_screen.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -10,26 +10,45 @@ class MyOrdersScreen extends StatefulWidget {
   State<MyOrdersScreen> createState() => _MyOrdersScreenState();
 }
 
-class _MyOrdersScreenState extends State<MyOrdersScreen> {
-  List orders = [];
+class _MyOrdersScreenState extends State<MyOrdersScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController tabController;
+
+  List activeOrders = [];
+  List historyOrders = [];
+
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchOrders();
+
+    tabController = TabController(length: 2, vsync: this);
+
+    fetchAllOrders();
   }
 
   // =========================
-  // FETCH ORDERS
+  // FETCH BOTH LISTS
   // =========================
-  Future<void> fetchOrders() async {
-    final data = await OrderService().getMyOrders();
+  Future<void> fetchAllOrders() async {
+    setState(() => isLoading = true);
+
+    final active = await OrderService().getActiveOrders();
+
+    final history = await OrderService().getOrderHistory();
 
     setState(() {
-      orders = data;
+      activeOrders = active;
+      historyOrders = history;
       isLoading = false;
     });
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,71 +58,139 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: const Text("My Orders")),
+
+        appBar: AppBar(
+          title: const Text("My Orders"),
+
+          bottom: TabBar(
+            controller: tabController,
+
+            tabs: const [
+              Tab(text: "Active"),
+              Tab(text: "History"),
+            ],
+          ),
+        ),
 
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : orders.isEmpty
-            ? const Center(child: Text("No orders found"))
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: orders.length,
-                itemBuilder: (context, index) {
-                  final order = orders[index];
+            : TabBarView(
+                controller: tabController,
 
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => OrderDetailsScreen(order: order),
-                        ),
-                      );
-                    },
+                children: [
+                  // ACTIVE ORDERS
+                  buildOrderList(activeOrders),
 
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: AppDecorations.card,
-
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // ORDER ID
-                          Text(
-                            "Order #${order["id"]}",
-                            style: AppTextStyles.heading4,
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          // STATUS
-                          Text(
-                            "Status: ${order["status"]}",
-                            style: AppTextStyles.bodyLarge,
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          // TOTAL
-                          Text(
-                            "Total: Rs ${order["total_price"]}",
-                            style: AppTextStyles.heading4,
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          // ITEMS COUNT
-                          Text(
-                            "Items: ${order["items"].length}",
-                            style: AppTextStyles.bodyLarge,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                  // HISTORY ORDERS
+                  buildOrderList(historyOrders),
+                ],
               ),
+      ),
+    );
+  }
+
+  // =========================
+  // COMMON ORDER LIST
+  // =========================
+  Widget buildOrderList(List orders) {
+    if (orders.isEmpty) {
+      return const Center(child: Text("No orders found"));
+    }
+
+    return RefreshIndicator(
+      onRefresh: fetchAllOrders,
+
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+
+        itemCount: orders.length,
+
+        itemBuilder: (context, index) {
+          final order = orders[index];
+
+          // =========================
+          // GET ITEMS
+          // =========================
+          final items = order["items"] ?? [];
+
+          // =========================
+          // OVERALL STATUS
+          // =========================
+          String overallStatus = "pending";
+
+          // ANY CANCELLED
+          if (items.any((i) => i["status"] == "cancelled")) {
+            overallStatus = "cancelled";
+          }
+          // ALL DELIVERED
+          else if (items.isNotEmpty &&
+              items.every((i) => i["status"] == "delivered")) {
+            overallStatus = "delivered";
+          }
+          // ANY SHIPPED
+          else if (items.any((i) => i["status"] == "shipped")) {
+            overallStatus = "shipped";
+          }
+          // ANY PROCESSING
+          else if (items.any((i) => i["status"] == "processing")) {
+            overallStatus = "processing";
+          }
+
+          return GestureDetector(
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => OrderDetailsScreen(order: order),
+                ),
+              );
+
+              // AUTO REFRESH AFTER BACK
+              fetchAllOrders();
+            },
+
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+
+              padding: const EdgeInsets.all(16),
+
+              decoration: AppDecorations.card,
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  // ORDER ID
+                  Text("Order #${order["id"]}", style: AppTextStyles.heading4),
+
+                  const SizedBox(height: 10),
+
+                  // STATUS
+                  Text(
+                    "Status: $overallStatus",
+                    style: AppTextStyles.bodyLarge,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // TOTAL
+                  Text(
+                    "Total: Rs ${order["total_price"]}",
+                    style: AppTextStyles.heading4,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // ITEMS
+                  Text(
+                    "Items: ${order["items"].length}",
+                    style: AppTextStyles.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

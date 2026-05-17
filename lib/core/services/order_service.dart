@@ -84,24 +84,84 @@ class OrderService {
   }
 
   // =========================
-  // UPDATE ORDER STATUS
+  // UPDATE ITEM STATUS
   // =========================
-  Future<Map<String, dynamic>> updateOrderStatus({
-    required int orderId,
+  Future<Map<String, dynamic>> updateItemStatus({
+    required int itemId,
     required String status,
   }) async {
     final token = box.read("token");
 
     final response = await http.put(
-      Uri.parse("$baseUrl/orders/$orderId/status"),
+      Uri.parse("$baseUrl/seller/order-item/$itemId/status"),
 
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
 
-      body: {"status": status},
+      body: jsonEncode({"status": status}),
     );
 
     final data = jsonDecode(response.body);
 
     return data;
+  }
+
+  // order detail screen
+  Future<Map<String, dynamic>> getOrderDetails(int orderId) async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/my-orders"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      final orders = data["orders"];
+
+      return orders.firstWhere((o) => o["id"] == orderId);
+    }
+
+    throw Exception("Order not found");
+  }
+
+  // Active Orders
+  Future<List> getActiveOrders() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/active-orders"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      return data["orders"];
+    }
+
+    return [];
+  }
+
+  // Order History
+  Future<List> getOrderHistory() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/order-history"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      return data["orders"];
+    }
+
+    return [];
   }
 }
