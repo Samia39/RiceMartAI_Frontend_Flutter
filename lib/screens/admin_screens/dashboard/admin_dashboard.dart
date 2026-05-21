@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/seller/shop/create_shop_screen.dart';
 import 'package:frontend/screens/admin_screens/analytics/analytics_screen.dart';
 import 'package:frontend/screens/admin_screens/notifications/admin_notifications_screen.dart';
 import 'package:frontend/screens/admin_screens/search/admin_search_results_screen.dart';
 import 'package:frontend/screens/admin_screens/settings/admin_settings_screen.dart';
+import 'package:frontend/screens/admin_screens/shops/add_seller_screen.dart';
 import 'package:frontend/screens/admin_screens/shops/approved_shops_screen.dart';
 import 'package:frontend/screens/admin_screens/orders/orders_management_screen.dart';
 import 'package:frontend/screens/admin_screens/payments/payments_screen.dart';
@@ -39,7 +39,7 @@ class AdminDashboard extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const CreateShopScreen()),
+                    MaterialPageRoute(builder: (_) => const AddSellerScreen()),
                   );
                 },
 
