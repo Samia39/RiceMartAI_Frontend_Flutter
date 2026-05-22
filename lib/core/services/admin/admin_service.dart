@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 
 class AdminService {
   final String baseUrl = "http://127.0.0.1:8000/api";
@@ -124,6 +123,173 @@ class AdminService {
     final response = await http.delete(
       Uri.parse("$baseUrl/shops/$shopId"),
       headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // GET USERS
+  // =========================
+
+  Future<List<dynamic>> getUsers() async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/users"),
+      headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // GET ROLES
+  // =========================
+
+  Future<List<dynamic>> getRoles() async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/roles"),
+      headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // for user mangenment module
+
+  // =========================
+  // CREATE USER
+  // =========================
+
+  Future<Map<String, dynamic>> createUser({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+  }) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/users"),
+      headers: {...headers, 'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+        'role': role,
+      }),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // UPDATE USER
+  // =========================
+
+  Future<Map<String, dynamic>> updateUser({
+    required int id,
+    required String name,
+    required String email,
+    required String role,
+  }) async {
+    final response = await http.put(
+      Uri.parse("$baseUrl/users/$id"),
+      headers: {...headers, 'Content-Type': 'application/json'},
+      body: jsonEncode({'name': name, 'email': email, 'role': role}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // DELETE USER
+  // =========================
+
+  Future<Map<String, dynamic>> deleteUser(int id) async {
+    final response = await http.delete(
+      Uri.parse("$baseUrl/users/$id"),
+      headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // for user management module
+  // =========================
+  // GET ROLES
+  // =========================
+
+  Future<List<dynamic>> getRolesManagement() async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/roles-management"),
+      headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // CREATE ROLE
+  // =========================
+
+  Future<Map<String, dynamic>> createRole(String name) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/roles-management"),
+      headers: {...headers, "Content-Type": "application/json"},
+      body: jsonEncode({"name": name}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // UPDATE ROLE
+  // =========================
+
+  Future<Map<String, dynamic>> updateRole(int id, String name) async {
+    final response = await http.put(
+      Uri.parse("$baseUrl/roles-management/$id"),
+      headers: {...headers, "Content-Type": "application/json"},
+      body: jsonEncode({"name": name}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // DELETE ROLE
+  // =========================
+
+  Future<Map<String, dynamic>> deleteRole(int id) async {
+    final response = await http.delete(
+      Uri.parse("$baseUrl/roles-management/$id"),
+      headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // GET PERMISSIONS
+  // =========================
+  Future<List<dynamic>> getPermissions() async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/permissions"),
+      headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
+  // ASSIGN PERMISSIONS
+  // =========================
+  Future<Map<String, dynamic>> assignPermissions({
+    required int roleId,
+    required List<String> permissions,
+  }) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/assign-permissions"),
+      headers: {...headers, 'Content-Type': 'application/json'},
+      body: jsonEncode({'role_id': roleId, 'permissions': permissions}),
     );
 
     return jsonDecode(response.body);

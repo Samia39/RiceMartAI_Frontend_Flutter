@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/admin_screens/user_management/users_screen.dart';
+import 'package:frontend/screens/admin_screens/user_management/roles_screen.dart';
+import 'package:frontend/screens/admin_screens/user_management/assign_permissions_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -20,7 +23,7 @@ class AdminDrawer extends StatelessWidget {
     return Drawer(
       backgroundColor: AppColors.cream,
 
-      child: Column(
+      child: ListView(
         children: [
           // HEADER
           UserAccountsDrawerHeader(
@@ -73,9 +76,69 @@ class AdminDrawer extends StatelessWidget {
               Get.to(() => const ApprovedShopsScreen());
             },
           ),
-          // USERS
-          drawerItem(icon: Icons.people, title: "Users", onTap: () {}),
 
+          // =========================
+          // USER MANAGEMENT
+          // =========================
+          ExpansionTile(
+            leading: const Icon(
+              Icons.admin_panel_settings,
+              color: AppColors.darkGreen,
+            ),
+
+            title: const Text(
+              "User Management",
+              style: TextStyle(
+                color: AppColors.darkGreen,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
+            childrenPadding: const EdgeInsets.only(left: 20),
+
+            children: [
+              // USERS
+              ListTile(
+                leading: const Icon(Icons.people, color: AppColors.darkGreen),
+
+                title: const Text("Users"),
+
+                onTap: () {
+                  Navigator.pop(context);
+
+                  Get.to(() => UsersScreen());
+                },
+              ),
+
+              // ROLES
+              ListTile(
+                leading: const Icon(Icons.badge, color: AppColors.darkGreen),
+
+                title: const Text("Roles"),
+
+                onTap: () {
+                  Navigator.pop(context);
+                  Get.to(() => RolesScreen());
+                },
+              ),
+
+              // ASSIGN PERMISSIONS
+              ListTile(
+                leading: const Icon(
+                  Icons.lock_open,
+                  color: AppColors.darkGreen,
+                ),
+
+                title: const Text("Assign Permissions"),
+
+                onTap: () {
+                  Navigator.pop(context);
+
+                  Get.to(() => AssignPermissionScreen());
+                },
+              ),
+            ],
+          ),
           // REPORTS
           drawerItem(icon: Icons.report, title: "Reports", onTap: () {}),
 
