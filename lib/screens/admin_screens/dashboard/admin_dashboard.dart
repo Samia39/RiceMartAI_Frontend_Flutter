@@ -8,7 +8,6 @@ import 'package:frontend/screens/admin_screens/shops/approved_shops_screen.dart'
 import 'package:frontend/screens/admin_screens/orders/orders_management_screen.dart';
 import 'package:frontend/screens/admin_screens/payments/payments_screen.dart';
 import 'package:frontend/screens/admin_screens/reports/reports_screen.dart';
-import 'package:frontend/screens/admin_screens/users/user_management_screen.dart';
 
 import '../../../core/utils/themes.dart';
 import '../shops/shop_approvals_screen.dart';
@@ -254,23 +253,6 @@ class AdminDashboard extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) => const ApprovedShopsScreen(),
-                      ),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                // Users
-                adminCard(
-                  title: "Users",
-                  subtitle: "View all users",
-                  icon: Icons.people,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const UserManagementScreen(),
                       ),
                     );
                   },

@@ -280,16 +280,30 @@ class AdminService {
   }
 
   // =========================
+  // GET ROLE PERMISSIONS
+  // =========================
+
+  Future<List<dynamic>> getRolePermissions(int roleId) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/roles-management/$roleId/permissions"),
+      headers: headers,
+    );
+
+    final data = jsonDecode(response.body);
+    return data['permissions'];
+  }
+
+  // =========================
   // ASSIGN PERMISSIONS
   // =========================
   Future<Map<String, dynamic>> assignPermissions({
     required int roleId,
-    required List<String> permissions,
+    required List<int> permissions,
   }) async {
     final response = await http.post(
       Uri.parse("$baseUrl/assign-permissions"),
-      headers: {...headers, 'Content-Type': 'application/json'},
-      body: jsonEncode({'role_id': roleId, 'permissions': permissions}),
+      headers: {...headers, "Content-Type": "application/json"},
+      body: jsonEncode({"role_id": roleId, "permissions": permissions}),
     );
 
     return jsonDecode(response.body);

@@ -5,6 +5,7 @@ import 'package:frontend/screens/admin_screens/user_management/assign_permission
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
 import '../screens/admin_screens/shops/shop_approvals_screen.dart';
 import '../screens/admin_screens/shops/approved_shops_screen.dart';
@@ -123,6 +124,7 @@ class AdminDrawer extends StatelessWidget {
               ),
 
               // ASSIGN PERMISSIONS
+              // ASSIGN PERMISSIONS
               ListTile(
                 leading: const Icon(
                   Icons.lock_open,
@@ -134,7 +136,15 @@ class AdminDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
 
-                  Get.to(() => AssignPermissionScreen());
+                  // REGISTER CONTROLLER ONLY ONCE
+                  if (!Get.isRegistered<PermissionsController>()) {
+                    Get.lazyPut<PermissionsController>(
+                      () => PermissionsController(),
+                      fenix: true,
+                    );
+                  }
+
+                  Get.to(() => const AssignPermissionScreen());
                 },
               ),
             ],
