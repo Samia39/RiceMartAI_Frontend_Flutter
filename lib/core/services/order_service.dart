@@ -164,4 +164,48 @@ class OrderService {
 
     return [];
   }
+
+  // =========================
+  // ADMIN ALL ORDERS
+  // =========================
+  Future<List> getAdminOrders() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/admin/orders"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      return data["orders"];
+    }
+
+    return [];
+  }
+
+  // =========================
+  // ADMIN UPDATE ITEM STATUS
+  // =========================
+  Future<Map<String, dynamic>> adminUpdateItemStatus({
+    required int itemId,
+    required String status,
+  }) async {
+    final token = box.read("token");
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/admin/order-item/$itemId/status"),
+
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+
+      body: jsonEncode({"status": status}),
+    );
+
+    return jsonDecode(response.body);
+  }
 }

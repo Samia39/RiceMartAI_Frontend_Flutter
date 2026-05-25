@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/admin_screens/orders/orders_management_screen.dart';
 import 'package:frontend/screens/admin_screens/user_management/users_screen.dart';
 import 'package:frontend/screens/admin_screens/user_management/roles_screen.dart';
 import 'package:frontend/screens/admin_screens/user_management/assign_permissions_screen.dart';
@@ -77,6 +78,17 @@ class AdminDrawer extends StatelessWidget {
               Get.to(() => const ApprovedShopsScreen());
             },
           ),
+          // Orders
+          drawerItem(
+            icon: Icons.shopping_bag,
+            title: "Orders",
+
+            onTap: () {
+              Navigator.pop(context);
+
+              Get.to(() => const OrdersManagementScreen());
+            },
+          ),
 
           // =========================
           // USER MANAGEMENT
@@ -123,7 +135,6 @@ class AdminDrawer extends StatelessWidget {
                 },
               ),
 
-              // ASSIGN PERMISSIONS
               // ASSIGN PERMISSIONS
               ListTile(
                 leading: const Icon(

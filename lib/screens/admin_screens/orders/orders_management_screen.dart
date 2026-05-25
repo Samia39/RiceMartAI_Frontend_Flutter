@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 
 class OrdersManagementScreen extends StatefulWidget {
@@ -8,35 +10,296 @@ class OrdersManagementScreen extends StatefulWidget {
   State<OrdersManagementScreen> createState() => _OrdersManagementScreenState();
 }
 
-class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
-  List<Map<String, dynamic>> orders = [
-    {
-      "id": "1001",
-      "buyer": "Hamza",
-      "seller": "Punjab Rice Traders",
-      "rice": "Super Basmati",
-      "qty": "50 kg",
-      "status": "Pending",
-    },
+class _OrdersManagementScreenState extends State<OrdersManagementScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController tabController;
 
-    {
-      "id": "1002",
-      "buyer": "Ali",
-      "seller": "Basmati House",
-      "rice": "Brown Rice",
-      "qty": "20 kg",
-      "status": "Processing",
-    },
-  ];
+  bool isLoading = true;
 
-  void updateStatus(int index, String status) {
-    setState(() {
-      orders[index]["status"] = status;
-    });
+  List activeOrders = [];
+  List historyOrders = [];
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Order marked $status")));
+  @override
+  void initState() {
+    super.initState();
+
+    tabController = TabController(length: 2, vsync: this);
+
+    fetchOrders();
+  }
+
+  // =========================
+  // FETCH ADMIN ORDERS
+  // =========================
+  Future<void> fetchOrders() async {
+    try {
+      final data = await OrderService().getAdminOrders();
+
+      final active = data.where((order) {
+        final items = order["items"] ?? [];
+
+        return items.any(
+          (i) => i["status"] != "delivered" && i["status"] != "cancelled",
+        );
+      }).toList();
+
+      final history = data.where((order) {
+        final items = order["items"] ?? [];
+
+        return items.isNotEmpty &&
+            items.every(
+              (i) => i["status"] == "delivered" || i["status"] == "cancelled",
+            );
+      }).toList();
+
+      setState(() {
+        activeOrders = active;
+        historyOrders = history;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  // =========================
+  // UPDATE ITEM STATUS
+  // =========================
+  Future<void> updateItemStatus({
+    required int itemId,
+    required String status,
+  }) async {
+    try {
+      final data = await OrderService().adminUpdateItemStatus(
+        itemId: itemId,
+        status: status,
+      );
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(data["message"])));
+
+      fetchOrders();
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  // =========================
+  // STATUS COLOR
+  // =========================
+  Color statusColor(String status) {
+    switch (status) {
+      case "pending":
+        return Colors.orange;
+
+      case "processing":
+        return Colors.blue;
+
+      case "shipped":
+        return Colors.purple;
+
+      case "delivered":
+        return Colors.green;
+
+      default:
+        return Colors.red;
+    }
+  }
+
+  // =========================
+  // ORDER CARD
+  // =========================
+  Widget orderCard(dynamic order) {
+    final items = order["items"] ?? [];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(16),
+      decoration: AppDecorations.card,
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+          // ORDER ID
+          Text("Order #${order["id"]}", style: AppTextStyles.heading3),
+
+          const SizedBox(height: 10),
+
+          // CUSTOMER
+          Text(
+            "Customer: ${order["user"]?["name"] ?? "Unknown"}",
+            style: AppTextStyles.bodyLarge,
+          ),
+
+          const SizedBox(height: 6),
+
+          // EMAIL
+          Text(order["user"]?["email"] ?? "", style: AppTextStyles.bodyMedium),
+
+          const SizedBox(height: 10),
+
+          // TOTAL
+          Text(
+            "Total: Rs ${order["total_price"]}",
+            style: AppTextStyles.heading4,
+          ),
+
+          const SizedBox(height: 18),
+
+          // ITEMS
+          ...items.map<Widget>((item) {
+            final product = item["product"];
+            final shop = item["shop"];
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(14),
+
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
+              ),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  // PRODUCT
+                  Text(product?["name"] ?? "", style: AppTextStyles.heading4),
+
+                  const SizedBox(height: 8),
+
+                  // SHOP
+                  Text(
+                    "Shop: ${shop?["name"] ?? ""}",
+                    style: AppTextStyles.bodyLarge,
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // QUANTITY
+                  Text(
+                    "Quantity: ${item["quantity"]}",
+                    style: AppTextStyles.bodyLarge,
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // PRICE
+                  Text(
+                    "Price: Rs ${item["price"]}",
+                    style: AppTextStyles.bodyLarge,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // STATUS
+                  Row(
+                    children: [
+                      Text("Status:", style: AppTextStyles.bodyLarge),
+
+                      const SizedBox(width: 10),
+
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+
+                        decoration: BoxDecoration(
+                          color: statusColor(item["status"]).withOpacity(0.15),
+
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+
+                        child: Text(
+                          item["status"],
+
+                          style: TextStyle(
+                            color: statusColor(item["status"]),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ACTIONS
+                  if (item["status"] != "delivered" &&
+                      item["status"] != "cancelled")
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            updateItemStatus(
+                              itemId: item["id"],
+                              status: "processing",
+                            );
+                          },
+
+                          child: const Text("Processing"),
+                        ),
+
+                        ElevatedButton(
+                          onPressed: () {
+                            updateItemStatus(
+                              itemId: item["id"],
+                              status: "shipped",
+                            );
+                          },
+
+                          child: const Text("Shipped"),
+                        ),
+
+                        ElevatedButton(
+                          onPressed: () {
+                            updateItemStatus(
+                              itemId: item["id"],
+                              status: "delivered",
+                            );
+                          },
+
+                          child: const Text("Delivered"),
+                        ),
+
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+
+                          onPressed: () {
+                            updateItemStatus(
+                              itemId: item["id"],
+                              status: "cancelled",
+                            );
+                          },
+
+                          child: const Text("Cancel"),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
   }
 
   @override
@@ -47,86 +310,60 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        appBar: AppBar(title: const Text("Orders Management")),
+        appBar: AppBar(
+          title: const Text("Orders Management"),
 
-        body: ListView.builder(
-          padding: const EdgeInsets.all(18),
+          bottom: TabBar(
+            controller: tabController,
 
-          itemCount: orders.length,
+            tabs: const [
+              Tab(text: "Active Orders"),
+              Tab(text: "History"),
+            ],
+          ),
+        ),
 
-          itemBuilder: (context, index) {
-            var order = orders[index];
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 20),
-
-              padding: const EdgeInsets.all(16),
-
-              decoration: AppDecorations.card,
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : TabBarView(
+                controller: tabController,
 
                 children: [
-                  Text("Order #${order["id"]}", style: AppTextStyles.heading4),
+                  // ACTIVE
+                  activeOrders.isEmpty
+                      ? const Center(child: Text("No active orders"))
+                      : RefreshIndicator(
+                          onRefresh: fetchOrders,
 
-                  const SizedBox(height: 10),
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
 
-                  Text("Buyer: ${order["buyer"]}"),
+                            itemCount: activeOrders.length,
 
-                  Text("Seller: ${order["seller"]}"),
-
-                  Text("Rice: ${order["rice"]}"),
-
-                  Text("Quantity: ${order["qty"]}"),
-
-                  const SizedBox(height: 10),
-
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.borderGold),
-
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-
-                    child: Text("Status: ${order["status"]}"),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            updateStatus(index, "Delivered");
-                          },
-                          child: const Text("Deliver"),
+                            itemBuilder: (context, index) {
+                              return orderCard(activeOrders[index]);
+                            },
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(width: 12),
+                  // HISTORY
+                  historyOrders.isEmpty
+                      ? const Center(child: Text("No history orders"))
+                      : RefreshIndicator(
+                          onRefresh: fetchOrders,
 
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            updateStatus(index, "Cancelled");
-                          },
-                          child: const Text("Cancel"),
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+
+                            itemCount: historyOrders.length,
+
+                            itemBuilder: (context, index) {
+                              return orderCard(historyOrders[index]);
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
-            );
-          },
-        ),
       ),
     );
   }

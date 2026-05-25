@@ -59,10 +59,6 @@ class AdminService {
     request.fields['description'] = description;
 
     // =========================
-    // IMAGE   (CNIC Image )
-    // =========================
-
-    // =========================
     // SEND REQUEST
     // =========================
 
