@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 import 'package:get/get.dart';
-import 'package:frontend/routes/app_routes.dart';
+
+import '../../../routes/app_routes.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -141,10 +142,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
             onTap: () async {
               await Get.toNamed(AppRoutes.orderDetails, arguments: order);
 
-              // AUTO REFRESH AFTER BACK
               fetchAllOrders();
             },
-
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
 

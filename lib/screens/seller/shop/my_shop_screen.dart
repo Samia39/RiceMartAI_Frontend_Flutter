@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
-import '../shop/edit_shop_screen.dart';
 
 class MyShopScreen extends StatefulWidget {
   const MyShopScreen({super.key});
@@ -67,7 +67,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
       Get.snackbar("Success", "Shop deleted");
 
-      Get.back();
+      Get.offAllNamed('/seller-dashboard');
     } else {
       Get.snackbar("Error", "Failed to delete shop");
     }
@@ -153,7 +153,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Get.to(() => const EditShopScreen());
+                    Get.toNamed(AppRoutes.editShop);
                   },
 
                   icon: const Icon(Icons.edit),
@@ -184,9 +184,10 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
                       confirmTextColor: Colors.white,
 
-                      onConfirm: () {
-                        Get.offAllNamed('/dashboard');
-                        deleteShop();
+                      onConfirm: () async {
+                        Get.back();
+
+                        await deleteShop();
                       },
                     );
                   },

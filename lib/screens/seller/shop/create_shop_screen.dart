@@ -172,7 +172,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.gradientBackground,

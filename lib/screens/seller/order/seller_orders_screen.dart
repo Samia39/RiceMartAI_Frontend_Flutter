@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 
@@ -12,17 +13,29 @@ class SellerOrdersScreen extends StatefulWidget {
 class _SellerOrdersScreenState extends State<SellerOrdersScreen>
     with SingleTickerProviderStateMixin {
   List orders = [];
+
   List activeOrders = [];
+
   List historyOrders = [];
 
   bool isLoading = true;
+
   late TabController tabController;
 
   @override
   void initState() {
     super.initState();
+
     tabController = TabController(length: 2, vsync: this);
+
     fetchSellerOrders();
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+
+    super.dispose();
   }
 
   Future<void> fetchSellerOrders() async {
@@ -39,12 +52,17 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
       setState(() {
         orders = data;
+
         activeOrders = active;
+
         historyOrders = history;
+
         isLoading = false;
       });
     } catch (e) {
-      setState(() => isLoading = false);
+      setState(() {
+        isLoading = false;
+      });
 
       ScaffoldMessenger.of(
         context,
@@ -74,19 +92,23 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
     }
   }
 
-  // ✅ FIXED HERE (INSIDE STATE CLASS)
   Color statusColor(String status) {
     switch (status) {
       case "pending":
         return Colors.orange;
+
       case "processing":
         return Colors.blue;
+
       case "shipped":
         return Colors.purple;
+
       case "delivered":
         return Colors.green;
+
       case "cancelled":
         return Colors.red;
+
       default:
         return Colors.grey;
     }
@@ -94,16 +116,21 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
   Widget orderCard(dynamic item) {
     final product = item["product"];
+
     final order = item["order"];
 
     final status = (item["status"] ?? "").toString();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+
       padding: const EdgeInsets.all(16),
+
       decoration: AppDecorations.card,
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           Text(product["name"] ?? "", style: AppTextStyles.heading4),
 
@@ -115,6 +142,7 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
           Text(
             "Customer: ${order["user"]?["name"] ?? "Unknown"}",
+
             style: AppTextStyles.bodyLarge,
           ),
 
@@ -130,12 +158,16 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+
             decoration: BoxDecoration(
               color: statusColor(status),
+
               borderRadius: BorderRadius.circular(20),
             ),
+
             child: Text(
               status.toUpperCase(),
+
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -147,6 +179,7 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
           Text(
             "Payment: ${order["payment_status"]}",
+
             style: AppTextStyles.bodyLarge,
           ),
 
@@ -155,6 +188,7 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
           Wrap(
             spacing: 10,
             runSpacing: 10,
+
             children: [
               if (status == "pending") ...[
                 ElevatedButton(
@@ -162,12 +196,16 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
                     itemId: item["id"],
                     status: "processing",
                   ),
+
                   child: const Text("Processing"),
                 ),
+
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+
                   onPressed: () =>
                       updateItemStatus(itemId: item["id"], status: "cancelled"),
+
                   child: const Text("Cancel"),
                 ),
               ],
@@ -176,12 +214,16 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
                 ElevatedButton(
                   onPressed: () =>
                       updateItemStatus(itemId: item["id"], status: "shipped"),
+
                   child: const Text("Shipped"),
                 ),
+
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+
                   onPressed: () =>
                       updateItemStatus(itemId: item["id"], status: "cancelled"),
+
                   child: const Text("Cancel"),
                 ),
               ],
@@ -190,6 +232,7 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
                 ElevatedButton(
                   onPressed: () =>
                       updateItemStatus(itemId: item["id"], status: "delivered"),
+
                   child: const Text("Delivered"),
                 ),
               ],
@@ -197,6 +240,7 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
               if (status == "delivered")
                 const Text(
                   "Order Delivered",
+
                   style: TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
@@ -206,6 +250,7 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
               if (status == "cancelled")
                 const Text(
                   "Order Cancelled",
+
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
@@ -222,44 +267,67 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.gradientBackground,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text("Seller Orders"),
-          bottom: TabBar(
-            controller: tabController,
-            tabs: const [
-              Tab(text: "Active Orders"),
-              Tab(text: "History"),
-            ],
-          ),
-        ),
-        body: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : TabBarView(
-                controller: tabController,
-                children: [
-                  activeOrders.isEmpty
-                      ? const Center(child: Text("No active orders"))
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: activeOrders.length,
-                          itemBuilder: (context, index) {
-                            return orderCard(activeOrders[index]);
-                          },
-                        ),
 
-                  historyOrders.isEmpty
-                      ? const Center(child: Text("No history orders"))
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: historyOrders.length,
-                          itemBuilder: (context, index) {
-                            return orderCard(historyOrders[index]);
-                          },
-                        ),
+      child: Column(
+        children: [
+          Container(
+            color: AppColors.darkGreen,
+
+            child: SafeArea(
+              bottom: false,
+
+              child: TabBar(
+                controller: tabController,
+
+                labelColor: Colors.white,
+
+                unselectedLabelColor: Colors.white70,
+
+                indicatorColor: Colors.white,
+
+                tabs: const [
+                  Tab(text: "Active Orders"),
+
+                  Tab(text: "History"),
                 ],
               ),
+            ),
+          ),
+
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : TabBarView(
+                    controller: tabController,
+
+                    children: [
+                      activeOrders.isEmpty
+                          ? const Center(child: Text("No active orders"))
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+
+                              itemCount: activeOrders.length,
+
+                              itemBuilder: (context, index) {
+                                return orderCard(activeOrders[index]);
+                              },
+                            ),
+
+                      historyOrders.isEmpty
+                          ? const Center(child: Text("No history orders"))
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+
+                              itemCount: historyOrders.length,
+
+                              itemBuilder: (context, index) {
+                                return orderCard(historyOrders[index]);
+                              },
+                            ),
+                    ],
+                  ),
+          ),
+        ],
       ),
     );
   }

@@ -69,8 +69,14 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         backgroundColor: Colors.transparent,
 
         appBar: AppBar(title: const Text("Seller Dashboard")),
-
-        drawer: const SellerDrawer(),
+        // Drawer
+        drawer: SellerDrawer(
+          onTabSelected: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+        ),
 
         body: screens[currentIndex],
 

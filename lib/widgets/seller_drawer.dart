@@ -3,17 +3,21 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../core/utils/themes.dart';
-import '../screens/seller/shop/my_shop_screen.dart';
+import '../routes/app_routes.dart';
 
 class SellerDrawer extends StatelessWidget {
-  const SellerDrawer({super.key});
+  // =========================
+  // TAB SWITCH CALLBACK
+  // =========================
+  final Function(int) onTabSelected;
+
+  const SellerDrawer({super.key, required this.onTabSelected});
 
   @override
   Widget build(BuildContext context) {
     final box = GetStorage();
 
     final userName = box.read("name") ?? "Seller";
-
     final userEmail = box.read("email") ?? "";
 
     return Drawer(
@@ -21,7 +25,9 @@ class SellerDrawer extends StatelessWidget {
 
       child: Column(
         children: [
+          // =========================
           // HEADER
+          // =========================
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: AppColors.darkGreen),
 
@@ -36,16 +42,39 @@ class SellerDrawer extends StatelessWidget {
             ),
           ),
 
-          // DASHBOARD
+          // =========================
+          // DASHBOARD TAB
+          // =========================
           drawerItem(
             icon: Icons.dashboard,
             title: "Dashboard",
+
             onTap: () {
               Navigator.pop(context);
+
+              // HOME TAB
+              onTabSelected(0);
             },
           ),
 
-          // MY SHOP
+          // =========================
+          // MY RICE TAB
+          // =========================
+          drawerItem(
+            icon: Icons.rice_bowl,
+            title: "My Rice",
+
+            onTap: () {
+              Navigator.pop(context);
+
+              // RICE TAB
+              onTabSelected(1);
+            },
+          ),
+
+          // =========================
+          // MY SHOP TAB
+          // =========================
           drawerItem(
             icon: Icons.store,
             title: "My Shop",
@@ -53,29 +82,60 @@ class SellerDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
 
-              Get.to(() => const MyShopScreen());
+              // SHOP TAB
+              onTabSelected(2);
             },
           ),
 
-          // MY RICE
-          drawerItem(icon: Icons.rice_bowl, title: "My Rice", onTap: () {}),
+          // =========================
+          // ORDERS TAB
+          // =========================
+          drawerItem(
+            icon: Icons.shopping_bag,
+            title: "Orders",
 
-          // ORDERS
-          drawerItem(icon: Icons.shopping_bag, title: "Orders", onTap: () {}),
+            onTap: () {
+              Navigator.pop(context);
 
+              // ORDERS TAB
+              onTabSelected(3);
+            },
+          ),
+
+          // =========================
+          // PROFILE TAB
+          // =========================
+          drawerItem(
+            icon: Icons.person,
+            title: "Profile",
+
+            onTap: () {
+              Navigator.pop(context);
+
+              // PROFILE TAB
+              onTabSelected(4);
+            },
+          ),
+
+          // =========================
           // NOTIFICATIONS
+          // =========================
           drawerItem(
             icon: Icons.notifications,
             title: "Notifications",
             onTap: () {},
           ),
 
+          // =========================
           // SETTINGS
+          // =========================
           drawerItem(icon: Icons.settings, title: "Settings", onTap: () {}),
 
           const Spacer(),
 
+          // =========================
           // LOGOUT
+          // =========================
           drawerItem(
             icon: Icons.logout,
             title: "Logout",
@@ -85,7 +145,7 @@ class SellerDrawer extends StatelessWidget {
             onTap: () {
               box.erase();
 
-              Get.offAllNamed("/login");
+              Get.offAllNamed(AppRoutes.login);
             },
           ),
 

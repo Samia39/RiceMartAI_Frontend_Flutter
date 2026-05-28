@@ -6,7 +6,9 @@ class AppRoutes {
   static const login = "/login";
   static const register = "/register";
 
-  // Buyer
+  // =========================
+  // BUYER DASHBOARD
+  // =========================
   static const dashboard = "/dashboard";
   static const cart = "/cart";
   static const riceDetails = "/rice-details";
@@ -15,9 +17,31 @@ class AppRoutes {
   static const orderDetails = "/order-details";
   static const createShop = "/create-shop";
 
-  // Seller
+  // =========================
+  // Seller Dashboard
+  // =========================
   static const sellerDashboard = "/seller-dashboard";
 
-  // Admin
+  // Seller Edit Shop
+  static const editShop = "/edit-shop";
+
+  // =========================
+  // ADMIN DASHBOARD
+  // =========================
   static const adminDashboard = "/admin-dashboard";
+  // Admin
+  static const analytics = "/analytics";
+  static const sellerApprovals = "/seller-approvals";
+  static const approvedShops = "/approved-shops";
+  static const ordersManagement = "/orders-management";
+  static const payments = "/payments";
+  static const reports = "/reports";
+  static const adminSettings = "/admin-settings";
+  static const adminNotifications = "/admin-notifications";
+  static const addSeller = "/add-seller";
+  static const adminSearch = "/admin-search";
+  // User Management
+  static const users = "/users";
+  static const roles = "/roles";
+  static const assignPermissions = "/assign-permissions";
 }

@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/admin_screens/orders/orders_management_screen.dart';
-import 'package:frontend/screens/admin_screens/user_management/users_screen.dart';
-import 'package:frontend/screens/admin_screens/user_management/roles_screen.dart';
-import 'package:frontend/screens/admin_screens/user_management/assign_permissions_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
+import '../routes/app_routes.dart';
 import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
-import '../screens/admin_screens/shops/shop_approvals_screen.dart';
-import '../screens/admin_screens/shops/approved_shops_screen.dart';
 
 class AdminDrawer extends StatelessWidget {
   const AdminDrawer({super.key});
@@ -63,7 +57,7 @@ class AdminDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
 
-              Get.to(() => const ShopApprovalsScreen());
+              Get.toNamed(AppRoutes.sellerApprovals);
             },
           ),
 
@@ -75,7 +69,7 @@ class AdminDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
 
-              Get.to(() => const ApprovedShopsScreen());
+              Get.toNamed(AppRoutes.approvedShops);
             },
           ),
           // Orders
@@ -86,7 +80,7 @@ class AdminDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
 
-              Get.to(() => const OrdersManagementScreen());
+              Get.toNamed(AppRoutes.ordersManagement);
             },
           ),
 
@@ -119,7 +113,7 @@ class AdminDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
 
-                  Get.to(() => UsersScreen());
+                  Get.toNamed(AppRoutes.users);
                 },
               ),
 
@@ -131,7 +125,7 @@ class AdminDrawer extends StatelessWidget {
 
                 onTap: () {
                   Navigator.pop(context);
-                  Get.to(() => RolesScreen());
+                  Get.toNamed(AppRoutes.roles);
                 },
               ),
 
@@ -155,7 +149,7 @@ class AdminDrawer extends StatelessWidget {
                     );
                   }
 
-                  Get.to(() => const AssignPermissionScreen());
+                  Get.toNamed(AppRoutes.assignPermissions);
                 },
               ),
             ],

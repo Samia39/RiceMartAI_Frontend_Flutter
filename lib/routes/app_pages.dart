@@ -1,17 +1,31 @@
 import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
+import '../screens/admin_screens/analytics/analytics_screen.dart';
+import '../screens/admin_screens/notifications/admin_notifications_screen.dart';
+import '../screens/admin_screens/orders/orders_management_screen.dart';
+import '../screens/admin_screens/payments/payments_screen.dart';
+import '../screens/admin_screens/reports/reports_screen.dart';
+import '../screens/admin_screens/search/admin_search_results_screen.dart';
+import '../screens/admin_screens/settings/admin_settings_screen.dart';
+import '../screens/admin_screens/shops/add_seller_screen.dart';
+import '../screens/admin_screens/shops/approved_shops_screen.dart';
+import '../screens/admin_screens/shops/shop_approvals_screen.dart';
+import '../screens/admin_screens/user_management/assign_permissions_screen.dart';
+import '../screens/admin_screens/user_management/roles_screen.dart';
+import '../screens/admin_screens/user_management/users_screen.dart';
 import '../screens/buyer/orders/my_orders_screen.dart';
+import '../screens/buyer/orders/order_details_screen.dart';
 import '../screens/buyer/shops/shop_details_screen.dart';
 import '../screens/buyer/cart/cart_screen.dart';
 import '../screens/buyer/rice/rice_detail_screen.dart';
 import '../screens/seller/shop/create_shop_screen.dart';
+import '../screens/seller/shop/edit_shop_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import '../screens/admin_screens/dashboard/admin_dashboard.dart';
 import '../screens/seller/dashboard/seller_dashboard_screen.dart';
-import '../screens/buyer/orders/order_details_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -46,14 +60,16 @@ class AppPages {
     // Shop Details Screen
     GetPage(name: AppRoutes.shopDetails, page: () => const ShopDetailsScreen()),
 
+    // My Orders
     GetPage(name: AppRoutes.myOrders, page: () => const MyOrdersScreen()),
 
-    // Order Details Screen
+    // Order Details
     GetPage(
       name: AppRoutes.orderDetails,
-      page: () => const OrderDetailsScreen(),
+      page: () => OrderDetailsScreen(order: Get.arguments),
     ),
 
+    //  Create Shop Screen
     GetPage(name: AppRoutes.createShop, page: () => const CreateShopScreen()),
 
     // =========================
@@ -64,9 +80,69 @@ class AppPages {
       page: () => const SellerDashboardScreen(),
     ),
 
+    GetPage(name: AppRoutes.editShop, page: () => const EditShopScreen()),
+
     // =========================
     // Admin Dashboard
     // =========================
     GetPage(name: AppRoutes.adminDashboard, page: () => const AdminDashboard()),
+
+    // Admin Analytics
+    GetPage(name: AppRoutes.analytics, page: () => const AnalyticsScreen()),
+
+    // Admin Seller Approvals
+    GetPage(
+      name: AppRoutes.sellerApprovals,
+      page: () => const ShopApprovalsScreen(),
+    ),
+
+    // Admin Approved Shops
+    GetPage(
+      name: AppRoutes.approvedShops,
+      page: () => const ApprovedShopsScreen(),
+    ),
+
+    // Admin Orders Management
+    GetPage(
+      name: AppRoutes.ordersManagement,
+      page: () => const OrdersManagementScreen(),
+    ),
+
+    // Admin Payments
+    GetPage(name: AppRoutes.payments, page: () => const PaymentsScreen()),
+
+    // Admin Reports
+    GetPage(name: AppRoutes.reports, page: () => const ReportsScreen()),
+
+    // Admin Settings
+    GetPage(
+      name: AppRoutes.adminSettings,
+      page: () => const AdminSettingsScreen(),
+    ),
+
+    // Admin Notifications
+    GetPage(
+      name: AppRoutes.adminNotifications,
+      page: () => const AdminNotificationsScreen(),
+    ),
+
+    // Admin Add Seller
+    GetPage(name: AppRoutes.addSeller, page: () => const AddSellerScreen()),
+
+    // Admin Search
+    GetPage(
+      name: AppRoutes.adminSearch,
+      page: () => AdminSearchResultsScreen(query: Get.arguments),
+    ),
+
+    // User Management
+    GetPage(name: AppRoutes.users, page: () => UsersScreen()),
+
+    GetPage(name: AppRoutes.roles, page: () => RolesScreen()),
+
+    GetPage(
+      name: AppRoutes.assignPermissions,
+      page: () => const AssignPermissionScreen(),
+    ),
   ];
 }

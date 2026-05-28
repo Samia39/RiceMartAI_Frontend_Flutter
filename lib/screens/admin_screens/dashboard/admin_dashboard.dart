@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/admin_screens/analytics/analytics_screen.dart';
-import 'package:frontend/screens/admin_screens/notifications/admin_notifications_screen.dart';
-import 'package:frontend/screens/admin_screens/search/admin_search_results_screen.dart';
-import 'package:frontend/screens/admin_screens/settings/admin_settings_screen.dart';
-import 'package:frontend/screens/admin_screens/shops/add_seller_screen.dart';
-import 'package:frontend/screens/admin_screens/shops/approved_shops_screen.dart';
-import 'package:frontend/screens/admin_screens/orders/orders_management_screen.dart';
-import 'package:frontend/screens/admin_screens/payments/payments_screen.dart';
-import 'package:frontend/screens/admin_screens/reports/reports_screen.dart';
-
+import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
-import '../shops/shop_approvals_screen.dart';
+import '../../../routes/app_routes.dart';
 import '../../../widgets/admin_drawer.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -31,15 +22,15 @@ class AdminDashboard extends StatelessWidget {
           centerTitle: true,
 
           actions: [
+            // =========================
+            // ADD SHOP
+            // =========================
             Padding(
               padding: const EdgeInsets.only(right: 12),
 
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddSellerScreen()),
-                  );
+                  Get.toNamed(AppRoutes.addSeller);
                 },
 
                 child: Column(
@@ -50,7 +41,7 @@ class AdminDashboard extends StatelessWidget {
                       width: 38,
                       height: 38,
 
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.darkGreen,
                       ),
@@ -70,18 +61,15 @@ class AdminDashboard extends StatelessWidget {
               ),
             ),
 
-            /// Settings
+            // =========================
+            // SETTINGS
+            // =========================
             Padding(
               padding: const EdgeInsets.only(right: 12),
 
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AdminSettingsScreen(),
-                    ),
-                  );
+                  Get.toNamed(AppRoutes.adminSettings);
                 },
 
                 child: Column(
@@ -92,7 +80,7 @@ class AdminDashboard extends StatelessWidget {
                       width: 38,
                       height: 38,
 
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.blue,
                       ),
@@ -111,17 +99,16 @@ class AdminDashboard extends StatelessWidget {
                 ),
               ),
             ),
+
+            // =========================
+            // NOTIFICATIONS
+            // =========================
             Padding(
               padding: const EdgeInsets.only(right: 12),
 
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AdminNotificationsScreen(),
-                    ),
-                  );
+                  Get.toNamed(AppRoutes.adminNotifications);
                 },
 
                 child: Column(
@@ -132,7 +119,7 @@ class AdminDashboard extends StatelessWidget {
                       width: 38,
                       height: 38,
 
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.orange,
                       ),
@@ -154,175 +141,159 @@ class AdminDashboard extends StatelessWidget {
           ],
         ),
 
-        // FIXED: scrollable body
         body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
 
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
 
-              children: [
-                Text("Admin Controls", style: AppTextStyles.heading2),
+            children: [
+              Text("Admin Controls", style: AppTextStyles.heading2),
 
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                Row(
-                  children: [
-                    Expanded(child: quickStatCard("Users", "1240")),
+              // =========================
+              // QUICK STATS
+              // =========================
+              Row(
+                children: [
+                  Expanded(child: quickStatCard("Users", "1240")),
 
-                    const SizedBox(width: 12),
+                  const SizedBox(width: 12),
 
-                    Expanded(child: quickStatCard("Orders", "520")),
-                  ],
-                ),
+                  Expanded(child: quickStatCard("Orders", "520")),
+                ],
+              ),
 
-                const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-                quickStatCard("Revenue", "Rs 2.3M"),
+              quickStatCard("Revenue", "Rs 2.3M"),
 
-                const SizedBox(height: 25),
-                TextField(
-                  onSubmitted: (value) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => AdminSearchResultsScreen(query: value),
-                      ),
-                    );
-                  },
+              const SizedBox(height: 25),
 
-                  decoration: InputDecoration(
-                    hintText: "Search users, sellers, shops, orders...",
+              // =========================
+              // SEARCH
+              // =========================
+              TextField(
+                onSubmitted: (value) {
+                  Get.toNamed(AppRoutes.adminSearch, arguments: value);
+                },
 
-                    prefixIcon: const Icon(Icons.search),
+                decoration: InputDecoration(
+                  hintText: "Search users, sellers, shops, orders...",
 
-                    filled: true,
+                  prefixIcon: const Icon(Icons.search),
 
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
+                  filled: true,
+
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
                   ),
                 ),
-                const SizedBox(height: 25),
+              ),
 
-                const SizedBox(height: 25),
+              const SizedBox(height: 25),
 
-                adminCard(
-                  title: "Analytics",
-                  subtitle: "Platform insights",
-                  icon: Icons.analytics,
+              // =========================
+              // ANALYTICS
+              // =========================
+              adminCard(
+                title: "Analytics",
+                subtitle: "Platform insights",
+                icon: Icons.analytics,
 
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AnalyticsScreen(),
-                      ),
-                    );
-                  },
-                ),
+                onTap: () {
+                  Get.toNamed(AppRoutes.analytics);
+                },
+              ),
 
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                // Pending Shops
-                adminCard(
-                  title: "Seller Approvals",
-                  subtitle: "Approve shops and verify sellers",
-                  icon: Icons.store_mall_directory,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ShopApprovalsScreen(),
-                      ),
-                    );
-                  },
-                ),
+              // =========================
+              // SELLER APPROVALS
+              // =========================
+              adminCard(
+                title: "Seller Approvals",
+                subtitle: "Approve shops and verify sellers",
+                icon: Icons.store_mall_directory,
 
-                const SizedBox(height: 20),
+                onTap: () {
+                  Get.toNamed(AppRoutes.sellerApprovals);
+                },
+              ),
 
-                // Approved Shops
-                adminCard(
-                  title: "Approved Shops",
-                  subtitle: "Manage active shops",
-                  icon: Icons.verified,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ApprovedShopsScreen(),
-                      ),
-                    );
-                  },
-                ),
+              const SizedBox(height: 20),
 
-                const SizedBox(height: 20),
+              // =========================
+              // APPROVED SHOPS
+              // =========================
+              adminCard(
+                title: "Approved Shops",
+                subtitle: "Manage active shops",
+                icon: Icons.verified,
 
-                // Market Prices
-                adminCard(
-                  title: "Market Prices",
-                  subtitle: "Manage rice prices",
-                  icon: Icons.bar_chart,
-                  onTap: () {},
-                ),
+                onTap: () {
+                  Get.toNamed(AppRoutes.approvedShops);
+                },
+              ),
 
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                // Orders
-                adminCard(
-                  title: "Orders",
-                  subtitle: "Manage customer orders",
-                  icon: Icons.shopping_cart,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const OrdersManagementScreen(),
-                      ),
-                    );
-                  },
-                ),
+              // =========================
+              // ORDERS
+              // =========================
+              adminCard(
+                title: "Orders",
+                subtitle: "Manage customer orders",
+                icon: Icons.shopping_cart,
 
-                const SizedBox(height: 20),
+                onTap: () {
+                  Get.toNamed(AppRoutes.ordersManagement);
+                },
+              ),
 
-                // Payments
-                adminCard(
-                  title: "Payments",
-                  subtitle: "Commission and payouts",
-                  icon: Icons.payments,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PaymentsScreen()),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                // feedback
-                adminCard(
-                  title: "Reports",
-                  subtitle: "Feedback and complaints",
-                  icon: Icons.report_problem,
+              const SizedBox(height: 20),
 
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ReportsScreen()),
-                    );
-                  },
-                ),
+              // =========================
+              // PAYMENTS
+              // =========================
+              adminCard(
+                title: "Payments",
+                subtitle: "Commission and payouts",
+                icon: Icons.payments,
 
-                const SizedBox(height: 20),
-              ],
-            ),
+                onTap: () {
+                  Get.toNamed(AppRoutes.payments);
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // =========================
+              // REPORTS
+              // =========================
+              adminCard(
+                title: "Reports",
+                subtitle: "Feedback and complaints",
+                icon: Icons.report_problem,
+
+                onTap: () {
+                  Get.toNamed(AppRoutes.reports);
+                },
+              ),
+
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
     );
   }
 
+  // =========================
+  // ADMIN CARD
+  // =========================
   Widget adminCard({
     required String title,
     required String subtitle,
@@ -334,6 +305,7 @@ class AdminDashboard extends StatelessWidget {
 
       child: Container(
         padding: const EdgeInsets.all(18),
+
         decoration: AppDecorations.card,
 
         child: Row(
@@ -345,6 +317,7 @@ class AdminDashboard extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
                   Text(title, style: AppTextStyles.heading4),
 
@@ -362,6 +335,9 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 
+  // =========================
+  // QUICK STATS CARD
+  // =========================
   Widget quickStatCard(String title, String value) {
     return Container(
       padding: const EdgeInsets.all(16),
