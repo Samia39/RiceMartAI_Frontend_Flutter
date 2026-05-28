@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import 'core/utils/themes.dart';
+
 import 'routes/app_routes.dart';
+import 'routes/app_pages.dart';
 
 void main() async {
   await GetStorage.init();
@@ -18,10 +20,12 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
 
-      theme: appTheme, // ✅ THIS IS REQUIRED
+      theme: appTheme,
 
       initialRoute: AppRoutes.splash,
-      getPages: AppRoutes.routes,
+
+      // All app pages
+      getPages: AppPages.routes,
     );
   }
 }

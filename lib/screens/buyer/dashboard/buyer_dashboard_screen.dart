@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/routes/app_routes.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
-import 'package:frontend/screens/buyer/cart/cart_screen.dart';
 import 'package:frontend/screens/buyer/profile/profile_screen.dart';
 import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
 import 'package:frontend/screens/buyer/shops/shops_screen.dart';
@@ -56,16 +56,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
               children: [
                 IconButton(
                   onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CartScreen(
-                          onCartUpdated: () {
-                            setState(() {});
-                          },
-                        ),
-                      ),
-                    );
+                    await Get.toNamed(AppRoutes.cart);
 
                     setState(() {});
                   },
@@ -103,7 +94,13 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         ),
 
         // DRAWER
-        drawer: const AppDrawer(),
+        drawer: AppDrawer(
+          onTabSelected: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+        ),
 
         // BODY
         body: screens[currentIndex],

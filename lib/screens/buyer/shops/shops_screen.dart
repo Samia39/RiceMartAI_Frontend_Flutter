@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
-
-import 'shop_details_screen.dart';
 
 class ShopsScreen extends StatefulWidget {
   const ShopsScreen({super.key});
@@ -123,7 +122,10 @@ class _ShopsScreenState extends State<ShopsScreen> {
 
                           return GestureDetector(
                             onTap: () {
-                              Get.to(() => ShopDetailsScreen(shop: shop));
+                              Get.toNamed(
+                                AppRoutes.shopDetails,
+                                arguments: shop,
+                              );
                             },
 
                             child: Container(

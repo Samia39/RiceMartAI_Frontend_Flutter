@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
-
-import '../shops/shop_details_screen.dart';
+import 'package:frontend/routes/app_routes.dart';
 import '../../../core/services/cart_service.dart';
 
 class RiceDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> rice;
-
-  const RiceDetailScreen({super.key, required this.rice});
+  const RiceDetailScreen({super.key});
 
   @override
   State<RiceDetailScreen> createState() => _RiceDetailScreenState();
@@ -19,7 +16,7 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final product = widget.rice;
+    final product = Get.arguments as Map<String, dynamic>;
 
     final shop = product["shop"];
 
@@ -254,13 +251,7 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-
-                      MaterialPageRoute(
-                        builder: (_) => ShopDetailsScreen(shop: shop),
-                      ),
-                    );
+                    Get.toNamed(AppRoutes.shopDetails, arguments: shop);
                   },
 
                   icon: const Icon(Icons.store),

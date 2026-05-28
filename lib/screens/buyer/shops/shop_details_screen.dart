@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 
 class ShopDetailsScreen extends StatefulWidget {
-  final Map<String, dynamic> shop;
-
-  const ShopDetailsScreen({super.key, required this.shop});
+  const ShopDetailsScreen({super.key});
 
   @override
   State<ShopDetailsScreen> createState() => _ShopDetailsScreenState();
 }
 
 class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
+  Map<String, dynamic> get shop => Get.arguments as Map<String, dynamic>;
+
   List<Map<String, dynamic>> productList = [];
 
   bool isLoading = true;
@@ -28,9 +28,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
   // FETCH SHOP PRODUCTS
   // =========================
   Future<void> fetchProducts() async {
-    final data = await ProductService().fetchShopProducts(
-      shopId: widget.shop["id"],
-    );
+    final data = await ProductService().fetchShopProducts(shopId: shop["id"]);
 
     setState(() {
       productList = data;
@@ -41,8 +39,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final shop = widget.shop;
-
     return Container(
       decoration: AppDecorations.gradientBackground,
 

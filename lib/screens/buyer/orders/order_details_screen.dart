@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
+import 'package:get/get.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
-  final Map<String, dynamic> order;
-
-  const OrderDetailsScreen({super.key, required this.order});
+  const OrderDetailsScreen({super.key});
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
@@ -13,6 +12,7 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   Map<String, dynamic>? order;
+  Map<String, dynamic> get orderData => Get.arguments as Map<String, dynamic>;
   bool isLoading = true;
 
   @override
@@ -26,7 +26,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   // =========================
   Future<void> fetchOrder() async {
     try {
-      final data = await OrderService().getOrderDetails(widget.order["id"]);
+      final data = await OrderService().getOrderDetails(orderData["id"]);
 
       if (!mounted) return;
 

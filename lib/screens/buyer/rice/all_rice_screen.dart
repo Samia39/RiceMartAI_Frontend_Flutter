@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
+import 'package:frontend/routes/app_routes.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../core/services/cart_service.dart';
-
-import 'rice_detail_screen.dart';
 
 class AllRiceScreen extends StatefulWidget {
   final VoidCallback? onCartUpdated;
@@ -70,10 +69,9 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
       // OPEN DETAIL SCREEN
       onTap: () async {
         // WAIT FOR RETURN VALUE
-        final result = await Navigator.push(
-          context,
-
-          MaterialPageRoute(builder: (_) => RiceDetailScreen(rice: product)),
+        final result = await Get.toNamed(
+          AppRoutes.riceDetails,
+          arguments: product,
         );
 
         // REFRESH UI WHEN CART UPDATED

@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/buyer/orders/my_orders_screen.dart';
-import 'package:frontend/screens/buyer/profile/profile_screen.dart';
-import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
-import 'package:frontend/screens/buyer/shops/shops_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../core/utils/themes.dart';
-import '../screens/buyer/cart/cart_screen.dart';
+import '../routes/app_routes.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  // =========================
+  // TAB SWITCH CALLBACK
+  // =========================
+  final Function(int) onTabSelected;
+
+  const AppDrawer({super.key, required this.onTabSelected});
 
   @override
   Widget build(BuildContext context) {
     final box = GetStorage();
 
     final userName = box.read("name") ?? "User";
-
     final userEmail = box.read("email") ?? "";
 
     return Drawer(
@@ -27,12 +27,13 @@ class AppDrawer extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // =========================
               // HEADER
+              // =========================
               UserAccountsDrawerHeader(
                 decoration: const BoxDecoration(color: AppColors.darkGreen),
 
                 accountName: Text(userName),
-
                 accountEmail: Text(userEmail),
 
                 currentAccountPicture: const CircleAvatar(
@@ -46,17 +47,24 @@ class AppDrawer extends StatelessWidget {
                 ),
               ),
 
-              // HOME
+              // =========================
+              // HOME TAB
+              // =========================
               drawerItem(
                 icon: Icons.home,
                 title: "Home",
 
                 onTap: () {
                   Navigator.pop(context);
+
+                  // SWITCH TO HOME TAB
+                  onTabSelected(0);
                 },
               ),
 
-              // RICE MARKETPLACE
+              // =========================
+              // RICE TAB
+              // =========================
               drawerItem(
                 icon: Icons.rice_bowl,
                 title: "Rice Marketplace",
@@ -64,11 +72,14 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
 
-                  Get.to(() => const AllRiceScreen());
+                  // SWITCH TO RICE TAB
+                  onTabSelected(1);
                 },
               ),
 
-              // SHOPS
+              // =========================
+              // SHOPS TAB
+              // =========================
               drawerItem(
                 icon: Icons.store,
                 title: "Shops",
@@ -76,10 +87,14 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
 
-                  Get.to(() => const ShopsScreen());
+                  // SWITCH TO SHOPS TAB
+                  onTabSelected(2);
                 },
               ),
-              // Add to Cart
+
+              // =========================
+              // CART PAGE
+              // =========================
               drawerItem(
                 icon: Icons.shopping_cart,
                 title: "My Cart",
@@ -87,46 +102,65 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
 
-                  Get.to(() => const CartScreen());
+                  // OPEN NEW PAGE
+                  Get.toNamed(AppRoutes.cart);
                 },
               ),
 
-              // PROFILE
+              // =========================
+              // PROFILE TAB
+              // =========================
               drawerItem(
                 icon: Icons.person,
                 title: "Profile",
+
                 onTap: () {
                   Navigator.pop(context);
-                  Get.to(() => const ProfileScreen());
+
+                  // SWITCH TO PROFILE TAB
+                  onTabSelected(4);
                 },
               ),
 
-              // ORDERS
+              // =========================
+              // ORDERS PAGE
+              // =========================
               drawerItem(
                 icon: Icons.shopping_bag,
                 title: "My Orders",
+
                 onTap: () {
                   Navigator.pop(context);
-                  Get.to(() => const MyOrdersScreen());
+
+                  // OPEN NEW PAGE
+                  Get.toNamed(AppRoutes.myOrders);
                 },
               ),
 
+              // =========================
               // NOTIFICATIONS
+              // =========================
               drawerItem(
                 icon: Icons.notifications,
                 title: "Notifications",
                 onTap: () {},
               ),
 
+              // =========================
               // SETTINGS
+              // =========================
               drawerItem(icon: Icons.settings, title: "Settings", onTap: () {}),
 
+              // =========================
               // FEEDBACK
+              // =========================
               drawerItem(icon: Icons.feedback, title: "Feedback", onTap: () {}),
 
               const SizedBox(height: 20),
 
+              // =========================
               // LOGOUT
+              // =========================
               drawerItem(
                 icon: Icons.logout,
                 title: "Logout",
@@ -136,7 +170,7 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {
                   box.erase();
 
-                  Get.offAllNamed("/login");
+                  Get.offAllNamed(AppRoutes.login);
                 },
               ),
 
@@ -149,7 +183,7 @@ class AppDrawer extends StatelessWidget {
   }
 
   // =========================
-  // DRAWER ITEM
+  // DRAWER ITEM WIDGET
   // =========================
   Widget drawerItem({
     required IconData icon,

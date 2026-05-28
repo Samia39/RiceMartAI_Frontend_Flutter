@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
-import 'order_details_screen.dart';
+import 'package:get/get.dart';
+import 'package:frontend/routes/app_routes.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
@@ -138,12 +139,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
           return GestureDetector(
             onTap: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => OrderDetailsScreen(order: order),
-                ),
-              );
+              await Get.toNamed(AppRoutes.orderDetails, arguments: order);
 
               // AUTO REFRESH AFTER BACK
               fetchAllOrders();

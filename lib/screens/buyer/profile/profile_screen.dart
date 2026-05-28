@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/buyer/orders/my_orders_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
+import '../../../routes/app_routes.dart';
 import '../../../core/utils/themes.dart';
-
-import '../../auth/login_screen.dart';
-import '../../seller/shop/create_shop_screen.dart';
-import '../../seller/dashboard/seller_dashboard_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -69,10 +64,7 @@ class ProfileScreen extends StatelessWidget {
                   title: const Text("My Orders"),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const MyOrdersScreen()),
-                    );
+                    Get.toNamed(AppRoutes.myOrders);
                   },
                 ),
 
@@ -85,7 +77,7 @@ class ProfileScreen extends StatelessWidget {
                     height: 55,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        Get.to(() => const CreateShopScreen());
+                        Get.toNamed(AppRoutes.createShop);
                       },
                       icon: const Icon(Icons.store),
                       label: const Text("Become Seller"),
@@ -99,7 +91,7 @@ class ProfileScreen extends StatelessWidget {
                     height: 55,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        Get.to(() => const SellerDashboardScreen());
+                        Get.toNamed(AppRoutes.sellerDashboard);
                       },
                       icon: const Icon(Icons.dashboard),
                       label: const Text("Seller Dashboard"),
@@ -118,7 +110,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     onPressed: () {
                       box.erase();
-                      Get.offAll(() => LoginScreen());
+                      Get.offAllNamed(AppRoutes.login);
                     },
                     icon: const Icon(Icons.logout),
                     label: const Text("Logout"),
