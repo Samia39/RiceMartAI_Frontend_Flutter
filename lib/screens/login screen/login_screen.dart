@@ -46,7 +46,13 @@ class _LoginScreenState extends State<LoginScreen> {
     if (mounted) setState(() => _isLoading = false);
 
     if (error == null) {
-      Get.offNamed('/dashboard');
+      if (AuthService.isAdmin()) {
+        Get.offNamed('/admin-dashboard');
+      } else if (AuthService.getRole() == 'seller') {
+        Get.offNamed('/seller-dashboard');
+      } else {
+        Get.offNamed('/user-dashboard');
+      }
     } else {
       _snack(error);
     }
