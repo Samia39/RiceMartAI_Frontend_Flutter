@@ -5,9 +5,6 @@ import '../screens/register_screen.dart';
 import '../screens/user_dashboard.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/seller_dashboard.dart';
-import '../screens/seller/my_products_screen.dart';
-import '../screens/seller/add_product_screen.dart';
-import '../screens/seller/edit_product_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -18,10 +15,7 @@ class AppRoutes {
   static const String userDashboard   = '/user-dashboard';
   static const String adminDashboard  = '/admin-dashboard';
   static const String sellerDashboard = '/seller-dashboard';
-  static const String myProducts      = '/my-products';
-  static const String addProduct      = '/add-product';
-  static const String editProduct     = '/edit-product';
-
+  
   static final List<GetPage> pages = [
     GetPage(name: splash,          page: () => const SplashScreen()),
     GetPage(name: login,           page: () => const LoginScreen()),
@@ -29,8 +23,6 @@ class AppRoutes {
     GetPage(name: userDashboard,   page: () => const UserDashboard()),
     GetPage(name: adminDashboard,  page: () => const AdminDashboard()),
     GetPage(name: sellerDashboard, page: () => const SellerDashboard()),
-    GetPage(name: myProducts,      page: () => const MyProductsScreen()),
-    GetPage(name: addProduct,      page: () => const AddProductScreen()),
-    GetPage(name: editProduct,     page: () => const EditProductScreen()),
+    
   ];
 }
