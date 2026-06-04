@@ -10,6 +10,7 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/services/cart_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../widgets/app_drawer.dart';
+import '../home/home_screen.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
   const BuyerDashboardScreen({super.key});
@@ -26,7 +27,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      Center(child: Text("Home", style: AppTextStyles.heading2)),
+      const HomeScreen(),
 
       AllRiceScreen(
         onCartUpdated: () {

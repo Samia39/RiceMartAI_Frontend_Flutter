@@ -7,12 +7,12 @@ class AuthMiddleware extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
-    var token = box.read('token'); // ✅ read saved token
+    final token = box.read('token');
 
     if (token == null) {
       return const RouteSettings(name: '/login');
     }
 
-    return null; // ✅ allow access
+    return null;
   }
 }

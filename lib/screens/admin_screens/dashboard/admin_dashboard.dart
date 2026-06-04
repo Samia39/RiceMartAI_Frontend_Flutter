@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 import '../../../widgets/admin_drawer.dart';
+import '../../../core/services/permission_service.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -25,119 +26,122 @@ class AdminDashboard extends StatelessWidget {
             // =========================
             // ADD SHOP
             // =========================
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
+            if (PermissionService.hasPermission('create shop'))
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
 
-              child: GestureDetector(
-                onTap: () {
-                  Get.toNamed(AppRoutes.addSeller);
-                },
+                child: GestureDetector(
+                  onTap: () {
+                    Get.toNamed(AppRoutes.addSeller);
+                  },
 
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
 
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
 
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.darkGreen,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.darkGreen,
+                        ),
+
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
 
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
+                      const SizedBox(height: 2),
 
-                    const SizedBox(height: 2),
-
-                    const Text("Add Shop", style: TextStyle(fontSize: 10)),
-                  ],
+                      const Text("Add Shop", style: TextStyle(fontSize: 10)),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
             // =========================
             // SETTINGS
             // =========================
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
+            if (PermissionService.hasPermission('view settings'))
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
 
-              child: GestureDetector(
-                onTap: () {
-                  Get.toNamed(AppRoutes.adminSettings);
-                },
+                child: GestureDetector(
+                  onTap: () {
+                    Get.toNamed(AppRoutes.adminSettings);
+                  },
 
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
 
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
 
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.blue,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                        ),
+
+                        child: const Icon(
+                          Icons.settings,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                       ),
 
-                      child: const Icon(
-                        Icons.settings,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
+                      const SizedBox(height: 2),
 
-                    const SizedBox(height: 2),
-
-                    const Text("Settings", style: TextStyle(fontSize: 10)),
-                  ],
+                      const Text("Settings", style: TextStyle(fontSize: 10)),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
             // =========================
             // NOTIFICATIONS
             // =========================
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
+            if (PermissionService.hasPermission('view notifications'))
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
 
-              child: GestureDetector(
-                onTap: () {
-                  Get.toNamed(AppRoutes.adminNotifications);
-                },
+                child: GestureDetector(
+                  onTap: () {
+                    Get.toNamed(AppRoutes.adminNotifications);
+                  },
 
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
 
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
 
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.orange,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.orange,
+                        ),
+
+                        child: const Icon(
+                          Icons.notifications,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                       ),
 
-                      child: const Icon(
-                        Icons.notifications,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
+                      const SizedBox(height: 2),
 
-                    const SizedBox(height: 2),
-
-                    const Text("Alerts", style: TextStyle(fontSize: 10)),
-                  ],
+                      const Text("Alerts", style: TextStyle(fontSize: 10)),
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
 
@@ -155,15 +159,16 @@ class AdminDashboard extends StatelessWidget {
               // =========================
               // QUICK STATS
               // =========================
-              Row(
-                children: [
-                  Expanded(child: quickStatCard("Users", "1240")),
+              if (PermissionService.hasPermission('view dashboard'))
+                Row(
+                  children: [
+                    Expanded(child: quickStatCard("Users", "1240")),
 
-                  const SizedBox(width: 12),
+                    const SizedBox(width: 12),
 
-                  Expanded(child: quickStatCard("Orders", "520")),
-                ],
-              ),
+                    Expanded(child: quickStatCard("Orders", "520")),
+                  ],
+                ),
 
               const SizedBox(height: 12),
 
@@ -174,84 +179,91 @@ class AdminDashboard extends StatelessWidget {
               // =========================
               // SEARCH
               // =========================
-              TextField(
-                onSubmitted: (value) {
-                  Get.toNamed(AppRoutes.adminSearch, arguments: value);
-                },
+              if (PermissionService.hasPermission('view users') ||
+                  PermissionService.hasPermission('view shops') ||
+                  PermissionService.hasPermission('view orders'))
+                TextField(
+                  onSubmitted: (value) {
+                    Get.toNamed(AppRoutes.adminSearch, arguments: value);
+                  },
 
-                decoration: InputDecoration(
-                  hintText: "Search users, sellers, shops, orders...",
+                  decoration: InputDecoration(
+                    hintText: "Search users, sellers, shops, orders...",
 
-                  prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
 
-                  filled: true,
+                    filled: true,
 
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                 ),
-              ),
 
               const SizedBox(height: 25),
 
               // =========================
               // ANALYTICS
               // =========================
-              adminCard(
-                title: "Analytics",
-                subtitle: "Platform insights",
-                icon: Icons.analytics,
+              if (PermissionService.hasPermission('view analytics'))
+                adminCard(
+                  title: "Analytics",
+                  subtitle: "Platform insights",
+                  icon: Icons.analytics,
 
-                onTap: () {
-                  Get.toNamed(AppRoutes.analytics);
-                },
-              ),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.analytics);
+                  },
+                ),
 
               const SizedBox(height: 20),
 
               // =========================
               // SELLER APPROVALS
               // =========================
-              adminCard(
-                title: "Seller Approvals",
-                subtitle: "Approve shops and verify sellers",
-                icon: Icons.store_mall_directory,
+              if (PermissionService.hasPermission('approve shops'))
+                adminCard(
+                  title: "Seller Approvals",
+                  subtitle: "Approve shops and verify sellers",
+                  icon: Icons.store_mall_directory,
 
-                onTap: () {
-                  Get.toNamed(AppRoutes.sellerApprovals);
-                },
-              ),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.sellerApprovals);
+                  },
+                ),
 
               const SizedBox(height: 20),
 
               // =========================
               // APPROVED SHOPS
               // =========================
-              adminCard(
-                title: "Approved Shops",
-                subtitle: "Manage active shops",
-                icon: Icons.verified,
+              if (PermissionService.hasPermission('view shops'))
+                adminCard(
+                  title: "Approved Shops",
+                  subtitle: "Manage active shops",
+                  icon: Icons.verified,
 
-                onTap: () {
-                  Get.toNamed(AppRoutes.approvedShops);
-                },
-              ),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.approvedShops);
+                  },
+                ),
 
               const SizedBox(height: 20),
 
               // =========================
               // ORDERS
               // =========================
-              adminCard(
-                title: "Orders",
-                subtitle: "Manage customer orders",
-                icon: Icons.shopping_cart,
+              if (PermissionService.hasPermission('manage orders'))
+                adminCard(
+                  title: "Orders",
+                  subtitle: "Manage customer orders",
+                  icon: Icons.shopping_cart,
 
-                onTap: () {
-                  Get.toNamed(AppRoutes.ordersManagement);
-                },
-              ),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.ordersManagement);
+                  },
+                ),
 
               const SizedBox(height: 20),
 
@@ -273,15 +285,16 @@ class AdminDashboard extends StatelessWidget {
               // =========================
               // REPORTS
               // =========================
-              adminCard(
-                title: "Reports",
-                subtitle: "Feedback and complaints",
-                icon: Icons.report_problem,
+              if (PermissionService.hasPermission('manage reports'))
+                adminCard(
+                  title: "Reports",
+                  subtitle: "Feedback and complaints",
+                  icon: Icons.report_problem,
 
-                onTap: () {
-                  Get.toNamed(AppRoutes.reports);
-                },
-              ),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.reports);
+                  },
+                ),
 
               const SizedBox(height: 20),
             ],

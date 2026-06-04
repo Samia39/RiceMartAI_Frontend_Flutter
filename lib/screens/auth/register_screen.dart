@@ -15,7 +15,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final AuthService _authService = AuthService();
   bool _obscurePassword = true;
 
   void register() async {
@@ -29,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     try {
-      var response = await _authService.register(name, email, password);
+      var response = await AuthService.register(name, email, password);
 
       if (response['user'] != null) {
         Get.snackbar("Success", "Registered successfully");

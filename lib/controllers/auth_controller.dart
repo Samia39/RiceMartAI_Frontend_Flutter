@@ -1,86 +1,122 @@
-import 'package:frontend/core/services/auth_service.dart';
-import 'package:frontend/screens/admin_screens/dashboard/admin_dashboard.dart';
-import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
-import 'package:frontend/screens/seller/dashboard/seller_dashboard_screen.dart';
+import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../core/services/auth_service.dart';
 
 class AuthController extends GetxController {
-  final AuthService _authService = AuthService();
-
-  final box = GetStorage();
+  var token = ''.obs;
+  var user = {}.obs;
+  var roles = <String>[].obs;
+  var permissions = <String>[].obs;
 
   var isLoading = false.obs;
 
+  // ======================
+  // LOGIN
+  // ======================
   Future<void> login(String email, String password) async {
-    if (email.isEmpty || password.isEmpty) {
-      Get.snackbar("Error", "Please fill all fields");
+    isLoading.value = true;
 
-      return;
+    final res = await AuthService.login(email, password);
+
+    if (res['token'] != null) {
+      token.value = res['token'];
+
+      roles.value = List<String>.from(res['roles'] ?? []);
+      permissions.value = List<String>.from(res['permissions'] ?? []);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', res['token']);
+
+      final box = GetStorage();
+      box.write('token', res['token']);
+      box.write('roles', res['roles']);
+      box.write('permissions', res['permissions']);
+      box.write('has_shop', res['has_shop']);
+
+      // 🚀 NOW NAVIGATE (IMPORTANT)
+      redirectUser(res);
+    } else {
+      Get.snackbar("Error", res['message'] ?? "Login failed");
     }
 
-    try {
-      isLoading.value = true;
+    isLoading.value = false;
+  }
 
-      var response = await _authService.login(email, password);
+  // ======================
+  // REGISTER
+  // ======================
+  Future<void> register(String name, String email, String password) async {
+    isLoading.value = true;
 
-      print(response);
+    final res = await AuthService.register(name, email, password);
 
-      if (response['token'] != null) {
-        box.erase();
+    if (res['token'] != null) {
+      Get.snackbar("Success", "Registered successfully");
+      Get.back(); // go to login
+    } else {
+      Get.snackbar("Error", res['message'] ?? "Register failed");
+    }
 
-        box.write('token', response['token']);
-        box.write('role', response['role']);
-        box.write('user', response['user']);
+    isLoading.value = false;
+  }
 
-        final shop = response['shop'];
+  // ======================
+  // LOAD USER (AUTO LOGIN)
+  // ======================
+  Future<void> loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedToken = prefs.getString('token');
 
-        box.write('has_shop', shop != null);
+    if (savedToken == null) return;
 
-        if (shop != null) {
-          box.write("shop_id", shop["id"]);
-          box.write("shop_name", shop["shop_name"]);
-          box.write("owner_name", shop["owner_name"]);
-          box.write("phone", shop["phone"]);
-          box.write("address", shop["address"]);
-          box.write("description", shop["description"]);
-        }
+    token.value = savedToken;
 
-        Get.snackbar("Success", "Login successful");
+    final res = await AuthService.me(savedToken);
 
-        String role = "customer";
+    user.value = res['user'] ?? {};
+    roles.value = List<String>.from(res['roles'] ?? []);
+    permissions.value = List<String>.from(res['permissions'] ?? []);
 
-        if (response['roles'] != null && response['roles'].isNotEmpty) {
-          role = response['roles'][0];
-        }
+    final box = GetStorage();
 
-        print("ROLE IS: $role");
+    box.write('roles', res['roles']);
+    box.write('permissions', res['permissions']);
+    box.write('has_shop', res['has_shop']);
+  }
 
-        if (role == "admin") {
-          Get.offAll(() => const AdminDashboard());
-          return;
-        }
+  // ======================
+  // HELPERS
+  // ======================
+  bool hasRole(String role) => roles.contains(role);
 
-        if (role == "seller") {
-          if (shop != null && shop['status'] == 'approved') {
-            Get.offAll(() => const SellerDashboardScreen());
-          } else {
-            Get.snackbar("Pending", "Your shop is waiting for admin approval");
-          }
+  bool hasPermission(String permission) => permissions.contains(permission);
 
-          return;
-        }
+  // ======================
+  // LOGOUT
+  // ======================
+  Future<void> logout() async {
+    token.value = '';
+    user.clear();
+    roles.clear();
+    permissions.clear();
 
-        Get.offAll(() => const BuyerDashboardScreen());
-      } else {
-        Get.snackbar("Error", response['message'] ?? "Login failed");
-      }
-    } catch (e) {
-      print(e);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
 
-      Get.snackbar("Error", "Server error");
-    } finally {
-      isLoading.value = false;
+    Get.offAllNamed('/login');
+  }
+
+  void redirectUser(Map data) {
+    final roles = List<String>.from(data['roles'] ?? []);
+
+    if (roles.contains('admin') || roles.contains('super_admin')) {
+      Get.offAllNamed(AppRoutes.adminDashboard);
+    } else if (roles.contains('seller')) {
+      Get.offAllNamed(AppRoutes.sellerDashboard);
+    } else {
+      Get.offAllNamed(AppRoutes.dashboard);
     }
   }
 }

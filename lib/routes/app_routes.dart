@@ -5,6 +5,7 @@ class AppRoutes {
   // Authentication
   static const login = "/login";
   static const register = "/register";
+  static const accessDenied = "/access-denied";
 
   // =========================
   // BUYER DASHBOARD

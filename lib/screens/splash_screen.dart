@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend/routes/app_routes.dart';
+import '../controllers/auth_controller.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import '../core/utils/themes.dart';
@@ -16,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   int dotCount = 0;
   Timer? _timer;
   final box = GetStorage();
+  final AuthController authController = Get.put(AuthController());
 
   @override
   void initState() {
@@ -29,14 +31,29 @@ class _SplashScreenState extends State<SplashScreen> {
     });
 
     // ⏳ NAVIGATION AFTER 3 SEC
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () async {
       var token = box.read('token');
 
-      if (token != null) {
-        Get.offNamed(AppRoutes.dashboard);
-      } else {
-        Get.offNamed('/login');
+      if (token == null) {
+        Get.offNamed(AppRoutes.login);
+        return;
       }
+
+      await authController.loadUser();
+
+      final roles = authController.roles;
+
+      if (roles.contains('admin') || roles.contains('super_admin')) {
+        Get.offNamed(AppRoutes.adminDashboard);
+        return;
+      }
+
+      if (roles.contains('seller')) {
+        Get.offNamed(AppRoutes.sellerDashboard);
+        return;
+      }
+
+      Get.offNamed(AppRoutes.dashboard);
     });
   }
 

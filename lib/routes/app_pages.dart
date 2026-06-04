@@ -1,5 +1,8 @@
+import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
+import '../middleware/role_middleware.dart';
+import '../screens/access_denied_screen.dart';
 import '../screens/admin_screens/analytics/analytics_screen.dart';
 import '../screens/admin_screens/notifications/admin_notifications_screen.dart';
 import '../screens/admin_screens/orders/orders_management_screen.dart';
@@ -23,10 +26,10 @@ import '../screens/seller/shop/edit_shop_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
-import '../screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import '../screens/admin_screens/dashboard/admin_dashboard.dart';
 import '../screens/seller/dashboard/seller_dashboard_screen.dart';
 import 'app_routes.dart';
+import '../middleware/permission_middleware.dart';
 
 class AppPages {
   static final routes = [
@@ -39,13 +42,22 @@ class AppPages {
     // Register Screen
     GetPage(name: AppRoutes.register, page: () => RegisterScreen()),
 
+    // Access Denied Screen
+    GetPage(
+      name: AppRoutes.accessDenied,
+      page: () => const AccessDeniedScreen(),
+    ),
+
     // =========================
     // Buyer Dashboard
     // =========================
     GetPage(
       name: AppRoutes.dashboard,
       page: () => const BuyerDashboardScreen(),
-      middlewares: [AuthMiddleware()],
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(['customer']),
+      ],
     ),
 
     // Cart Screen
@@ -61,7 +73,11 @@ class AppPages {
     GetPage(name: AppRoutes.shopDetails, page: () => const ShopDetailsScreen()),
 
     // My Orders
-    GetPage(name: AppRoutes.myOrders, page: () => const MyOrdersScreen()),
+    GetPage(
+      name: AppRoutes.myOrders,
+      page: () => const MyOrdersScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view orders')],
+    ),
 
     // Order Details
     GetPage(
@@ -70,7 +86,11 @@ class AppPages {
     ),
 
     //  Create Shop Screen
-    GetPage(name: AppRoutes.createShop, page: () => const CreateShopScreen()),
+    GetPage(
+      name: AppRoutes.createShop,
+      page: () => const CreateShopScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('create shop')],
+    ),
 
     // =========================
     // Seller Dashboard
@@ -78,71 +98,115 @@ class AppPages {
     GetPage(
       name: AppRoutes.sellerDashboard,
       page: () => const SellerDashboardScreen(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(['seller']),
+      ],
     ),
 
-    GetPage(name: AppRoutes.editShop, page: () => const EditShopScreen()),
+    GetPage(
+      name: AppRoutes.editShop,
+      page: () => const EditShopScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('manage shop')],
+    ),
 
     // =========================
     // Admin Dashboard
     // =========================
-    GetPage(name: AppRoutes.adminDashboard, page: () => const AdminDashboard()),
+    GetPage(
+      name: AppRoutes.adminDashboard,
+      page: () => const AdminDashboard(),
+      middlewares: [
+        AuthMiddleware(),
+        RoleMiddleware(['admin', 'super_admin']),
+      ],
+    ),
 
     // Admin Analytics
-    GetPage(name: AppRoutes.analytics, page: () => const AnalyticsScreen()),
+    GetPage(
+      name: AppRoutes.analytics,
+      page: () => const AnalyticsScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view analytics')],
+    ),
 
     // Admin Seller Approvals
     GetPage(
       name: AppRoutes.sellerApprovals,
       page: () => const ShopApprovalsScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('approve shops')],
     ),
 
     // Admin Approved Shops
     GetPage(
       name: AppRoutes.approvedShops,
       page: () => const ApprovedShopsScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view shops')],
     ),
-
     // Admin Orders Management
     GetPage(
       name: AppRoutes.ordersManagement,
       page: () => const OrdersManagementScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('manage orders')],
     ),
 
     // Admin Payments
     GetPage(name: AppRoutes.payments, page: () => const PaymentsScreen()),
 
     // Admin Reports
-    GetPage(name: AppRoutes.reports, page: () => const ReportsScreen()),
+    GetPage(
+      name: AppRoutes.reports,
+      page: () => const ReportsScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('manage reports')],
+    ),
 
     // Admin Settings
     GetPage(
       name: AppRoutes.adminSettings,
       page: () => const AdminSettingsScreen(),
+      middlewares: [AuthMiddleware()],
     ),
 
     // Admin Notifications
     GetPage(
       name: AppRoutes.adminNotifications,
       page: () => const AdminNotificationsScreen(),
+      middlewares: [AuthMiddleware()],
     ),
 
     // Admin Add Seller
-    GetPage(name: AppRoutes.addSeller, page: () => const AddSellerScreen()),
+    GetPage(
+      name: AppRoutes.addSeller,
+      page: () => const AddSellerScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('create shop')],
+    ),
 
     // Admin Search
     GetPage(
       name: AppRoutes.adminSearch,
       page: () => AdminSearchResultsScreen(query: Get.arguments),
+      middlewares: [AuthMiddleware()],
     ),
 
     // User Management
-    GetPage(name: AppRoutes.users, page: () => UsersScreen()),
+    GetPage(
+      name: AppRoutes.users,
+      page: () => UsersScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view users')],
+    ),
 
-    GetPage(name: AppRoutes.roles, page: () => RolesScreen()),
+    GetPage(
+      name: AppRoutes.roles,
+      page: () => RolesScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('manage roles')],
+    ),
 
     GetPage(
       name: AppRoutes.assignPermissions,
       page: () => const AssignPermissionScreen(),
+      middlewares: [
+        AuthMiddleware(),
+        PermissionMiddleware('manage permissions'),
+      ],
     ),
   ];
 }
