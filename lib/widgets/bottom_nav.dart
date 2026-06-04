@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../core/utils/themes.dart';
@@ -11,6 +10,8 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final role = AuthService.getRole() ?? 'user'; // ← ?? 'user' add kiya
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.cream.withOpacity(0.95),
@@ -28,72 +29,121 @@ class BottomNav extends StatelessWidget {
       ),
       child: BottomNavigationBar(
         currentIndex: currentIndex,
-        onTap: (index) => _onTap(index),
+        onTap: (index) => _onTap(index, role),
         backgroundColor: Colors.transparent,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppColors.darkGreen,
         unselectedItemColor: AppColors.darkGreen.withOpacity(0.45),
         selectedLabelStyle: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
+            fontSize: 11, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontSize: 11),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.rice_bowl_outlined),
-            activeIcon: Icon(Icons.rice_bowl),
-            label: 'Products',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            activeIcon: Icon(Icons.shopping_cart),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        items: _getItems(role),
       ),
     );
   }
 
-  void _onTap(int index) {
-    final role = AuthService.getRole();
-    switch (index) {
-      case 0:
-        if (role == 'admin') {
-          Get.offNamed('/admin-dashboard');
-        } else if (role == 'seller') {
-          Get.offNamed('/seller-dashboard');
-        } else {
-          Get.offNamed('/user-dashboard');
-        }
-        break;
-      case 1:
-        Get.toNamed('/products');
-        break;
-      case 2:
-        Get.toNamed('/orders');
-        break;
-      case 3:
-        Get.toNamed('/profile');
-        break;
-      case 4:
-        Get.toNamed('/settings');
-        break;
+  List<BottomNavigationBarItem> _getItems(String role) {
+    if (role == 'admin') {
+      return const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.inventory_2_outlined),
+          activeIcon: Icon(Icons.inventory_2),
+          label: 'Products',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.store_outlined),
+          activeIcon: Icon(Icons.store),
+          label: 'Shops',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    } else if (role == 'seller') {
+      return const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.rice_bowl_outlined),
+          activeIcon: Icon(Icons.rice_bowl),
+          label: 'Products',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_bag_outlined),
+          activeIcon: Icon(Icons.shopping_bag),
+          label: 'Orders',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    } else {
+      return const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.rice_bowl_outlined),
+          activeIcon: Icon(Icons.rice_bowl),
+          label: 'Rice',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.store_outlined),
+          activeIcon: Icon(Icons.store),
+          label: 'Shops',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.chat_outlined),
+          activeIcon: Icon(Icons.chat),
+          label: 'Chat',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    }
+  }
+
+  void _onTap(int index, String role) {
+    if (role == 'admin') {
+      switch (index) {
+        case 0: Get.offNamed('/admin-dashboard'); break;
+        case 1: Get.toNamed('/admin-products'); break;
+        case 2: Get.toNamed('/admin-shops'); break;
+        case 3: Get.toNamed('/profile'); break;
+      }
+    } else if (role == 'seller') {
+      switch (index) {
+        case 0: Get.offNamed('/seller-dashboard'); break;
+        case 1: Get.toNamed('/my-products'); break;
+        case 2: Get.toNamed('/my-orders'); break;
+        case 3: Get.toNamed('/profile'); break;
+      }
+    } else {
+      switch (index) {
+        case 0: Get.offNamed('/user-dashboard'); break;
+        case 1: Get.toNamed('/user-products'); break;
+        case 2: Get.toNamed('/shops'); break;
+        case 3: Get.toNamed('/chat'); break;
+        case 4: Get.toNamed('/profile'); break;
+      }
     }
   }
 }

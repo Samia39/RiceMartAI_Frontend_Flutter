@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../core/utils/themes.dart';
@@ -11,46 +10,44 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = AuthService.getCurrentUser();
+    final role = AuthService.getRole() ?? 'user'; // ← FIX: ?? 'user' add kiya
 
     return Drawer(
       backgroundColor: Colors.transparent,
       child: Container(
-        decoration: AppDecorations.gradientBackground,
+        color: AppColors.cream,
         child: SafeArea(
           child: Column(
             children: [
-              // ── User Info Header ──────────────────────────
+              // ── User Header ──────────────────────────────
               Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(16),
-                decoration: AppDecorations.card,
-                child: Row(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                color: AppColors.darkGreen,
+                child: Column(
                   children: [
                     Container(
-                      width: 50,
-                      height: 50,
+                      width: 70,
+                      height: 70,
                       decoration: BoxDecoration(
-                        color: AppColors.cream.withOpacity(0.35),
+                        color: AppColors.cream.withOpacity(0.2),
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: AppColors.borderGold, width: 1.5),
+                            color: AppColors.borderGold, width: 2),
                       ),
                       child: Icon(Icons.person,
-                          color: AppColors.darkGreen, size: 28),
+                          color: AppColors.cream, size: 40),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user['name'] ?? 'User',
-                          style: AppTextStyles.heading4,
-                        ),
-                        Text(
-                          user['role'] ?? 'user',
-                          style: AppTextStyles.labelMuted,
-                        ),
-                      ],
+                    const SizedBox(height: 10),
+                    Text(
+                      user['name'] ?? 'User',
+                      style: AppTextStyles.heading4
+                          .copyWith(color: AppColors.cream),
+                    ),
+                    Text(
+                      role.toUpperCase(), // ← Ab error nahi aaye ga
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: AppColors.cream.withOpacity(0.7)),
                     ),
                   ],
                 ),
@@ -58,66 +55,96 @@ class AppDrawer extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              // ── Menu Items ────────────────────────────────
-              _drawerItem(
-                icon: Icons.home_outlined,
-                label: 'Home',
-                onTap: () {
-                  Get.back();
-                  final role = AuthService.getRole();
-                  if (role == 'admin') {
-                    Get.offNamed('/admin-dashboard');
-                  } else if (role == 'seller') {
-                    Get.offNamed('/seller-dashboard');
-                  } else {
-                    Get.offNamed('/user-dashboard');
-                  }
-                },
-              ),
-              _drawerItem(
-                icon: Icons.rice_bowl_outlined,
-                label: 'Products',
-                onTap: () {
-                  Get.back();
-                },
-              ),
-              _drawerItem(
-                icon: Icons.shopping_cart_outlined,
-                label: 'Orders',
-                onTap: () {
-                  Get.back();
-                },
-              ),
-              _drawerItem(
-                icon: Icons.favorite_outline,
-                label: 'Wishlist',
-                onTap: () {
-                  Get.back();
-                },
-              ),
-              _drawerItem(
-                icon: Icons.notifications_outlined,
-                label: 'Notifications',
-                onTap: () {
-                  Get.back();
-                },
-              ),
-              _drawerItem(
-                icon: Icons.person_outline,
-                label: 'Profile',
-                onTap: () {
-                  Get.back();
-                },
-              ),
-              _drawerItem(
-                icon: Icons.settings_outlined,
-                label: 'Settings',
-                onTap: () {
-                  Get.back();
-                },
-              ),
+              // ── Menu Items — Role k hisab se ─────────────
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  children: [
+                    _drawerItem(Icons.home_outlined, 'Home', () {
+                      Get.back();
+                      if (role == 'admin') {
+                        Get.offNamed('/admin-dashboard');
+                      } else if (role == 'seller') {
+                        Get.offNamed('/seller-dashboard');
+                      } else {
+                        Get.offNamed('/user-dashboard');
+                      }
+                    }),
 
-              const Spacer(),
+                    if (role == 'user') ...[
+                      _drawerItem(Icons.storefront_outlined,
+                          'Rice Marketplace', () {
+                        Get.back();
+                        Get.toNamed('/user-products');
+                      }),
+                      _drawerItem(Icons.store_outlined, 'Shops', () {
+                        Get.back();
+                        Get.toNamed('/shops');
+                      }),
+                      _drawerItem(
+                          Icons.shopping_cart_outlined, 'My Cart', () {
+                        Get.back();
+                      }),
+                      _drawerItem(Icons.person_outline, 'Profile', () {
+                        Get.back();
+                      }),
+                      _drawerItem(
+                          Icons.shopping_bag_outlined, 'My Orders', () {
+                        Get.back();
+                      }),
+                      _drawerItem(
+                          Icons.notifications_outlined, 'Notifications', () {
+                        Get.back();
+                      }),
+                      _drawerItem(Icons.settings_outlined, 'Settings', () {
+                        Get.back();
+                      }),
+                      _drawerItem(Icons.feedback_outlined, 'Feedback', () {
+                        Get.back();
+                      }),
+                    ],
+
+                    if (role == 'seller') ...[
+                      _drawerItem(Icons.rice_bowl_outlined, 'My Products',
+                          () {
+                        Get.back();
+                        Get.toNamed('/my-products');
+                      }),
+                      _drawerItem(Icons.add_box_outlined, 'Add Product', () {
+                        Get.back();
+                        Get.toNamed('/add-product');
+                      }),
+                      _drawerItem(
+                          Icons.shopping_bag_outlined, 'My Orders', () {
+                        Get.back();
+                      }),
+                      _drawerItem(Icons.person_outline, 'Profile', () {
+                        Get.back();
+                      }),
+                      _drawerItem(Icons.settings_outlined, 'Settings', () {
+                        Get.back();
+                      }),
+                    ],
+
+                    if (role == 'admin') ...[
+                      _drawerItem(Icons.inventory_2_outlined, 'All Products',
+                          () {
+                        Get.back();
+                        Get.toNamed('/admin-products');
+                      }),
+                      _drawerItem(Icons.store_outlined, 'All Shops', () {
+                        Get.back();
+                      }),
+                      _drawerItem(Icons.people_outline, 'Users', () {
+                        Get.back();
+                      }),
+                      _drawerItem(Icons.settings_outlined, 'Settings', () {
+                        Get.back();
+                      }),
+                    ],
+                  ],
+                ),
+              ),
 
               // ── Logout ────────────────────────────────────
               Padding(
@@ -129,13 +156,20 @@ class AppDrawer extends StatelessWidget {
                   },
                   child: Container(
                     padding: const EdgeInsets.all(14),
-                    decoration: AppDecorations.card,
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: AppColors.error.withOpacity(0.3)),
+                    ),
                     child: Row(
                       children: [
                         Icon(Icons.logout,
-                            color: AppColors.darkGreen, size: 22),
+                            color: AppColors.error, size: 22),
                         const SizedBox(width: 12),
-                        Text('Logout', style: AppTextStyles.heading4),
+                        Text('Logout',
+                            style: AppTextStyles.heading4
+                                .copyWith(color: AppColors.error)),
                       ],
                     ),
                   ),
@@ -148,27 +182,13 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _drawerItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: AppDecorations.card,
-          child: Row(
-            children: [
-              Icon(icon, color: AppColors.darkGreen, size: 22),
-              const SizedBox(width: 14),
-              Text(label, style: AppTextStyles.bodyLarge),
-            ],
-          ),
-        ),
-      ),
+  Widget _drawerItem(IconData icon, String label, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.darkGreen, size: 22),
+      title: Text(label, style: AppTextStyles.bodyLarge),
+      onTap: onTap,
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
     );
   }
 }
