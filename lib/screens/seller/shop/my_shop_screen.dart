@@ -23,20 +23,40 @@ class _MyShopScreenState extends State<MyShopScreen> {
   @override
   void initState() {
     super.initState();
-
-    loadShopData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadShopData();
+    });
   }
 
-  void loadShopData() {
+  Future<void> loadShopData() async {
     final box = GetStorage();
 
-    shopName = box.read("shop_name") ?? "";
-    ownerName = box.read("owner_name") ?? "";
-    phone = box.read("phone") ?? "";
-    address = box.read("address") ?? "";
-    description = box.read("description") ?? "";
+    String token = box.read("token") ?? "";
 
-    setState(() {});
+    final result = await ShopService().getMyShop(token);
+
+    if (result["success"] == true) {
+      final shop = result["shop"];
+
+      setState(() {
+        shopName = shop["shop_name"] ?? "";
+        ownerName = shop["owner_name"] ?? "";
+        phone = shop["phone"] ?? "";
+        address = shop["address"] ?? "";
+        description = shop["description"] ?? "";
+      });
+
+      // SAVE ALSO IN STORAGE
+      box.write("shop_id", shop["id"]);
+      box.write("shop_name", shop["shop_name"]);
+      box.write("owner_name", shop["owner_name"]);
+      box.write("phone", shop["phone"]);
+      box.write("address", shop["address"]);
+      box.write("description", shop["description"]);
+      box.write("shop_approved", shop["is_approved"]);
+    } else {
+      Get.snackbar("Error", result["message"]);
+    }
   }
 
   // =========================

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 class ShopService {
   final String baseUrl = "http://127.0.0.1:8000/api";
 
+  // create shop
   Future<Map<String, dynamic>> createShop({
     required String token,
     required String cnic,
@@ -38,6 +39,7 @@ class ShopService {
     return jsonDecode(response.body);
   }
 
+  // fetch pending shops for admin
   Future<List<Map<String, dynamic>>> fetchPendingShops({
     required String token,
   }) async {
@@ -56,6 +58,7 @@ class ShopService {
     return [];
   }
 
+  // approve shop
   Future approveShop({required String token, required int shopId}) async {
     final response = await http.post(
       Uri.parse("$baseUrl/shops/$shopId/approve"),
@@ -68,6 +71,7 @@ class ShopService {
     return jsonDecode(response.body);
   }
 
+  // fetch approved shops for customers
   Future<List<Map<String, dynamic>>> fetchApprovedShops() async {
     String token = GetStorage().read("token") ?? "";
 
@@ -148,5 +152,28 @@ class ShopService {
     print(response.body);
 
     return jsonDecode(response.body);
+  }
+
+  // get my shop details
+  Future<Map<String, dynamic>> getMyShop(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/my-shop"),
+        headers: {
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {"success": true, "shop": data["shop"]};
+      } else {
+        return {"success": false, "message": data["message"]};
+      }
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 }
