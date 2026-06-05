@@ -1,33 +1,105 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: deprecated_member_use
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'rice_marketplace_page.dart';
+import 'user/shops_screen.dart'; // ← SHOPS IMPORT ADD KIYA
+
+// ─────────────────────────────────────────────
+//  THEME
+// ─────────────────────────────────────────────
+
+class AppColors {
+  AppColors._();
+  static const Color darkGreen  = Color(0xFF1A2820);
+  static const Color lightGreen = Color(0xFF5A8A6E);
+  static const Color golden     = Color(0xFF9D7E3F);
+  static const Color cream      = Color(0xFFD4C9A8);
+  static const Color borderGold = Color(0xFFB8A97A);
+  static const Color error      = Color(0xFFD32F2F);
+
+  static Color cardFill      = cream.withOpacity(0.22);
+  static Color cardBorder    = borderGold.withOpacity(0.45);
+  static Color inputFill     = cream.withOpacity(0.30);
+  static Color inputBorder   = borderGold.withOpacity(0.55);
+  static Color overlayLight  = cream.withOpacity(0.30);
+  static Color iconMuted     = darkGreen.withOpacity(0.75);
+  static Color divider       = darkGreen.withOpacity(0.15);
+}
+
+class AppGradients {
+  AppGradients._();
+  static const LinearGradient background = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [AppColors.lightGreen, AppColors.golden],
+  );
+}
+
+class AppTextStyles {
+  AppTextStyles._();
+  static const TextStyle heading3 = TextStyle(
+    fontSize: 18, fontWeight: FontWeight.bold,
+    color: AppColors.darkGreen, letterSpacing: 0.3,
+  );
+  static const TextStyle bodyLarge = TextStyle(
+    fontSize: 14, color: AppColors.darkGreen, height: 1.5,
+  );
+  static TextStyle bodySmall = TextStyle(
+    fontSize: 12, color: AppColors.darkGreen.withOpacity(0.65), height: 1.4,
+  );
+  static TextStyle labelMuted = TextStyle(
+    fontSize: 13, color: AppColors.darkGreen.withOpacity(0.75),
+  );
+}
+
+// ─────────────────────────────────────────────
+//  MAIN
+// ─────────────────────────────────────────────
 void main() {
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark,
+  ));
   runApp(const RiceMartApp());
 }
 
 class RiceMartApp extends StatelessWidget {
   const RiceMartApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Rice Mart',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'Roboto', useMaterial3: true),
+      theme: ThemeData(
+        useMaterial3: true,
+        fontFamily: 'Poppins',
+        colorScheme: ColorScheme.light(
+          primary: AppColors.darkGreen,
+          secondary: AppColors.golden,
+          surface: AppColors.cream,
+        ),
+        scaffoldBackgroundColor: AppColors.lightGreen,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: AppColors.darkGreen),
+          titleTextStyle: AppTextStyles.heading3,
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+          ),
+        ),
+      ),
       home: const UserDashboard(),
     );
   }
 }
 
-// ─── COLORS (exact figma) ───────────────────
-const kDarkGreen = Color(0xFF2D4A27);
-const kMidGreen  = Color(0xFF4A6741);
-const kOlive     = Color(0xFF6B7C3E);
-const kGoldOlive = Color(0xFF8A7A3A);
-const kDrawerBg  = Color(0xFFEDE8D0);
-const kLogoutRed = Color(0xFFB03A2E);
-const kIconGrey  = Color(0xFF3A3A2E);
-
-// ─── USER DASHBOARD ─────────────────────────
+// ─────────────────────────────────────────────
+//  USER DASHBOARD
+// ─────────────────────────────────────────────
 class UserDashboard extends StatefulWidget {
   const UserDashboard({super.key});
   @override
@@ -51,135 +123,196 @@ class _UserDashboardState extends State<UserDashboard> {
     return Scaffold(
       key: _scaffoldKey,
       extendBodyBehindAppBar: true,
-
-      // ── AppBar
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white, size: 26),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+        leading: GestureDetector(
+          onTap: () => _scaffoldKey.currentState?.openDrawer(),
+          child: Container(
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.cream.withOpacity(0.25),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.borderGold.withOpacity(0.50)),
+            ),
+            child: Icon(Icons.menu, color: AppColors.darkGreen, size: 20),
+          ),
         ),
         title: Text(
           _titles[_currentIndex],
           style: const TextStyle(
-            color: Colors.white, fontWeight: FontWeight.w600,
-            fontSize: 20, letterSpacing: 0.4,
+            fontFamily: 'Poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkGreen,
+            letterSpacing: 0.3,
           ),
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 26),
-            onPressed: () {},
+          GestureDetector(
+            onTap: () {},
+            child: Container(
+              margin: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.cream.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.borderGold.withOpacity(0.50)),
+              ),
+              child: Icon(Icons.shopping_cart_outlined,
+                  color: AppColors.darkGreen, size: 20),
+            ),
           ),
         ],
       ),
-
       drawer: _buildDrawer(context),
       body: _pages[_currentIndex],
       bottomNavigationBar: _buildBottomNav(),
     );
   }
 
-  // ════════════════════════════════════════════
-  //  DRAWER — exact figma
-  // ════════════════════════════════════════════
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
-      width: 280,
-      backgroundColor: kDrawerBg,
-      child: Column(
-        children: [
-          // Dark green header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 52, 20, 22),
-            color: kDarkGreen,
-            child: Row(
-              children: [
-                Container(
-                  width: 60, height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.15),
-                    border: Border.all(color: Colors.white30, width: 1.5),
+      width: 285,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        decoration: const BoxDecoration(gradient: AppGradients.background),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 54, 20, 22),
+              decoration: BoxDecoration(
+                color: AppColors.darkGreen.withOpacity(0.55),
+                border: Border(
+                  bottom: BorderSide(
+                      color: AppColors.borderGold.withOpacity(0.40), width: 1),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 58, height: 58,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cream.withOpacity(0.20),
+                      border: Border.all(
+                          color: AppColors.borderGold.withOpacity(0.60),
+                          width: 1.5),
+                    ),
+                    child: Icon(Icons.person, size: 36, color: AppColors.darkGreen),
                   ),
-                  child: const Icon(Icons.person, size: 38, color: Colors.white70),
-                ),
-                const SizedBox(width: 14),
-                const Text('User',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600)),
-              ],
+                  const SizedBox(width: 14),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('User',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            color: AppColors.darkGreen,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          )),
+                      Text('Marketplace User',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            color: AppColors.darkGreen.withOpacity(0.65),
+                            fontSize: 12,
+                          )),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-
-          // Menu items
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              children: [
-                _drawerTile(Icons.home_outlined, 'Home', onTap: () {
-                  setState(() => _currentIndex = 0); Navigator.pop(context);
-                }),
-                _drawerTile(Icons.storefront_outlined, 'Rice Marketplace', onTap: () {
-                  setState(() => _currentIndex = 1); Navigator.pop(context);
-                }),
-                _drawerTile(Icons.store_outlined, 'Shops', onTap: () {
-                  setState(() => _currentIndex = 2); Navigator.pop(context);
-                }),
-                _drawerTile(Icons.shopping_cart_outlined, 'My Cart', onTap: () {
-                  Navigator.pop(context);
-                }),
-                _drawerTile(Icons.person_outline, 'Profile', onTap: () {
-                  setState(() => _currentIndex = 4); Navigator.pop(context);
-                }),
-                _drawerTile(Icons.receipt_long_outlined, 'My Orders', onTap: () {
-                  Navigator.pop(context);
-                }),
-                _drawerTile(Icons.notifications_outlined, 'Notifications', onTap: () {
-                  Navigator.pop(context);
-                }),
-                _drawerTile(Icons.settings_outlined, 'Settings', onTap: () {
-                  Navigator.pop(context);
-                }),
-                _drawerTile(Icons.feedback_outlined, 'Feedback', onTap: () {
-                  Navigator.pop(context);
-                }),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: Divider(color: Color(0xFFCCC9A8), thickness: 1),
-                ),
-                _drawerTile(Icons.logout, 'Logout', color: kLogoutRed, onTap: () {
-                  Navigator.pop(context);
-                  _showLogoutDialog(context);
-                }),
-              ],
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                children: [
+                  _drawerTile(Icons.home_outlined, 'Home', onTap: () {
+                    setState(() => _currentIndex = 0);
+                    Navigator.pop(context);
+                  }),
+                  _drawerTile(Icons.storefront_outlined, 'Rice Marketplace',
+                      onTap: () {
+                    setState(() => _currentIndex = 1);
+                    Navigator.pop(context);
+                  }),
+                  _drawerTile(Icons.store_outlined, 'Shops', onTap: () {
+                    setState(() => _currentIndex = 2);
+                    Navigator.pop(context);
+                  }),
+                  _drawerTile(Icons.shopping_cart_outlined, 'My Cart',
+                      onTap: () => Navigator.pop(context)),
+                  _drawerTile(Icons.person_outline, 'Profile', onTap: () {
+                    setState(() => _currentIndex = 4);
+                    Navigator.pop(context);
+                  }),
+                  _drawerTile(Icons.receipt_long_outlined, 'My Orders',
+                      onTap: () => Navigator.pop(context)),
+                  _drawerTile(Icons.notifications_outlined, 'Notifications',
+                      onTap: () => Navigator.pop(context)),
+                  _drawerTile(Icons.settings_outlined, 'Settings',
+                      onTap: () => Navigator.pop(context)),
+                  _drawerTile(Icons.feedback_outlined, 'Feedback',
+                      onTap: () => Navigator.pop(context)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 6),
+                    child: Divider(
+                        color: AppColors.borderGold.withOpacity(0.40),
+                        thickness: 1),
+                  ),
+                  _drawerTile(Icons.logout, 'Logout',
+                      color: AppColors.error, onTap: () {
+                    Navigator.pop(context);
+                    _showLogoutDialog(context);
+                  }),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _drawerTile(IconData icon, String label,
       {required VoidCallback onTap, Color? color}) {
-    final c = color ?? kIconGrey;
+    final c = color ?? Colors.black;
     return InkWell(
       onTap: onTap,
+      splashColor: AppColors.cream.withOpacity(0.10),
+      highlightColor: AppColors.cream.withOpacity(0.06),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
         child: Row(
           children: [
-            Icon(icon, color: c, size: 22),
-            const SizedBox(width: 16),
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.cream.withOpacity(color != null ? 0.08 : 0.12),
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(
+                    color: AppColors.borderGold.withOpacity(0.30), width: 1),
+              ),
+              child: Icon(icon, color: c, size: 18),
+            ),
+            const SizedBox(width: 14),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(label,
                 style: TextStyle(
-                  color: c, fontSize: 15,
+                  fontFamily: 'Poppins',
+                  color: c,
+                  fontSize: 14,
                   fontWeight: color != null ? FontWeight.bold : FontWeight.w500,
-                )),
+                  letterSpacing: 0.2,
+                ),
+              ),
             ),
           ],
         ),
@@ -191,41 +324,64 @@ class _UserDashboardState extends State<UserDashboard> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        backgroundColor: AppColors.cream,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Logout',
+            style: TextStyle(
+                color: AppColors.darkGreen, fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to logout?',
+            style:
+                TextStyle(color: AppColors.darkGreen.withOpacity(0.75))),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: kLogoutRed),
+          TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Logout', style: TextStyle(color: Colors.white)),
+            child:
+                Text('Cancel', style: TextStyle(color: AppColors.darkGreen)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Logout',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  // ════════════════════════════════════════════
-  //  BOTTOM NAV — exact figma: Home|Rice|Shops|Chat|Profile
-  // ════════════════════════════════════════════
   Widget _buildBottomNav() {
     final items = [
-      {'icon': Icons.home_rounded,               'label': 'Home'},
-      {'icon': Icons.grain_rounded,              'label': 'Rice'},
-      {'icon': Icons.store_rounded,              'label': 'Shops'},
-      {'icon': Icons.chat_bubble_outline_rounded,'label': 'Chat'},
-      {'icon': Icons.person_rounded,             'label': 'Profile'},
+      {'icon': Icons.home_rounded,                'label': 'Home'},
+      {'icon': Icons.grain_rounded,               'label': 'Rice'},
+      {'icon': Icons.store_rounded,               'label': 'Shops'},
+      {'icon': Icons.chat_bubble_outline_rounded, 'label': 'Chat'},
+      {'icon': Icons.person_rounded,              'label': 'Profile'},
     ];
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))],
+      decoration: BoxDecoration(
+        color: AppColors.golden.withOpacity(0.88),
+        border: Border(
+          top: BorderSide(
+              color: AppColors.borderGold.withOpacity(0.50), width: 1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.darkGreen.withOpacity(0.18),
+            blurRadius: 14,
+            offset: const Offset(0, -3),
+          ),
+        ],
       ),
       child: SafeArea(
         child: SizedBox(
-          height: 62,
+          height: 64,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (i) {
@@ -234,33 +390,35 @@ class _UserDashboardState extends State<UserDashboard> {
                 onTap: () => setState(() => _currentIndex = i),
                 behavior: HitTestBehavior.opaque,
                 child: SizedBox(
-                  width: 64,
+                  width: 66,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        items[i]['icon'] as IconData,
-                        color: selected ? kDarkGreen : Colors.grey,
-                        size: 26,
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        items[i]['label'] as String,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                          color: selected ? kDarkGreen : Colors.grey,
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        width: 40, height: 36,
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? AppColors.darkGreen.withOpacity(0.20)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          items[i]['icon'] as IconData,
+                          color: Colors.black,
+                          size: 24,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      // active indicator dot
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        height: 3,
-                        width: selected ? 20 : 0,
-                        decoration: BoxDecoration(
-                          color: kDarkGreen,
-                          borderRadius: BorderRadius.circular(4),
+                      Text(
+                        items[i]['label'] as String,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 10.5,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w400,
+                          color: Colors.black,
                         ),
                       ),
                     ],
@@ -275,84 +433,95 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 }
 
-// ─── HOME PAGE ──────────────────────────────
+// ─────────────────────────────────────────────
+//  PAGES
+// ─────────────────────────────────────────────
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF4A6741), Color(0xFF6B7C3E), Color(0xFF8A7A3A)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: const Center(
+      decoration: const BoxDecoration(gradient: AppGradients.background),
+      child: Center(
         child: Text('Home',
           style: TextStyle(
-            color: Colors.white, fontSize: 32,
-            fontWeight: FontWeight.bold, letterSpacing: 1.0,
-          )),
+            fontFamily: 'Poppins', fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkGreen, letterSpacing: 1.0,
+          ),
+        ),
       ),
     );
   }
 }
 
-// ─── PLACEHOLDER PAGES ───────────────────────
 class RicePage extends StatelessWidget {
   const RicePage({super.key});
   @override
-  Widget build(BuildContext context) => _Placeholder(
-      icon: Icons.grain_rounded, label: 'Rice Marketplace',
-      colors: [kDarkGreen, kOlive]);
+  Widget build(BuildContext context) => const RiceMarketplacePage();
 }
 
+// ← SHOPS PAGE FIX — ShopsScreen use kar raha hai ab
 class ShopsPage extends StatelessWidget {
   const ShopsPage({super.key});
   @override
-  Widget build(BuildContext context) => _Placeholder(
-      icon: Icons.store_rounded, label: 'Shops',
-      colors: [kOlive, kDarkGreen]);
+  Widget build(BuildContext context) => const ShopsScreen();
 }
 
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
   @override
-  Widget build(BuildContext context) => _Placeholder(
-      icon: Icons.chat_bubble_rounded, label: 'Chat',
-      colors: [kMidGreen, kOlive]);
+  Widget build(BuildContext context) =>
+      _Placeholder(icon: Icons.chat_bubble_rounded, label: 'Chat');
 }
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
   @override
-  Widget build(BuildContext context) => _Placeholder(
-      icon: Icons.person_rounded, label: 'Profile',
-      colors: [kDarkGreen, kGoldOlive]);
+  Widget build(BuildContext context) =>
+      _Placeholder(icon: Icons.person_rounded, label: 'Profile');
 }
 
 class _Placeholder extends StatelessWidget {
   final IconData icon;
   final String label;
-  final List<Color> colors;
-  const _Placeholder({required this.icon, required this.label, required this.colors});
+  const _Placeholder({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: colors,
-            begin: Alignment.topLeft, end: Alignment.bottomRight)),
+      decoration: const BoxDecoration(gradient: AppGradients.background),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 60, color: Colors.white30),
-            const SizedBox(height: 14),
-            Text(label, style: const TextStyle(color: Color.fromARGB(255, 177, 196, 181), fontSize: 26, fontWeight: FontWeight.bold)),
+            Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.cream.withOpacity(0.22),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: AppColors.borderGold.withOpacity(0.45),
+                    width: 1.5),
+              ),
+              child: Icon(icon,
+                  size: 38,
+                  color: AppColors.darkGreen.withOpacity(0.55)),
+            ),
+            const SizedBox(height: 16),
+            Text(label,
+                style: TextStyle(
+                  fontFamily: 'Poppins', fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkGreen,
+                )),
             const SizedBox(height: 6),
-            Text('Coming soon...', style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 14)),
+            Text('Coming soon...',
+                style: TextStyle(
+                  fontFamily: 'Poppins', fontSize: 13,
+                  color: AppColors.darkGreen.withOpacity(0.55),
+                )),
           ],
         ),
       ),

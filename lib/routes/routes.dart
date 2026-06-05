@@ -6,6 +6,10 @@ import '../screens/user_dashboard.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/seller_dashboard.dart';
 
+import '../screens/user/shops_screen.dart';
+import '../screens/user/shop_detail_screen.dart';
+
+
 class AppRoutes {
   AppRoutes._();
 
@@ -15,7 +19,12 @@ class AppRoutes {
   static const String userDashboard   = '/user-dashboard';
   static const String adminDashboard  = '/admin-dashboard';
   static const String sellerDashboard = '/seller-dashboard';
-  
+  static const String userProducts    = '/user-products';
+  static const String productDetail   = '/product-detail';
+  static const String shops           = '/shops';
+  static const String shopDetail      = '/shop-detail';
+  static const String adminProducts   = '/admin-products';
+
   static final List<GetPage> pages = [
     GetPage(name: splash,          page: () => const SplashScreen()),
     GetPage(name: login,           page: () => const LoginScreen()),
@@ -23,6 +32,9 @@ class AppRoutes {
     GetPage(name: userDashboard,   page: () => const UserDashboard()),
     GetPage(name: adminDashboard,  page: () => const AdminDashboard()),
     GetPage(name: sellerDashboard, page: () => const SellerDashboard()),
+    
+    GetPage(name: shops,           page: () => const ShopsScreen()),
+    GetPage(name: shopDetail,      page: () => const ShopDetailScreen()),
     
   ];
 }

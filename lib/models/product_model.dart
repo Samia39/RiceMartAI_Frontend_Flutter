@@ -1,6 +1,7 @@
 class Product {
   final int id;
   final int sellerId;
+  final int? shopId;
   final String name;
   final String description;
   final double price;
@@ -12,6 +13,7 @@ class Product {
   Product({
     required this.id,
     required this.sellerId,
+    this.shopId,
     required this.name,
     required this.description,
     required this.price,
@@ -25,6 +27,7 @@ class Product {
     return Product(
       id: json['id'],
       sellerId: json['seller_id'],
+      shopId: json['shop_id'],
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       price: double.parse(json['price'].toString()),
