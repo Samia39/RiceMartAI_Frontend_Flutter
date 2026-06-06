@@ -1,4 +1,6 @@
 import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
+import 'package:frontend/screens/chats/chat.dart';
+import 'package:frontend/screens/chats/conversation.dart';
 import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';
@@ -208,5 +210,7 @@ class AppPages {
         PermissionMiddleware('manage permissions'),
       ],
     ),
+    GetPage(name: AppRoutes.chat, page: () => ChatScreen()),
+    GetPage(name: AppRoutes.conversation, page: () => ConversationsScreen()),
   ];
 }
