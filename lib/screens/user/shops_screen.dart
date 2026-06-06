@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../core/utils/themes.dart';
 import '../../core/services/shop_service.dart';
 import '../../models/shop_model.dart';
 
@@ -25,8 +24,12 @@ class _ShopsScreenState extends State<ShopsScreen> {
 
   Future<void> loadShops() async {
     setState(() => isLoading = true);
-    shops = await ShopService.getAllShops();
-    filtered = shops;
+    try {
+      shops = await ShopService.getAllShops();
+      filtered = shops;
+    } catch (e) {
+      filtered = [];
+    }
     setState(() => isLoading = false);
   }
 
@@ -44,18 +47,8 @@ class _ShopsScreenState extends State<ShopsScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // ── Rice Shops Title ─────────────────────────────
-        const SizedBox(height: 16),
-        const Text('Rice Shops',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A2820),
-            )),
-        const SizedBox(height: 16),
-
         // ── Search Bar ───────────────────────────────────
+        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
@@ -119,7 +112,8 @@ class _ShopsScreenState extends State<ShopsScreen> {
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 14),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD4C9A8).withOpacity(0.22),
+                                color: const Color(0xFFD4C9A8)
+                                    .withOpacity(0.22),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                     color: const Color(0xFFB8A97A)
@@ -128,15 +122,17 @@ class _ShopsScreenState extends State<ShopsScreen> {
                               child: Row(
                                 children: [
                                   ClipRRect(
-                                    borderRadius: const BorderRadius.horizontal(
-                                        left: Radius.circular(16)),
+                                    borderRadius:
+                                        const BorderRadius.horizontal(
+                                            left: Radius.circular(16)),
                                     child: shop.logo != null
                                         ? Image.network(
                                             'http://localhost/sheezabackend/public/storage/${shop.logo}',
                                             width: 90,
                                             height: 90,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) => _noLogo(),
+                                            errorBuilder: (_, __, ___) =>
+                                                _noLogo(),
                                           )
                                         : _noLogo(),
                                   ),
@@ -158,20 +154,27 @@ class _ShopsScreenState extends State<ShopsScreen> {
                                           if (shop.address != null)
                                             Row(
                                               children: [
-                                                Icon(Icons.location_on_outlined,
+                                                Icon(
+                                                    Icons
+                                                        .location_on_outlined,
                                                     size: 14,
-                                                    color: const Color(0xFF1A2820)
-                                                        .withOpacity(0.75)),
+                                                    color:
+                                                        const Color(0xFF1A2820)
+                                                            .withOpacity(
+                                                                0.75)),
                                                 const SizedBox(width: 4),
                                                 Expanded(
                                                   child: Text(
                                                     shop.address!,
                                                     style: TextStyle(
                                                         fontSize: 12,
-                                                        color: const Color(0xFF1A2820)
-                                                            .withOpacity(0.65)),
+                                                        color: const Color(
+                                                                0xFF1A2820)
+                                                            .withOpacity(
+                                                                0.65)),
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                 ),
                                               ],
@@ -190,7 +193,8 @@ class _ShopsScreenState extends State<ShopsScreen> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(right: 12),
+                                    padding:
+                                        const EdgeInsets.only(right: 12),
                                     child: Icon(Icons.arrow_forward_ios,
                                         size: 16,
                                         color: const Color(0xFF1A2820)
@@ -213,7 +217,8 @@ class _ShopsScreenState extends State<ShopsScreen> {
       width: 90,
       height: 90,
       color: const Color(0xFFD4C9A8).withOpacity(0.22),
-      child: const Icon(Icons.store, size: 35, color: Color(0xFF1A2820)),
+      child: const Icon(Icons.store,
+          size: 35, color: Color(0xFF1A2820)),
     );
   }
 }

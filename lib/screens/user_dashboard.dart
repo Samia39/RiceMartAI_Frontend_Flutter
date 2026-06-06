@@ -466,7 +466,14 @@ class RicePage extends StatelessWidget {
 class ShopsPage extends StatelessWidget {
   const ShopsPage({super.key});
   @override
-  Widget build(BuildContext context) => const ShopsScreen();
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + kToolbarHeight,
+      ),
+      child: const ShopsScreen(),
+    );
+  }
 }
 
 class ChatPage extends StatelessWidget {
