@@ -16,6 +16,7 @@ import '../screens/admin_screens/shops/shop_approvals_screen.dart';
 import '../screens/admin_screens/user_management/assign_permissions_screen.dart';
 import '../screens/admin_screens/user_management/roles_screen.dart';
 import '../screens/admin_screens/user_management/users_screen.dart';
+import '../screens/buyer/cart/checkout_screen.dart';
 import '../screens/buyer/orders/my_orders_screen.dart';
 import '../screens/buyer/orders/order_details_screen.dart';
 import '../screens/buyer/shops/shop_details_screen.dart';
@@ -65,6 +66,9 @@ class AppPages {
       name: AppRoutes.cart,
       page: () => CartScreen(onCartUpdated: () {}),
     ),
+
+    // Checkout Screen
+    GetPage(name: AppRoutes.checkout, page: () => const CheckoutScreen()),
 
     // Rice Details Screen
     GetPage(name: AppRoutes.riceDetails, page: () => const RiceDetailScreen()),

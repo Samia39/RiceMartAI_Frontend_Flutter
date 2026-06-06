@@ -1,8 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
-
-import 'cart_service.dart';
 
 class OrderService {
   final box = GetStorage();
@@ -11,35 +10,77 @@ class OrderService {
   // =========================
   // CHECKOUT API CALL
   // =========================
-  Future<Map<String, dynamic>> checkout() async {
-    final token = box.read("token");
+  Future<Map<String, dynamic>> checkout({
+    required String customerName,
+    required String phone,
+    required String address,
+    required String paymentMethod,
+    required List cart,
+    // File? paymentProof,
+    dynamic paymentProof, // Change to dynamic to avoid import issues
+  }) async {
+    try {
+      final token = box.read("token");
 
-    // GET CART
-    final cart = CartService().getCart();
+      // =========================
+      // MULTIPART REQUEST
+      // =========================
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$baseUrl/checkout"),
+      );
 
-    if (cart.isEmpty) {
-      return {"success": false, "message": "Cart is empty"};
+      // =========================
+      // HEADERS
+      // =========================
+      request.headers['Authorization'] = 'Bearer $token';
+
+      request.headers['Accept'] = 'application/json';
+
+      // =========================
+      // FIELDS
+      // =========================
+      request.fields['customer_name'] = customerName;
+
+      request.fields['phone'] = phone;
+
+      request.fields['address'] = address;
+
+      request.fields['payment_method'] = paymentMethod;
+
+      request.fields['city'] = '';
+
+      // =========================
+      // CART
+      // =========================
+      for (int i = 0; i < cart.length; i++) {
+        request.fields['cart[$i][product_id]'] = cart[i]['product_id']
+            .toString();
+        request.fields['cart[$i][quantity]'] = cart[i]['quantity'].toString();
+      }
+
+      // =========================
+      // PAYMENT SCREENSHOT
+      // =========================
+      if (!kIsWeb && paymentProof != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('payment_proof', paymentProof.path),
+        );
+      }
+
+      // =========================
+      // SEND REQUEST
+      // =========================
+      final response = await request.send();
+
+      final responseData = await response.stream.bytesToString();
+
+      final data = jsonDecode(responseData);
+
+      return data;
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
     }
-
-    // FORMAT CART FOR BACKEND
-    final formattedCart = cart.map((item) {
-      return {"id": item["id"], "quantity": item["quantity"]};
-    }).toList();
-
-    // API REQUEST
-    final response = await http.post(
-      Uri.parse("$baseUrl/checkout"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({"cart": formattedCart}),
-    );
-
-    final data = jsonDecode(response.body);
-
-    return data;
   }
 
   // =========================

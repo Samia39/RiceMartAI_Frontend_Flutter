@@ -12,6 +12,7 @@ class AppRoutes {
   // =========================
   static const dashboard = "/dashboard";
   static const cart = "/cart";
+  static const checkout = "/checkout";
   static const riceDetails = "/rice-details";
   static const shopDetails = "/shop-details";
   static const myOrders = "/my-orders";
