@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'rice_marketplace_page.dart';
 import 'user/shops_screen.dart'; // ← SHOPS IMPORT ADD KIYA
+import 'user/profile_screen.dart';
 
 // ─────────────────────────────────────────────
 //  THEME
@@ -483,13 +484,21 @@ class ChatPage extends StatelessWidget {
       _Placeholder(icon: Icons.chat_bubble_rounded, label: 'Chat');
 }
 
+// Import add karo file ke upar
+
+// ProfilePage class replace karo
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
   @override
-  Widget build(BuildContext context) =>
-      _Placeholder(icon: Icons.person_rounded, label: 'Profile');
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + kToolbarHeight,
+      ),
+      child: const ProfileScreen(),
+    );
+  }
 }
-
 class _Placeholder extends StatelessWidget {
   final IconData icon;
   final String label;
