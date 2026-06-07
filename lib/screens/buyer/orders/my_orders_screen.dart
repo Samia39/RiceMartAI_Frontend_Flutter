@@ -166,6 +166,20 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                     style: AppTextStyles.bodyLarge,
                   ),
 
+                  const SizedBox(height: 8),
+
+                  Text(
+                    "Payment: ${order["payment_method"]}",
+                    style: AppTextStyles.bodyLarge,
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    "Payment Status: ${order["payment_status"]}",
+                    style: AppTextStyles.bodyLarge,
+                  ),
+
                   const SizedBox(height: 10),
 
                   // TOTAL

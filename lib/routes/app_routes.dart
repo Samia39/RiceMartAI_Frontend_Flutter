@@ -36,7 +36,7 @@ class AppRoutes {
   static const sellerApprovals = "/seller-approvals";
   static const approvedShops = "/approved-shops";
   static const ordersManagement = "/orders-management";
-  static const payments = "/payments";
+
   static const reports = "/reports";
   static const adminSettings = "/admin-settings";
   static const adminNotifications = "/admin-notifications";

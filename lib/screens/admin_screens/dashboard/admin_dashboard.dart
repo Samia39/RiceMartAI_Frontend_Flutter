@@ -268,21 +268,6 @@ class AdminDashboard extends StatelessWidget {
               const SizedBox(height: 20),
 
               // =========================
-              // PAYMENTS
-              // =========================
-              adminCard(
-                title: "Payments",
-                subtitle: "Commission and payouts",
-                icon: Icons.payments,
-
-                onTap: () {
-                  Get.toNamed(AppRoutes.payments);
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // =========================
               // REPORTS
               // =========================
               if (PermissionService.hasPermission('manage reports'))

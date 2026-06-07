@@ -249,4 +249,49 @@ class OrderService {
 
     return jsonDecode(response.body);
   }
+
+  // =========================
+  // ADMIN PAYMENTS
+  // =========================
+  Future<List> getAdminPayments() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/admin/payments"),
+
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      return data["payments"];
+    }
+
+    return [];
+  }
+
+  // =========================
+  // UPDATE PAYMENT STATUS
+  // =========================
+  Future<Map<String, dynamic>> updatePaymentStatus({
+    required int orderId,
+    required String paymentStatus,
+  }) async {
+    final token = box.read("token");
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/admin/orders/$orderId/payment-status"),
+
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+
+      body: jsonEncode({"payment_status": paymentStatus}),
+    );
+
+    return jsonDecode(response.body);
+  }
 }

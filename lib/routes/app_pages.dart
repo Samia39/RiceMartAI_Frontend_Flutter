@@ -6,7 +6,6 @@ import '../screens/access_denied_screen.dart';
 import '../screens/admin_screens/analytics/analytics_screen.dart';
 import '../screens/admin_screens/notifications/admin_notifications_screen.dart';
 import '../screens/admin_screens/orders/orders_management_screen.dart';
-import '../screens/admin_screens/payments/payments_screen.dart';
 import '../screens/admin_screens/reports/reports_screen.dart';
 import '../screens/admin_screens/search/admin_search_results_screen.dart';
 import '../screens/admin_screens/settings/admin_settings_screen.dart';
@@ -150,11 +149,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.ordersManagement,
       page: () => const OrdersManagementScreen(),
-      middlewares: [AuthMiddleware(), PermissionMiddleware('manage orders')],
     ),
-
-    // Admin Payments
-    GetPage(name: AppRoutes.payments, page: () => const PaymentsScreen()),
 
     // Admin Reports
     GetPage(

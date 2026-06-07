@@ -141,7 +141,23 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
           const SizedBox(height: 8),
 
           Text(
-            "Customer: ${order["user"]?["name"] ?? "Unknown"}",
+            "Customer: ${order["customer_name"] ?? "Unknown"}",
+
+            style: AppTextStyles.bodyLarge,
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            "Phone: ${order["phone"] ?? ""}",
+
+            style: AppTextStyles.bodyLarge,
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            "Address: ${order["address"] ?? ""}",
 
             style: AppTextStyles.bodyLarge,
           ),
@@ -178,7 +194,15 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
           const SizedBox(height: 10),
 
           Text(
-            "Payment: ${order["payment_status"]}",
+            "Payment Method: ${order["payment_method"]}",
+
+            style: AppTextStyles.bodyLarge,
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            "Payment Status: ${order["payment_status"]}",
 
             style: AppTextStyles.bodyLarge,
           ),
