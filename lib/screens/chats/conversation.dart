@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/chat_services.dart';
+import 'package:frontend/core/services/chat_service.dart';
 import 'package:get/get.dart';
-import '../../../../core/utils/themes.dart';
-import '../../../../routes/app_routes.dart';
+import '../../../core/utils/themes.dart';
+import '../../../routes/app_routes.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
