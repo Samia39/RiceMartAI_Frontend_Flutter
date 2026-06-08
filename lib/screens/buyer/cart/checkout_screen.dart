@@ -294,52 +294,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
               // =========================
               // CARD FIELDS
-              // =========================
-              if (paymentMethod == "card")
-                Column(
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: "Card Number",
-
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: "Expiry Date",
-
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: "CVV",
-
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
+              // ========================
               const SizedBox(height: 30),
 
               // =========================
