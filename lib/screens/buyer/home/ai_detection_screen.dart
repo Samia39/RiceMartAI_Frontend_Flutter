@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/buyer/home/ai_result.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/test_service.dart';
@@ -41,30 +42,41 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
   }
 
   // ================= SEND IMAGE =================
+  // ================= SEND IMAGE =================
   Future<void> sendImage() async {
     if (selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select an image first")),
       );
-
       return;
     }
 
-    bool success = await TestService.uploadImage(selectedImage!);
+    // Loading show karo
+    bool isLoading;
+    setState(() => isLoading = true);
 
-    if (success) {
-      setState(() {
-        result = "Image uploaded successfully";
-      });
+    final response = await TestService.uploadImage(selectedImage!);
+
+    setState(() => isLoading = false);
+
+    if (response['success'] == true) {
+      // ✅ Result screen pe navigate karo
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AIResultScreen(result: response['data']),
+        ),
+      );
     } else {
-      setState(() {
-        result = "Upload failed";
-      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(response['message'] ?? 'Failed')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isLoading = false;
     return Scaffold(
       appBar: AppBar(title: const Text("AI Rice Detection")),
 
@@ -162,18 +174,17 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                 const SizedBox(height: 25),
 
                 // ================= SEND BUTTON =================
+
+                // Send button mein:
                 SizedBox(
                   width: double.infinity,
                   height: 52,
-
-                  child: ElevatedButton(
-                    onPressed: sendImage,
-
-                    child: const Text("Send"),
+                  child: ElevatedButton.icon(
+                    onPressed: isLoading ? null : sendImage,
+                    icon: const Icon(Icons.biotech_outlined),
+                    label: Text(isLoading ? 'Analyzing...' : 'Analyze Rice'),
                   ),
                 ),
-
-                const SizedBox(height: 30),
 
                 // ================= RESULT =================
                 if (result.isNotEmpty)

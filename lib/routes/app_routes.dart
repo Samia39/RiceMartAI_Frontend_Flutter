@@ -47,4 +47,5 @@ class AppRoutes {
   static const assignPermissions = "/assign-permissions";
   static const chat = "/chat";
   static const conversation = "/conversation";
+  static const aireult = "/aireult";
 }
