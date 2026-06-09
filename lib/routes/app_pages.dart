@@ -5,7 +5,8 @@ import '../middleware/role_middleware.dart';
 import '../screens/access_denied_screen.dart';
 import '../screens/admin_screens/analytics/analytics_screen.dart';
 import '../screens/admin_screens/notifications/admin_notifications_screen.dart';
-import '../screens/admin_screens/orders/orders_management_screen.dart';
+import '../screens/admin_screens/orders/admin_orders_screen.dart';
+import '../screens/admin_screens/payments/payment_screen.dart';
 import '../screens/admin_screens/reports/reports_screen.dart';
 import '../screens/admin_screens/search/admin_search_results_screen.dart';
 import '../screens/admin_screens/settings/admin_settings_screen.dart';
@@ -145,10 +146,12 @@ class AppPages {
       page: () => const ApprovedShopsScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('view shops')],
     ),
-    // Admin Orders Management
+    // Admin Payments
+    GetPage(name: AppRoutes.paymentScreen, page: () => const PaymentScreen()),
+    // Admin Orders
     GetPage(
-      name: AppRoutes.ordersManagement,
-      page: () => const OrdersManagementScreen(),
+      name: AppRoutes.adminordersscreen,
+      page: () => const AdminOrdersScreen(),
     ),
 
     // Admin Reports

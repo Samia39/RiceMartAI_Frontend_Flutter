@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -287,10 +285,37 @@ ThemeData get appTheme {
     ),
 
     // ── Input decoration ──────────────────────────────────────
+    //
+    // ── Input decoration ──────────────────────────────────────
     inputDecorationTheme: InputDecorationTheme(
-      border: InputBorder.none,
+      filled: true,
+      fillColor: AppColors.cream.withOpacity(0.25),
+
       hintStyle: AppTextStyles.hint,
+
+      labelStyle: TextStyle(color: AppColors.darkGreen.withOpacity(0.8)),
+
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: AppColors.borderGold.withOpacity(0.6)),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.darkGreen, width: 2),
+      ),
+
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.error),
+      ),
+
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.error, width: 2),
+      ),
     ),
 
     // ── Elevated button ───────────────────────────────────────

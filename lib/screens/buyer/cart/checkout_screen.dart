@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,10 +21,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // CONTROLLERS
   // =========================
   final nameController = TextEditingController();
-
   final phoneController = TextEditingController();
-
   final addressController = TextEditingController();
+  final transactionIdController = TextEditingController();
 
   // =========================
   // PAYMENT METHOD
@@ -32,9 +31,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String paymentMethod = "easypaisa";
 
   // =========================
-  // PAYMENT IMAGE
+  // IMAGE (WEB)
   // =========================
-  File? paymentImage;
+  Uint8List? paymentImageBytes;
+  String? paymentFileName;
+
+  // =========================
+  // CART
+  // =========================
+  List cart = [];
 
   // =========================
   // TOTAL
@@ -42,31 +47,58 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double total = 0;
 
   // =========================
-  // CART
+  // LOADING
   // =========================
-  List cart = [];
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
 
     cart = CartService().getCart();
-
     total = CartService().totalPrice();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    transactionIdController.dispose();
+    super.dispose();
   }
 
   // =========================
   // PICK IMAGE
   // =========================
   Future<void> pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
+    try {
+      final picker = ImagePicker();
 
-    if (pickedFile != null) {
-      setState(() {
-        paymentImage = File(pickedFile.path);
-      });
+      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+
+      if (file != null) {
+        paymentImageBytes = await file.readAsBytes();
+        if (paymentImageBytes!.lengthInBytes > 2 * 1024 * 1024) {
+          paymentImageBytes = null;
+
+          Get.snackbar(
+            "Error",
+            "Image size must be less than 2 MB",
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+        paymentFileName = file.name;
+
+        setState(() {});
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Unable to select image",
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -74,58 +106,128 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // PLACE ORDER
   // =========================
   Future<void> placeOrder() async {
-    // SIMPLE VALIDATION
-    if (nameController.text.isEmpty ||
-        phoneController.text.isEmpty ||
-        addressController.text.isEmpty) {
-      Get.snackbar("Error", "Please fill all fields");
-
-      return;
-    }
-
-    // CHECK SCREENSHOT
-    if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
-        paymentImage == null) {
-      Get.snackbar("Error", "Please upload payment screenshot");
-
+    // =========================
+    // BASIC VALIDATION
+    // =========================
+    if (nameController.text.trim().isEmpty ||
+        phoneController.text.trim().isEmpty ||
+        addressController.text.trim().isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Please fill all required fields",
+        snackPosition: SnackPosition.TOP,
+      );
       return;
     }
 
     // =========================
-    // CONVERT CART
+    // TRANSACTION ID REQUIRED
+    // =========================
+    if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
+        transactionIdController.text.trim().isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Please enter transaction ID",
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    // =========================
+    // SCREENSHOT REQUIRED
+    // =========================
+    if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
+        paymentImageBytes == null) {
+      Get.snackbar(
+        "Error",
+        "Please upload payment screenshot",
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    // =========================
+    // EMPTY CART CHECK
+    // =========================
+    if (cart.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Your cart is empty",
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text("Confirm Order"),
+        content: Text(
+          "Are you sure you want to place this order for Rs ${total.toStringAsFixed(0)}?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text("Confirm"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    // =========================
+    // CONVERT CART FOR API
     // =========================
     List items = cart.map((item) {
       return {"product_id": item["id"], "quantity": item["quantity"]};
     }).toList();
 
-    // =========================
-    // API CALL
-    // =========================
-    final result = await OrderService().checkout(
-      customerName: nameController.text,
+    setState(() {
+      isLoading = true;
+    });
 
-      phone: phoneController.text,
+    try {
+      final result = await OrderService().checkout(
+        customerName: nameController.text.trim(),
+        phone: phoneController.text.trim(),
+        address: addressController.text.trim(),
+        paymentMethod: paymentMethod,
+        transactionId: transactionIdController.text.trim(),
+        imageBytes: paymentImageBytes,
+        fileName: paymentFileName,
+        cart: items,
+      );
 
-      address: addressController.text,
+      setState(() {
+        isLoading = false;
+      });
 
-      paymentMethod: paymentMethod,
+      if (result["success"] == true) {
+        CartService().clearCart();
 
-      paymentProof: paymentImage,
+        Get.snackbar(
+          "Success",
+          result["message"] ?? "Order placed successfully",
+          snackPosition: SnackPosition.TOP,
+        );
 
-      cart: items,
-    );
+        Get.offAllNamed(AppRoutes.myOrders);
+      } else {
+        Get.snackbar(
+          "Error",
+          result["message"] ?? "Checkout failed",
+          snackPosition: SnackPosition.TOP,
+        );
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
 
-    // =========================
-    // SUCCESS
-    // =========================
-    if (result["success"] == true) {
-      CartService().clearCart();
-
-      Get.snackbar("Success", "Order placed successfully");
-
-      Get.offAllNamed(AppRoutes.dashboard);
-    } else {
-      Get.snackbar("Error", result["message"] ?? "Checkout failed");
+      Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -133,38 +235,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.gradientBackground,
-
       child: Scaffold(
         backgroundColor: Colors.transparent,
-
         appBar: AppBar(title: const Text("Checkout")),
-
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
               // =========================
               // NAME
               // =========================
               TextField(
                 controller: nameController,
-
-                style: const TextStyle(color: Colors.black),
-
-                decoration: InputDecoration(
-                  labelText: "Full Name",
-
-                  filled: true,
-                  fillColor: Colors.white,
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                decoration: const InputDecoration(labelText: "Customer Name"),
               ),
+
               const SizedBox(height: 16),
 
               // =========================
@@ -172,19 +257,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               // =========================
               TextField(
                 controller: phoneController,
-
-                style: const TextStyle(color: Colors.black),
-
-                decoration: InputDecoration(
-                  labelText: "Phone Number",
-
-                  filled: true,
-                  fillColor: Colors.white,
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: "Phone Number"),
               ),
 
               const SizedBox(height: 16),
@@ -194,85 +268,124 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               // =========================
               TextField(
                 controller: addressController,
-
                 maxLines: 3,
+                decoration: const InputDecoration(labelText: "Address"),
+              ),
 
-                style: const TextStyle(color: Colors.black),
+              const SizedBox(height: 24),
 
-                decoration: InputDecoration(
-                  labelText: "Address",
+              // =========================
+              // ORDER SUMMARY
+              // =========================
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: AppDecorations.card,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Order Summary", style: AppTextStyles.heading3),
 
-                  filled: true,
-                  fillColor: Colors.white,
+                    const SizedBox(height: 15),
 
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                    ...cart.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item["name"] ?? "",
+                                    style: AppTextStyles.heading4,
+                                  ),
+
+                                  Text(
+                                    "Shop: ${item["shop"]?["shop_name"] ?? "-"}",
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            Text("x${item["quantity"]}"),
+
+                            const SizedBox(width: 15),
+
+                            Text("Rs ${item["price"]}"),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+
+                    const Divider(),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Total", style: AppTextStyles.heading3),
+                        Text(
+                          "Rs ${total.toStringAsFixed(0)}",
+                          style: AppTextStyles.heading3,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
 
-              // =========================
-              // PAYMENT METHOD
-              // =========================
-              Text("Select Payment Method", style: AppTextStyles.heading4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Payment Method", style: AppTextStyles.heading4),
+              ),
 
               const SizedBox(height: 10),
 
               RadioListTile(
                 value: "easypaisa",
-
                 groupValue: paymentMethod,
-
+                title: const Text("EasyPaisa"),
                 onChanged: (value) {
                   setState(() {
                     paymentMethod = value!;
                   });
                 },
-
-                title: const Text("EasyPaisa"),
               ),
 
               RadioListTile(
                 value: "jazzcash",
-
                 groupValue: paymentMethod,
-
+                title: const Text("JazzCash"),
                 onChanged: (value) {
                   setState(() {
                     paymentMethod = value!;
                   });
                 },
-
-                title: const Text("JazzCash"),
               ),
 
               RadioListTile(
                 value: "card",
-
                 groupValue: paymentMethod,
-
+                title: const Text("Card"),
                 onChanged: (value) {
                   setState(() {
                     paymentMethod = value!;
                   });
                 },
-
-                title: const Text("Card"),
               ),
 
               const SizedBox(height: 20),
 
-              // =========================
-              // EASYPAISA/JAZZCASH
-              // =========================
               if (paymentMethod == "easypaisa" || paymentMethod == "jazzcash")
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
-                    Text("Send payment to:", style: AppTextStyles.bodyLarge),
+                    const Text(
+                      "Send Payment To:",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
 
                     const SizedBox(height: 8),
 
@@ -280,32 +393,59 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                     const SizedBox(height: 20),
 
-                    ElevatedButton(
-                      onPressed: pickImage,
-
-                      child: Text(
-                        paymentImage == null
-                            ? "Upload Screenshot"
-                            : "Screenshot Selected",
+                    TextField(
+                      controller: transactionIdController,
+                      decoration: const InputDecoration(
+                        labelText: "Transaction ID",
                       ),
                     ),
+
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: pickImage,
+                        child: Text(
+                          paymentFileName == null
+                              ? "Upload Screenshot"
+                              : paymentFileName!,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    if (paymentImageBytes != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.memory(
+                          paymentImageBytes!,
+                          height: 180,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                   ],
                 ),
 
-              // =========================
-              // CARD FIELDS
-              // ========================
+              if (paymentMethod == "card")
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: AppDecorations.card,
+                  child: const Text(
+                    "Card payment gateway will be integrated in future versions. "
+                    "For project demonstration, card payment is shown as a UI option.",
+                  ),
+                ),
+
               const SizedBox(height: 30),
 
-              // =========================
-              // TOTAL
-              // =========================
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                 children: [
                   Text("Total", style: AppTextStyles.heading3),
-
                   Text(
                     "Rs ${total.toStringAsFixed(0)}",
                     style: AppTextStyles.heading3,
@@ -315,17 +455,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
               const SizedBox(height: 30),
 
-              // =========================
-              // PLACE ORDER BUTTON
-              // =========================
               SizedBox(
                 width: double.infinity,
-                height: 50,
-
+                height: 55,
                 child: ElevatedButton(
-                  onPressed: placeOrder,
-
-                  child: const Text("Place Order"),
+                  onPressed: isLoading ? null : placeOrder,
+                  child: isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text("Place Order"),
                 ),
               ),
             ],

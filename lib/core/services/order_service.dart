@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,69 +14,56 @@ class OrderService {
     required String phone,
     required String address,
     required String paymentMethod,
+    required String transactionId,
     required List cart,
-    // File? paymentProof,
-    dynamic paymentProof, // Change to dynamic to avoid import issues
+    List<int>? imageBytes,
+    String? fileName,
   }) async {
     try {
       final token = box.read("token");
 
-      // =========================
-      // MULTIPART REQUEST
-      // =========================
       var request = http.MultipartRequest(
         'POST',
         Uri.parse("$baseUrl/checkout"),
       );
 
-      // =========================
-      // HEADERS
-      // =========================
-      request.headers['Authorization'] = 'Bearer $token';
+      request.headers.addAll({
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      });
 
-      request.headers['Accept'] = 'application/json';
-
-      // =========================
-      // FIELDS
-      // =========================
       request.fields['customer_name'] = customerName;
-
       request.fields['phone'] = phone;
-
       request.fields['address'] = address;
-
-      request.fields['payment_method'] = paymentMethod;
-
       request.fields['city'] = '';
+      request.fields['payment_method'] = paymentMethod;
+      request.fields['transaction_id'] = transactionId;
 
-      // =========================
-      // CART
-      // =========================
       for (int i = 0; i < cart.length; i++) {
         request.fields['cart[$i][product_id]'] = cart[i]['product_id']
             .toString();
+
         request.fields['cart[$i][quantity]'] = cart[i]['quantity'].toString();
       }
 
-      // =========================
-      // PAYMENT SCREENSHOT
-      // =========================
-      if (!kIsWeb && paymentProof != null) {
+      if (imageBytes != null) {
         request.files.add(
-          await http.MultipartFile.fromPath('payment_proof', paymentProof.path),
+          http.MultipartFile.fromBytes(
+            'payment_proof',
+            imageBytes,
+            filename: fileName ?? "payment.jpg",
+          ),
         );
       }
 
-      // =========================
-      // SEND REQUEST
-      // =========================
       final response = await request.send();
 
-      final responseData = await response.stream.bytesToString();
+      final responseBody = await response.stream.bytesToString();
 
-      final data = jsonDecode(responseData);
+      print(response.statusCode);
+      print(responseBody);
 
-      return data;
+      return jsonDecode(responseBody);
     } catch (e) {
       return {"success": false, "message": e.toString()};
     }
@@ -275,21 +261,45 @@ class OrderService {
   // UPDATE PAYMENT STATUS
   // =========================
   Future<Map<String, dynamic>> updatePaymentStatus({
-    required int orderId,
+    required int paymentId,
     required String paymentStatus,
+    String? rejectionReason,
   }) async {
     final token = box.read("token");
 
     final response = await http.put(
-      Uri.parse("$baseUrl/admin/orders/$orderId/payment-status"),
-
+      Uri.parse("$baseUrl/admin/payments/$paymentId/status"),
       headers: {
         "Authorization": "Bearer $token",
         "Accept": "application/json",
         "Content-Type": "application/json",
       },
+      body: jsonEncode({
+        "payment_status": paymentStatus,
+        if (rejectionReason != null) "rejection_reason": rejectionReason,
+      }),
+    );
 
-      body: jsonEncode({"payment_status": paymentStatus}),
+    return jsonDecode(response.body);
+  }
+  // =========================
+  // ADMIN UPDATE ORDER STATUS
+  // =========================
+
+  Future<Map<String, dynamic>> updateOrderStatus({
+    required int orderId,
+    required String status,
+  }) async {
+    final token = box.read("token");
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/admin/orders/$orderId/status"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"status": status}),
     );
 
     return jsonDecode(response.body);

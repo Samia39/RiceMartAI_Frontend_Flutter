@@ -80,7 +80,7 @@ class AdminDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
 
-              Get.toNamed(AppRoutes.ordersManagement);
+              Get.toNamed(AppRoutes.adminordersscreen);
             },
           ),
 
@@ -153,6 +153,17 @@ class AdminDrawer extends StatelessWidget {
                 },
               ),
             ],
+          ),
+
+          drawerItem(
+            icon: Icons.pending_actions,
+            title: "Payment Approvals",
+
+            onTap: () {
+              Navigator.pop(context);
+
+              Get.toNamed(AppRoutes.paymentScreen);
+            },
           ),
           // REPORTS
           drawerItem(icon: Icons.report, title: "Reports", onTap: () {}),
