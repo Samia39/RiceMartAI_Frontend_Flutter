@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/seller/order/seller_order_details_screen.dart';
+import 'package:get/get.dart';
 
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
@@ -12,347 +14,131 @@ class SellerOrdersScreen extends StatefulWidget {
 
 class _SellerOrdersScreenState extends State<SellerOrdersScreen>
     with SingleTickerProviderStateMixin {
-  List orders = [];
+  final OrderService service = OrderService();
 
-  List activeOrders = [];
-
-  List historyOrders = [];
+  List items = [];
+  List activeItems = [];
+  List historyItems = [];
 
   bool isLoading = true;
-
   late TabController tabController;
 
   @override
   void initState() {
     super.initState();
-
     tabController = TabController(length: 2, vsync: this);
-
-    fetchSellerOrders();
+    fetchOrders();
   }
 
   @override
   void dispose() {
     tabController.dispose();
-
     super.dispose();
   }
 
-  Future<void> fetchSellerOrders() async {
+  Future<void> fetchOrders() async {
+    setState(() => isLoading = true);
+
     try {
-      final data = await OrderService().fetchSellerOrders();
+      final data = await service.fetchSellerOrders();
 
-      final active = data.where((item) {
-        return item["status"] != "delivered" && item["status"] != "cancelled";
-      }).toList();
+      final active = data
+          .where(
+            (i) => i["status"] != "delivered" && i["status"] != "cancelled",
+          )
+          .toList();
 
-      final history = data.where((item) {
-        return item["status"] == "delivered" || item["status"] == "cancelled";
-      }).toList();
+      final history = data
+          .where(
+            (i) => i["status"] == "delivered" || i["status"] == "cancelled",
+          )
+          .toList();
 
       setState(() {
-        orders = data;
-
-        activeOrders = active;
-
-        historyOrders = history;
-
+        items = data;
+        activeItems = active;
+        historyItems = history;
         isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      setState(() => isLoading = false);
+      Get.snackbar("Error", e.toString());
     }
   }
 
-  Future<void> updateItemStatus({
-    required int itemId,
-    required String status,
-  }) async {
-    try {
-      final data = await OrderService().updateItemStatus(
-        itemId: itemId,
-        status: status,
-      );
+  Future<void> updateStatus(int itemId, String status) async {
+    final res = await service.updateItemStatus(itemId: itemId, status: status);
 
-      await fetchSellerOrders();
+    Get.snackbar(
+      res["success"] == true ? "Success" : "Error",
+      res["message"] ?? "",
+    );
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(data["message"])));
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    }
+    fetchOrders();
   }
 
-  Color statusColor(String status) {
-    switch (status) {
-      case "pending":
-        return Colors.orange;
-
-      case "processing":
-        return Colors.blue;
-
-      case "shipped":
-        return Colors.purple;
-
-      case "delivered":
-        return Colors.green;
-
-      case "cancelled":
-        return Colors.red;
-
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Widget orderCard(dynamic item) {
+  Widget buildItemCard(dynamic item) {
     final product = item["product"];
-
     final order = item["order"];
 
-    final status = (item["status"] ?? "").toString();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-
-      padding: const EdgeInsets.all(16),
-
-      decoration: AppDecorations.card,
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Text(product["name"] ?? "", style: AppTextStyles.heading4),
-
-          const SizedBox(height: 12),
-
-          Text("Order ID: ${order["id"]}", style: AppTextStyles.bodyLarge),
-
-          const SizedBox(height: 8),
-
-          Text(
-            "Customer: ${order["customer_name"] ?? "Unknown"}",
-
-            style: AppTextStyles.bodyLarge,
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            "Phone: ${order["phone"] ?? ""}",
-
-            style: AppTextStyles.bodyLarge,
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            "Address: ${order["address"] ?? ""}",
-
-            style: AppTextStyles.bodyLarge,
-          ),
-
-          const SizedBox(height: 8),
-
-          Text("Quantity: ${item["quantity"]}", style: AppTextStyles.bodyLarge),
-
-          const SizedBox(height: 8),
-
-          Text("Price: Rs ${item["price"]}", style: AppTextStyles.bodyLarge),
-
-          const SizedBox(height: 14),
-
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-
-            decoration: BoxDecoration(
-              color: statusColor(status),
-
-              borderRadius: BorderRadius.circular(20),
-            ),
-
-            child: Text(
-              status.toUpperCase(),
-
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Text(
-            "Payment Method: ${order["payment_method"]}",
-
-            style: AppTextStyles.bodyLarge,
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            "Payment Status: ${order["payment_status"]}",
-
-            style: AppTextStyles.bodyLarge,
-          ),
-
-          const SizedBox(height: 18),
-
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-
-            children: [
-              if (status == "pending") ...[
-                ElevatedButton(
-                  onPressed: () => updateItemStatus(
-                    itemId: item["id"],
-                    status: "processing",
-                  ),
-
-                  child: const Text("Processing"),
-                ),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-
-                  onPressed: () =>
-                      updateItemStatus(itemId: item["id"], status: "cancelled"),
-
-                  child: const Text("Cancel"),
-                ),
-              ],
-
-              if (status == "processing") ...[
-                ElevatedButton(
-                  onPressed: () =>
-                      updateItemStatus(itemId: item["id"], status: "shipped"),
-
-                  child: const Text("Shipped"),
-                ),
-
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-
-                  onPressed: () =>
-                      updateItemStatus(itemId: item["id"], status: "cancelled"),
-
-                  child: const Text("Cancel"),
-                ),
-              ],
-
-              if (status == "shipped") ...[
-                ElevatedButton(
-                  onPressed: () =>
-                      updateItemStatus(itemId: item["id"], status: "delivered"),
-
-                  child: const Text("Delivered"),
-                ),
-              ],
-
-              if (status == "delivered")
-                const Text(
-                  "Order Delivered",
-
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-              if (status == "cancelled")
-                const Text(
-                  "Order Cancelled",
-
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-            ],
-          ),
-        ],
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => SellerOrderDetailScreen(item: item));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: AppDecorations.card,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(product["name"]),
+            Text("Order #: ${order["order_number"]}"),
+            Text("Status: ${item["status"]}"),
+          ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: AppDecorations.gradientBackground,
-
-      child: Column(
-        children: [
-          Container(
-            color: AppColors.darkGreen,
-
-            child: SafeArea(
-              bottom: false,
-
-              child: TabBar(
-                controller: tabController,
-
-                labelColor: Colors.white,
-
-                unselectedLabelColor: Colors.white70,
-
-                indicatorColor: Colors.white,
-
-                tabs: const [
-                  Tab(text: "Active Orders"),
-
-                  Tab(text: "History"),
-                ],
-              ),
-            ),
+    return Column(
+      children: [
+        Container(
+          color: Colors.green,
+          child: TabBar(
+            controller: tabController,
+            tabs: const [
+              Tab(text: "Active"),
+              Tab(text: "History"),
+            ],
           ),
+        ),
 
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : TabBarView(
-                    controller: tabController,
+        Expanded(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : TabBarView(
+                  controller: tabController,
+                  children: [
+                    ListView(
+                      padding: const EdgeInsets.all(12),
+                      children: activeItems
+                          .map((e) => buildItemCard(e))
+                          .toList(),
+                    ),
 
-                    children: [
-                      activeOrders.isEmpty
-                          ? const Center(child: Text("No active orders"))
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-
-                              itemCount: activeOrders.length,
-
-                              itemBuilder: (context, index) {
-                                return orderCard(activeOrders[index]);
-                              },
-                            ),
-
-                      historyOrders.isEmpty
-                          ? const Center(child: Text("No history orders"))
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-
-                              itemCount: historyOrders.length,
-
-                              itemBuilder: (context, index) {
-                                return orderCard(historyOrders[index]);
-                              },
-                            ),
-                    ],
-                  ),
-          ),
-        ],
-      ),
+                    ListView(
+                      padding: const EdgeInsets.all(12),
+                      children: historyItems
+                          .map((e) => buildItemCard(e))
+                          .toList(),
+                    ),
+                  ],
+                ),
+        ),
+      ],
     );
   }
 }
