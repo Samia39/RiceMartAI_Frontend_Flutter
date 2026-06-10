@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../core/services/order_service.dart';
+import '../../../core/services/payment_service.dart';
 import '../../../core/utils/themes.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -12,10 +12,11 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
+  final PaymentService paymentService = PaymentService();
+
   List payments = [];
   bool isLoading = true;
 
-  // Change this according to your environment
   static const String imageBaseUrl = "http://localhost:8000";
 
   @override
@@ -30,7 +31,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
 
     try {
-      final data = await OrderService().getAdminPayments();
+      final data = await paymentService.getAdminPayments();
 
       if (mounted) {
         setState(() {
@@ -51,7 +52,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     String status, {
     String? rejectionReason,
   }) async {
-    final result = await OrderService().updatePaymentStatus(
+    final result = await paymentService.updatePaymentStatus(
       paymentId: paymentId,
       paymentStatus: status,
       rejectionReason: rejectionReason,

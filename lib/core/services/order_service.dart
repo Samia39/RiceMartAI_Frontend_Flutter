@@ -213,6 +213,27 @@ class OrderService {
   }
 
   // =========================
+  // ADMIN ORDER HISTORY
+  // =========================
+
+  Future<List> getAdminOrderHistory() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/admin/order-history"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      return data["orders"];
+    }
+
+    return [];
+  }
+
+  // =========================
   // ADMIN UPDATE ITEM STATUS
   // =========================
   Future<Map<String, dynamic>> adminUpdateItemStatus({
@@ -230,75 +251,6 @@ class OrderService {
         "Content-Type": "application/json",
       },
 
-      body: jsonEncode({"status": status}),
-    );
-
-    return jsonDecode(response.body);
-  }
-
-  // =========================
-  // ADMIN PAYMENTS
-  // =========================
-  Future<List> getAdminPayments() async {
-    final token = box.read("token");
-
-    final response = await http.get(
-      Uri.parse("$baseUrl/admin/payments"),
-
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
-    );
-
-    final data = jsonDecode(response.body);
-
-    if (data["success"] == true) {
-      return data["payments"];
-    }
-
-    return [];
-  }
-
-  // =========================
-  // UPDATE PAYMENT STATUS
-  // =========================
-  Future<Map<String, dynamic>> updatePaymentStatus({
-    required int paymentId,
-    required String paymentStatus,
-    String? rejectionReason,
-  }) async {
-    final token = box.read("token");
-
-    final response = await http.put(
-      Uri.parse("$baseUrl/admin/payments/$paymentId/status"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "payment_status": paymentStatus,
-        if (rejectionReason != null) "rejection_reason": rejectionReason,
-      }),
-    );
-
-    return jsonDecode(response.body);
-  }
-  // =========================
-  // ADMIN UPDATE ORDER STATUS
-  // =========================
-
-  Future<Map<String, dynamic>> updateOrderStatus({
-    required int orderId,
-    required String status,
-  }) async {
-    final token = box.read("token");
-
-    final response = await http.put(
-      Uri.parse("$baseUrl/admin/orders/$orderId/status"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
       body: jsonEncode({"status": status}),
     );
 
