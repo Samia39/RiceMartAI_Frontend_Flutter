@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/themes.dart';
+import '../review/shop_review_dialog.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final dynamic order;
@@ -197,6 +198,26 @@ class OrderDetailsScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
+
+                            // Show review button only if item is delivered
+                            const SizedBox(height: 12),
+
+                            if (status == "delivered")
+                              ElevatedButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+
+                                    builder: (context) {
+                                      return ShopReviewDialog(
+                                        orderItemId: item["id"],
+                                      );
+                                    },
+                                  );
+                                },
+
+                                child: const Text("Rate Shop"),
+                              ),
                           ],
                         ),
                       );
