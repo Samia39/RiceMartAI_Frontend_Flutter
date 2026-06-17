@@ -7,8 +7,8 @@ import '../middleware/role_middleware.dart';
 import '../screens/access_denied_screen.dart';
 import '../screens/admin_screens/analytics/analytics_screen.dart';
 import '../screens/admin_screens/notifications/admin_notifications_screen.dart';
-import '../screens/admin_screens/orders/orders_management_screen.dart';
-import '../screens/admin_screens/payments/payments_screen.dart';
+import '../screens/admin_screens/orders/admin_orders_screen.dart';
+import '../screens/admin_screens/payments/payment_screen.dart';
 import '../screens/admin_screens/reports/reports_screen.dart';
 import '../screens/admin_screens/search/admin_search_results_screen.dart';
 import '../screens/admin_screens/settings/admin_settings_screen.dart';
@@ -18,6 +18,7 @@ import '../screens/admin_screens/shops/shop_approvals_screen.dart';
 import '../screens/admin_screens/user_management/assign_permissions_screen.dart';
 import '../screens/admin_screens/user_management/roles_screen.dart';
 import '../screens/admin_screens/user_management/users_screen.dart';
+import '../screens/buyer/cart/checkout_screen.dart';
 import '../screens/buyer/orders/my_orders_screen.dart';
 import '../screens/buyer/orders/order_details_screen.dart';
 import '../screens/buyer/shops/shop_details_screen.dart';
@@ -68,6 +69,9 @@ class AppPages {
       name: AppRoutes.cart,
       page: () => CartScreen(onCartUpdated: () {}),
     ),
+
+    // Checkout Screen
+    GetPage(name: AppRoutes.checkout, page: () => const CheckoutScreen()),
 
     // Rice Details Screen
     GetPage(name: AppRoutes.riceDetails, page: () => const RiceDetailScreen()),
@@ -145,15 +149,13 @@ class AppPages {
       page: () => const ApprovedShopsScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('view shops')],
     ),
-    // Admin Orders Management
-    GetPage(
-      name: AppRoutes.ordersManagement,
-      page: () => const OrdersManagementScreen(),
-      middlewares: [AuthMiddleware(), PermissionMiddleware('manage orders')],
-    ),
-
     // Admin Payments
-    GetPage(name: AppRoutes.payments, page: () => const PaymentsScreen()),
+    GetPage(name: AppRoutes.paymentScreen, page: () => const PaymentScreen()),
+    // Admin Orders
+    GetPage(
+      name: AppRoutes.adminordersscreen,
+      page: () => const AdminOrdersScreen(),
+    ),
 
     // Admin Reports
     GetPage(

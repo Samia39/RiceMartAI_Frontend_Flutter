@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/cart_service.dart';
 import '../../../core/utils/themes.dart';
-
-import '../../../core/services/order_service.dart';
 import 'package:get/get.dart';
+
+import '../../../routes/app_routes.dart';
 
 class CartScreen extends StatefulWidget {
   // =========================
@@ -198,30 +198,8 @@ class _CartScreenState extends State<CartScreen> {
                           height: 50,
 
                           child: ElevatedButton(
-                            onPressed: () async {
-                              final result = await OrderService().checkout();
-
-                              if (result["success"] == true) {
-                                // CLEAR CART AFTER SUCCESS
-                                CartService().clearCart();
-
-                                setState(() {
-                                  cart = [];
-                                  total = 0;
-                                });
-
-                                widget.onCartUpdated?.call();
-
-                                Get.snackbar(
-                                  "Success",
-                                  "Order placed successfully",
-                                );
-                              } else {
-                                Get.snackbar(
-                                  "Error",
-                                  result["message"] ?? "Checkout failed",
-                                );
-                              }
+                            onPressed: () {
+                              Get.toNamed(AppRoutes.checkout);
                             },
                             child: const Text("Checkout"),
                           ),

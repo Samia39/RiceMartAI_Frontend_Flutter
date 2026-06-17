@@ -252,37 +252,6 @@ class AdminDashboard extends StatelessWidget {
               const SizedBox(height: 20),
 
               // =========================
-              // ORDERS
-              // =========================
-              if (PermissionService.hasPermission('manage orders'))
-                adminCard(
-                  title: "Orders",
-                  subtitle: "Manage customer orders",
-                  icon: Icons.shopping_cart,
-
-                  onTap: () {
-                    Get.toNamed(AppRoutes.ordersManagement);
-                  },
-                ),
-
-              const SizedBox(height: 20),
-
-              // =========================
-              // PAYMENTS
-              // =========================
-              adminCard(
-                title: "Payments",
-                subtitle: "Commission and payouts",
-                icon: Icons.payments,
-
-                onTap: () {
-                  Get.toNamed(AppRoutes.payments);
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // =========================
               // REPORTS
               // =========================
               if (PermissionService.hasPermission('manage reports'))

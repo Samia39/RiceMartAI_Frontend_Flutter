@@ -12,6 +12,7 @@ class AppRoutes {
   // =========================
   static const dashboard = "/dashboard";
   static const cart = "/cart";
+  static const checkout = "/checkout";
   static const riceDetails = "/rice-details";
   static const shopDetails = "/shop-details";
   static const myOrders = "/my-orders";
@@ -34,8 +35,9 @@ class AppRoutes {
   static const analytics = "/analytics";
   static const sellerApprovals = "/seller-approvals";
   static const approvedShops = "/approved-shops";
-  static const ordersManagement = "/orders-management";
-  static const payments = "/payments";
+  static const paymentScreen = "/payment-screen";
+  static const adminordersscreen = "/admin-orders";
+
   static const reports = "/reports";
   static const adminSettings = "/admin-settings";
   static const adminNotifications = "/admin-notifications";

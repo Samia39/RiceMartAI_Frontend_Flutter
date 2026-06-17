@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
-import 'cart_service.dart';
-
 class OrderService {
   final box = GetStorage();
   final String baseUrl = "http://127.0.0.1:8000/api";
@@ -11,35 +9,64 @@ class OrderService {
   // =========================
   // CHECKOUT API CALL
   // =========================
-  Future<Map<String, dynamic>> checkout() async {
-    final token = box.read("token");
+  Future<Map<String, dynamic>> checkout({
+    required String customerName,
+    required String phone,
+    required String address,
+    required String paymentMethod,
+    required String transactionId,
+    required List cart,
+    List<int>? imageBytes,
+    String? fileName,
+  }) async {
+    try {
+      final token = box.read("token");
 
-    // GET CART
-    final cart = CartService().getCart();
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$baseUrl/checkout"),
+      );
 
-    if (cart.isEmpty) {
-      return {"success": false, "message": "Cart is empty"};
-    }
-
-    // FORMAT CART FOR BACKEND
-    final formattedCart = cart.map((item) {
-      return {"id": item["id"], "quantity": item["quantity"]};
-    }).toList();
-
-    // API REQUEST
-    final response = await http.post(
-      Uri.parse("$baseUrl/checkout"),
-      headers: {
+      request.headers.addAll({
         "Authorization": "Bearer $token",
         "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({"cart": formattedCart}),
-    );
+      });
 
-    final data = jsonDecode(response.body);
+      request.fields['customer_name'] = customerName;
+      request.fields['phone'] = phone;
+      request.fields['address'] = address;
+      request.fields['city'] = '';
+      request.fields['payment_method'] = paymentMethod;
+      request.fields['transaction_id'] = transactionId;
 
-    return data;
+      for (int i = 0; i < cart.length; i++) {
+        request.fields['cart[$i][product_id]'] = cart[i]['product_id']
+            .toString();
+
+        request.fields['cart[$i][quantity]'] = cart[i]['quantity'].toString();
+      }
+
+      if (imageBytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'payment_proof',
+            imageBytes,
+            filename: fileName ?? "payment.jpg",
+          ),
+        );
+      }
+
+      final response = await request.send();
+
+      final responseBody = await response.stream.bytesToString();
+
+      print(response.statusCode);
+      print(responseBody);
+
+      return jsonDecode(responseBody);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 
   // =========================
@@ -173,6 +200,27 @@ class OrderService {
 
     final response = await http.get(
       Uri.parse("$baseUrl/admin/orders"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      return data["orders"];
+    }
+
+    return [];
+  }
+
+  // =========================
+  // ADMIN ORDER HISTORY
+  // =========================
+
+  Future<List> getAdminOrderHistory() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/admin/order-history"),
       headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
     );
 
