@@ -7,6 +7,11 @@ class Shop {
   final String? logo;
   final String? address;
   final String status;
+  final String? ownerName;
+  final String? phone;
+  final String? cnicNumber;
+  final String? cnicImage;
+  final String? sellerName;
   final List<Product> products;
 
   Shop({
@@ -17,6 +22,11 @@ class Shop {
     this.logo,
     this.address,
     required this.status,
+    this.ownerName,
+    this.phone,
+    this.cnicNumber,
+    this.cnicImage,
+    this.sellerName,
     this.products = const [],
   });
 
@@ -29,6 +39,11 @@ class Shop {
       logo: json['logo'],
       address: json['address'],
       status: json['status'] ?? 'pending',
+      ownerName: json['owner_name'],
+      phone: json['phone'],
+      cnicNumber: json['cnic_number'],
+      cnicImage: json['cnic_image'],
+      sellerName: json['seller'] != null ? json['seller']['name'] : null,
       products: json['products'] != null
           ? (json['products'] as List)
               .map((e) => Product.fromJson(e))

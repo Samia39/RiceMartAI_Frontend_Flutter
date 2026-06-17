@@ -8,6 +8,9 @@ import '../screens/seller_dashboard.dart';
 
 import '../screens/user/shops_screen.dart';
 import '../screens/user/shop_detail_screen.dart';
+import '../screens/admin/admin_shops_screen.dart';
+import '../screens/admin/admin_shop_detail_screen.dart';
+
 
 
 class AppRoutes {
@@ -35,6 +38,9 @@ class AppRoutes {
     
     GetPage(name: shops,           page: () => const ShopsScreen()),
     GetPage(name: shopDetail,      page: () => const ShopDetailScreen()),
+    // pages list mein add karo:
+   GetPage(name: '/admin-shops',       page: () => const AdminShopsScreen()),
+   GetPage(name: '/admin-shop-detail', page: () => const AdminShopDetailScreen()), 
     
   ];
 }
