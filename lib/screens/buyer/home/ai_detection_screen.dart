@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -23,7 +25,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
   bool isLoading = false;
   String? imageSourceLabel;
 
-  // ── Camera ──
+  // ── Camera (mobile only) ──
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _cameraOpen = false;
@@ -31,21 +33,42 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
   final ImagePicker picker = ImagePicker();
 
+  // ── Desktop check ──
+  // Desktop = Windows / macOS / Linux (not web, not mobile)
+  bool get _isDesktop =>
+      !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
+
+  bool get _isMobile => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
   @override
   void dispose() {
     _cameraController?.dispose();
     super.dispose();
   }
 
-  // ─────────────── OPEN LIVE CAMERA ───────────────
-  Future<void> _openCamera() async {
-    // Web: fall back to image_picker camera (browser handles permission)
-    if (kIsWeb) {
+  // ════════════════════════════════════════
+  //  CAMERA BUTTON PRESSED
+  //  → Desktop/Web: image_picker file dialog
+  //  → Mobile: live camera preview
+  // ════════════════════════════════════════
+  Future<void> handleCameraButton() async {
+    if (_isDesktop || kIsWeb) {
+      // Desktop & Web: image_picker handles it natively
       await _takePhotoImagePicker();
-      return;
+    } else if (_isMobile) {
+      // Mobile: toggle live camera preview
+      if (_cameraOpen) {
+        await _closeCamera();
+      } else {
+        await _openCamera();
+      }
     }
+  }
 
-    // Request permission first
+  // ════════════════════════════════════════
+  //  OPEN LIVE CAMERA (mobile only)
+  // ════════════════════════════════════════
+  Future<void> _openCamera() async {
     final status = await Permission.camera.request();
     if (!status.isGranted) {
       if (!mounted) return;
@@ -101,15 +124,15 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ─────────────── CAPTURE FROM LIVE CAMERA ───────────────
+  // ════════════════════════════════════════
+  //  CAPTURE PHOTO (mobile live preview)
+  // ════════════════════════════════════════
   Future<void> _capturePhoto() async {
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
     }
-
     try {
       final XFile photo = await _cameraController!.takePicture();
-
       await _cameraController!.dispose();
       _cameraController = null;
 
@@ -129,14 +152,20 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ─────────────── CLOSE CAMERA WITHOUT CAPTURING ───────────────
+  // ════════════════════════════════════════
+  //  CLOSE CAMERA (mobile)
+  // ════════════════════════════════════════
   Future<void> _closeCamera() async {
     await _cameraController?.dispose();
     _cameraController = null;
     setState(() => _cameraOpen = false);
   }
 
-  // ─────────────── WEB FALLBACK ───────────────
+  // ════════════════════════════════════════
+  //  IMAGE PICKER CAMERA (desktop + web fallback)
+  //  Desktop pe: system camera app ya file dialog
+  //  Web pe: browser camera popup
+  // ════════════════════════════════════════
   Future<void> _takePhotoImagePicker() async {
     try {
       final XFile? image = await picker.pickImage(
@@ -150,21 +179,23 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
         });
       }
     } catch (e) {
+      // Desktop mein camera nahi hoga toh gallery suggest karo
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
-            "Camera not available in browser. Please use gallery.",
+            "Camera not available. Please use Gallery to select an image.",
           ),
-          backgroundColor: AppColors.error,
+          backgroundColor: AppColors.warning,
         ),
       );
     }
   }
 
-  // ─────────────── GALLERY ───────────────
+  // ════════════════════════════════════════
+  //  GALLERY
+  // ════════════════════════════════════════
   Future<void> pickGalleryImage() async {
-    // Close camera if open
     if (_cameraOpen) await _closeCamera();
 
     try {
@@ -189,7 +220,9 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ─────────────── PERMISSION DIALOG ───────────────
+  // ════════════════════════════════════════
+  //  PERMISSION DIALOG
+  // ════════════════════════════════════════
   void _showPermissionSettingsDialog() {
     showDialog(
       context: context,
@@ -215,7 +248,9 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     );
   }
 
-  // ─────────────── SEND TO SERVER ───────────────
+  // ════════════════════════════════════════
+  //  SEND TO SERVER & NAVIGATE
+  // ════════════════════════════════════════
   Future<void> sendImage() async {
     if (selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -249,7 +284,25 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ─────────────── BUILD IMAGE PREVIEW ───────────────
+  // ════════════════════════════════════════
+  //  CAMERA BUTTON LABEL & ICON
+  //  changes based on platform + state
+  // ════════════════════════════════════════
+  String get _cameraButtonLabel {
+    if (_isDesktop) return "Take Photo"; // desktop: file dialog
+    if (kIsWeb) return "Take Photo"; // web: browser camera
+    if (_cameraOpen) return "Close Camera"; // mobile: toggle
+    return "Open Camera";
+  }
+
+  IconData get _cameraButtonIcon {
+    if (_cameraOpen) return Icons.camera_alt;
+    return Icons.camera_alt_outlined;
+  }
+
+  // ════════════════════════════════════════
+  //  IMAGE PREVIEW WIDGET
+  // ════════════════════════════════════════
   Widget _buildImagePreview() {
     if (selectedImage == null) {
       return Column(
@@ -294,7 +347,9 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     );
   }
 
-  // ─────────────── MAIN BUILD ───────────────
+  // ════════════════════════════════════════
+  //  MAIN BUILD
+  // ════════════════════════════════════════
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -309,16 +364,65 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ── Title ────────────────────────────────
                 Text(
                   "Rice Category Detection",
                   style: AppTextStyles.heading2.copyWith(
                     color: AppColors.cream,
                   ),
                 ),
+                const SizedBox(height: 6),
+                Text(
+                  "Upload or capture a rice image for AI analysis",
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.cream.withOpacity(0.80),
+                  ),
+                ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
 
-                // ─────────── LIVE CAMERA PREVIEW or IMAGE PREVIEW ───────────
+                // ── Platform badge ────────────────────────
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.darkGreen.withOpacity(0.55),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isDesktop
+                              ? Icons.computer
+                              : kIsWeb
+                              ? Icons.web
+                              : Icons.smartphone,
+                          color: AppColors.cream,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _isDesktop
+                              ? "Desktop Mode"
+                              : kIsWeb
+                              ? "Web Mode"
+                              : "Mobile Mode",
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.cream,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // ── Image / Camera Preview ────────────────
                 Stack(
                   children: [
                     Container(
@@ -331,20 +435,25 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                               child: CameraPreview(_cameraController!),
                             )
                           : _cameraInitializing
-                          ? const Center(
+                          ? Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 12),
-                                  Text("Opening camera..."),
+                                  CircularProgressIndicator(
+                                    color: AppColors.darkGreen,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    "Opening camera...",
+                                    style: AppTextStyles.bodyMedium,
+                                  ),
                                 ],
                               ),
                             )
                           : _buildImagePreview(),
                     ),
 
-                    // ── Capture button overlay (shown when camera is open) ──
+                    // ── Shutter overlay (mobile live preview) ──
                     if (_cameraOpen)
                       Positioned(
                         bottom: 12,
@@ -353,7 +462,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Close camera
                             IconButton(
                               onPressed: _closeCamera,
                               icon: const Icon(
@@ -366,24 +474,23 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                               ),
                             ),
                             const SizedBox(width: 24),
-                            // Shutter button
                             GestureDetector(
                               onTap: _capturePhoto,
                               child: Container(
-                                width: 64,
-                                height: 64,
+                                width: 68,
+                                height: 68,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white,
                                   border: Border.all(
-                                    color: Colors.white38,
+                                    color: Colors.white54,
                                     width: 4,
                                   ),
                                 ),
                                 child: const Icon(
                                   Icons.camera_alt,
                                   color: Colors.black87,
-                                  size: 30,
+                                  size: 32,
                                 ),
                               ),
                             ),
@@ -391,7 +498,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                         ),
                       ),
 
-                    // ── Source badge (shown when image is captured) ──
+                    // ── Source badge (after image selected) ──
                     if (imageSourceLabel != null && !_cameraOpen)
                       Positioned(
                         top: 10,
@@ -413,7 +520,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                                     ? Icons.camera_alt
                                     : Icons.photo_library,
                                 color: Colors.white,
-                                size: 14,
+                                size: 13,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -430,46 +537,57 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 20),
 
-                // ─────────── GALLERY BUTTON ───────────
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: isLoading ? null : pickGalleryImage,
-                    icon: const Icon(Icons.photo_library_outlined),
-                    label: const Text("Upload From Gallery"),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ─────────── CAMERA BUTTON ───────────
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: isLoading
-                        ? null
-                        : (_cameraOpen ? _closeCamera : _openCamera),
-                    icon: Icon(
-                      _cameraOpen
-                          ? Icons.camera_alt
-                          : Icons.camera_alt_outlined,
+                // ── Gallery + Camera buttons ────────────────
+                Row(
+                  children: [
+                    // Gallery
+                    Expanded(
+                      child: SizedBox(
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: isLoading ? null : pickGalleryImage,
+                          icon: const Icon(
+                            Icons.photo_library_outlined,
+                            size: 18,
+                          ),
+                          label: const Text("Gallery"),
+                        ),
+                      ),
                     ),
-                    label: Text(_cameraOpen ? "Close Camera" : "Open Camera"),
-                  ),
+
+                    const SizedBox(width: 12),
+
+                    // Camera — label & behavior changes by platform
+                    Expanded(
+                      child: SizedBox(
+                        height: 52,
+                        child: ElevatedButton.icon(
+                          onPressed: isLoading ? null : handleCameraButton,
+                          icon: Icon(_cameraButtonIcon, size: 18),
+                          label: Text(_cameraButtonLabel),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 14),
 
-                // ─────────── ANALYZE BUTTON ───────────
+                // ── Analyze Button ──────────────────────────
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton.icon(
                     onPressed: isLoading ? null : sendImage,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.darkGreen.withOpacity(0.80),
+                      foregroundColor: AppColors.cream,
+                      disabledBackgroundColor: AppColors.darkGreen.withOpacity(
+                        0.35,
+                      ),
+                    ),
                     icon: isLoading
                         ? const SizedBox(
                             width: 20,
@@ -490,15 +608,21 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                   ),
                 ),
 
+                // ── Loading hint ────────────────────────────
                 if (isLoading) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   Center(
                     child: Text(
-                      "Sending to server, please wait...",
-                      style: TextStyle(color: AppColors.cream, fontSize: 13),
+                      "AI is analyzing your rice image...\nThis may take 10–20 seconds",
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.cream.withOpacity(0.80),
+                      ),
                     ),
                   ),
                 ],
+
+                const SizedBox(height: 20),
               ],
             ),
           ),

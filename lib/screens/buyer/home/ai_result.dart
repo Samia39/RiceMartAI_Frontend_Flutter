@@ -1,6 +1,6 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
 import '../../../core/utils/themes.dart';
 
 class AIResultScreen extends StatelessWidget {
@@ -34,6 +34,14 @@ class AIResultScreen extends StatelessWidget {
     }
   }
 
+  // ✅ Clean rice type for search
+  // "Basmati Rice" → "Basmati", "Long Grain" → "Long Grain"
+  String _cleanRiceType(String riceType) {
+    return riceType
+        .replaceAll(RegExp(r'\s*[Rr]ice\s*$'), '') // remove trailing "Rice"
+        .trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isRice = result['is_rice'] ?? false;
@@ -45,6 +53,14 @@ class AIResultScreen extends StatelessWidget {
     final List defects = result['defects'] ?? [];
     final String reasoning = result['reasoning'] ?? '';
     final String recommendation = result['recommendation'] ?? '';
+
+    // ✅ Search query for marketplace
+    final String searchQuery = _cleanRiceType(riceType);
+    final bool canSearch =
+        isRice &&
+        riceType.isNotEmpty &&
+        riceType.toLowerCase() != 'unknown' &&
+        riceType.toLowerCase() != 'none';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detection Result')),
@@ -61,7 +77,7 @@ class AIResultScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ═══════════════ HEADER CARD ═══════════════
+                // ══════════════ HEADER CARD ══════════════
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -103,7 +119,7 @@ class AIResultScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // ═══════════════ RICE TYPE + QUALITY ═══════════════
+                // ══════════════ RICE TYPE + QUALITY ══════════════
                 if (isRice) ...[
                   Row(
                     children: [
@@ -166,9 +182,84 @@ class AIResultScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 16),
+
+                  // ✅ ══════════════ SHOP THIS RICE BUTTON ══════════════
+                  if (canSearch)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.golden.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.golden.withOpacity(0.50),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Label
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.storefront_outlined,
+                                size: 16,
+                                color: AppColors.golden,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Shop This Rice',
+                                style: AppTextStyles.label.copyWith(
+                                  color: AppColors.golden,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'We found "$riceType" — browse available listings in the marketplace.',
+                            style: AppTextStyles.bodySmall,
+                          ),
+                          const SizedBox(height: 12),
+
+                          // ✅ The main button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AllRiceScreen(
+                                      // ✅ Pass rice type as filter
+                                      initialSearchQuery: searchQuery,
+                                    ),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.darkGreen
+                                    .withOpacity(0.85),
+                                foregroundColor: AppColors.cream,
+                              ),
+                              icon: const Icon(Icons.shopping_bag_outlined),
+                              label: Text(
+                                'Show $riceType in Marketplace',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  const SizedBox(height: 16),
                 ],
 
-                // ═══════════════ OBSERVATIONS ═══════════════
+                // ══════════════ OBSERVATIONS ══════════════
                 if (observations.isNotEmpty) ...[
                   _sectionCard(
                     title: 'Observations',
@@ -178,7 +269,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // ═══════════════ DEFECTS ═══════════════
+                // ══════════════ DEFECTS ══════════════
                 if (defects.isNotEmpty) ...[
                   _sectionCard(
                     title: 'Defects Found',
@@ -190,7 +281,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // ═══════════════ REASONING ═══════════════
+                // ══════════════ REASONING ══════════════
                 if (reasoning.isNotEmpty) ...[
                   Container(
                     width: double.infinity,
@@ -218,7 +309,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // ═══════════════ RECOMMENDATION ═══════════════
+                // ══════════════ RECOMMENDATION ══════════════
                 if (recommendation.isNotEmpty) ...[
                   Container(
                     width: double.infinity,
@@ -263,7 +354,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
 
-                // ═══════════════ SCAN AGAIN BUTTON ═══════════════
+                // ══════════════ SCAN AGAIN ══════════════
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -283,7 +374,7 @@ class AIResultScreen extends StatelessWidget {
     );
   }
 
-  // ═══════════════ HELPERS ═══════════════
+  // ══════════════ HELPERS ══════════════
 
   Widget _infoTile(
     String label,
