@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../core/utils/themes.dart';
 import '../core/services/auth_service.dart';
 import 'seller/seller_orders_screen.dart';
+import 'seller/seller_shop_screen.dart'; // ← ADD KIYA
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -25,7 +26,7 @@ class _SellerDashboardState extends State<SellerDashboard> {
     final pages = [
       const _HomePage(),
       const _RicePage(),
-      const _MyShopPage(),
+      const _MyShopPage(), // ← Yahan fix hai
       const _ChatPage(),
       _OrdersPage(context: context),
       const _ProfilePage(),
@@ -301,12 +302,21 @@ class _RicePage extends StatelessWidget {
       );
 }
 
+// ← FIX — SellerShopScreen add kiya
 class _MyShopPage extends StatelessWidget {
   const _MyShopPage();
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: AppDecorations.gradientBackground,
-      );
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: AppDecorations.gradientBackground,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + kToolbarHeight,
+        ),
+        child: const SellerShopScreen(),
+      ),
+    );
+  }
 }
 
 class _ChatPage extends StatelessWidget {

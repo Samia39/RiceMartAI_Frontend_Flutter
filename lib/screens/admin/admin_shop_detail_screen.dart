@@ -5,13 +5,65 @@ import '../../core/utils/themes.dart';
 import '../../core/services/shop_service.dart';
 import '../../models/shop_model.dart';
 
-class AdminShopDetailScreen extends StatelessWidget {
+class AdminShopDetailScreen extends StatefulWidget {
   const AdminShopDetailScreen({super.key});
+  @override
+  State<AdminShopDetailScreen> createState() => _AdminShopDetailScreenState();
+}
+
+class _AdminShopDetailScreenState extends State<AdminShopDetailScreen> {
+  bool isLoading = false;
+  late Shop shop;
+
+  @override
+  void initState() {
+    super.initState();
+    shop = Get.arguments as Shop;
+  }
+
+  Future<void> _approve() async {
+    setState(() => isLoading = true);
+    print('Approve clicked! Shop ID: ${shop.id}');
+    try {
+      final success = await ShopService.updateStatus(shop.id, 'approved');
+      print('Approve result: $success');
+      if (success) {
+        Get.snackbar('Success ✅', 'Shop approved!',
+            backgroundColor: AppColors.cream);
+        Get.offNamed('/admin-shops', arguments: 'approved');
+      } else {
+        Get.snackbar('Error', 'Approve nahi hua!',
+            backgroundColor: AppColors.cream);
+      }
+    } catch (e) {
+      print('Error: $e');
+      Get.snackbar('Error', e.toString(),
+          backgroundColor: AppColors.cream);
+    }
+    setState(() => isLoading = false);
+  }
+
+  Future<void> _reject() async {
+    setState(() => isLoading = true);
+    try {
+      final success = await ShopService.updateStatus(shop.id, 'rejected');
+      if (success) {
+        Get.snackbar('Done', 'Shop rejected.',
+            backgroundColor: AppColors.cream);
+        Get.offNamed('/admin-shops', arguments: 'pending');
+      } else {
+        Get.snackbar('Error', 'Reject nahi hua!',
+            backgroundColor: AppColors.cream);
+      }
+    } catch (e) {
+      Get.snackbar('Error', e.toString(),
+          backgroundColor: AppColors.cream);
+    }
+    setState(() => isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Shop shop = Get.arguments as Shop;
-
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -20,7 +72,6 @@ class AdminShopDetailScreen extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // ── Header ──────────────────────────────────
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -49,14 +100,12 @@ class AdminShopDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Shop Status Card ──────────────────
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: AppDecorations.card,
@@ -66,8 +115,7 @@ class AdminShopDetailScreen extends StatelessWidget {
                               width: 55,
                               height: 55,
                               decoration: BoxDecoration(
-                                color:
-                                    AppColors.darkGreen.withOpacity(0.10),
+                                color: AppColors.darkGreen.withOpacity(0.10),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(Icons.store,
@@ -77,8 +125,7 @@ class AdminShopDetailScreen extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(shop.name,
-                                    style: AppTextStyles.heading4),
+                                Text(shop.name, style: AppTextStyles.heading4),
                                 const SizedBox(height: 4),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -111,10 +158,7 @@ class AdminShopDetailScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // ── Seller Information ────────────────
-                      Text('Seller Information',
-                          style: AppTextStyles.heading3),
+                      Text('Seller Information', style: AppTextStyles.heading3),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -132,10 +176,7 @@ class AdminShopDetailScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // ── Shop Information ──────────────────
-                      Text('Shop Information',
-                          style: AppTextStyles.heading3),
+                      Text('Shop Information', style: AppTextStyles.heading3),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -152,10 +193,7 @@ class AdminShopDetailScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // ── CNIC Document ─────────────────────
-                      Text('CNIC Document',
-                          style: AppTextStyles.heading3),
+                      Text('CNIC Document', style: AppTextStyles.heading3),
                       const SizedBox(height: 10),
                       Container(
                         width: double.infinity,
@@ -167,8 +205,7 @@ class AdminShopDetailScreen extends StatelessWidget {
                                 child: Image.network(
                                   'http://127.0.0.1:8000/storage/${shop.cnicImage}',
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      _noCnicImage(),
+                                  errorBuilder: (_, __, ___) => _noCnicImage(),
                                 ),
                               )
                             : _noCnicImage(),
@@ -177,105 +214,99 @@ class AdminShopDetailScreen extends StatelessWidget {
 
                       // ── Action Buttons ────────────────────
                       if (shop.status == 'pending') ...[
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () async {
-                                  final success =
-                                      await ShopService.updateStatus(
-                                          shop.id, 'approved');
-                                  if (success) {
-                                    Get.snackbar('Success',
-                                        'Shop approved!',
-                                        backgroundColor: AppColors.cream);
-                                    Get.back();
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppColors.success.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        color: AppColors.success
-                                            .withOpacity(0.40)),
+                        isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      // Approve
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: _approve,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 14),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.success
+                                                  .withOpacity(0.15),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              border: Border.all(
+                                                  color: AppColors.success
+                                                      .withOpacity(0.40)),
+                                            ),
+                                            child: const Center(
+                                              child: Text('Approve',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.success,
+                                                  )),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      // Correction
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () {},
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 14),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.cream
+                                                  .withOpacity(0.30),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              border: Border.all(
+                                                  color: AppColors.borderGold
+                                                      .withOpacity(0.60)),
+                                            ),
+                                            child: const Center(
+                                              child: Text('Correction',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.darkGreen,
+                                                  )),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  child: const Center(
-                                    child: Text('Approve',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.success,
-                                        )),
+                                  const SizedBox(height: 10),
+                                  // Reject
+                                  GestureDetector(
+                                    onTap: _reject,
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 14),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.error.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color:
+                                                AppColors.error.withOpacity(0.40)),
+                                      ),
+                                      child: const Center(
+                                        child: Text('Reject',
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.error,
+                                            )),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {},
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.cream.withOpacity(0.30),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        color: AppColors.borderGold
-                                            .withOpacity(0.60)),
-                                  ),
-                                  child: const Center(
-                                    child: Text('Correction',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.darkGreen,
-                                        )),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () async {
-                            final success = await ShopService.updateStatus(
-                                shop.id, 'rejected');
-                            if (success) {
-                              Get.snackbar(
-                                  'Done', 'Shop rejected.',
-                                  backgroundColor: AppColors.cream);
-                              Get.back();
-                            }
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: AppColors.error.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                  color: AppColors.error.withOpacity(0.40)),
-                            ),
-                            child: const Center(
-                              child: Text('Reject',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.error,
-                                  )),
-                            ),
-                          ),
-                        ),
                       ],
                       const SizedBox(height: 24),
                     ],
@@ -317,8 +348,8 @@ class AdminShopDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _divider() => Divider(
-      color: AppColors.darkGreen.withOpacity(0.10), thickness: 1);
+  Widget _divider() =>
+      Divider(color: AppColors.darkGreen.withOpacity(0.10), thickness: 1);
 
   Widget _noCnicImage() {
     return Center(
