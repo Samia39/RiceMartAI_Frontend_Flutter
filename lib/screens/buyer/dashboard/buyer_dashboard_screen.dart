@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/chats/conversation.dart';
 import 'package:frontend/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -37,7 +38,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
       const ShopsScreen(),
 
-      Center(child: Text("Chat", style: AppTextStyles.heading2)),
+      ConversationsScreen(),
 
       const ProfileScreen(),
     ];

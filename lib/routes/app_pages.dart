@@ -1,4 +1,6 @@
 import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
+import 'package:frontend/screens/chats/chat.dart';
+import 'package:frontend/screens/chats/conversation.dart';
 import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';
@@ -29,6 +31,7 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/admin_screens/dashboard/admin_dashboard.dart';
 import '../screens/seller/dashboard/seller_dashboard_screen.dart';
+// import '../screens/buyer/home/ai_result.dart';
 import 'app_routes.dart';
 import '../middleware/permission_middleware.dart';
 
@@ -210,5 +213,11 @@ class AppPages {
         PermissionMiddleware('manage permissions'),
       ],
     ),
+    GetPage(name: AppRoutes.chat, page: () => ChatScreen()),
+    GetPage(name: AppRoutes.conversation, page: () => ConversationsScreen()),
+    // GetPage(
+    //   name: AppRoutes.airesult,
+    //   page: () => const AIResultScreen(result: {}),
+    // ),
   ];
 }

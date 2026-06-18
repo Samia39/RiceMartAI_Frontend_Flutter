@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/chats/conversation.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../rice/add_rice_screen.dart';
@@ -61,6 +62,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           ? const MyShopScreen()
           : const _NoAccess(),
 
+      ConversationsScreen(),
       // ORDERS (permission required)
       PermissionService.hasPermission('view orders')
           ? const SellerOrdersScreen()
@@ -105,6 +107,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
             BottomNavigationBarItem(icon: Icon(Icons.rice_bowl), label: "Rice"),
 
             BottomNavigationBarItem(icon: Icon(Icons.store), label: "My Shop"),
+            BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
 
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_bag),
