@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/themes.dart';
 import 'ai_detection_screen.dart';
+import 'ai_recommendation_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -113,10 +114,21 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 18),
 
                   // ================= RECOMMENDATION =================
-                  featureCard(
-                    icon: Icons.recommend_rounded,
-                    title: "Rice Recommendation",
-                    subtitle: "Get smart rice recommendations",
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AiRecommendationScreen(),
+                        ),
+                      );
+                    },
+
+                    child: featureCard(
+                      icon: Icons.recommend_rounded,
+                      title: "Rice Recommendation",
+                      subtitle: "Get smart rice recommendations",
+                    ),
                   ),
                 ],
               ),
