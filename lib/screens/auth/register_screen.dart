@@ -29,15 +29,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       var response = await AuthService.register(name, email, password);
-
-      if (response['user'] != null) {
-        Get.snackbar("Success", "Registered successfully");
-        Get.offNamed('/login');
-      } else {
-        Get.snackbar("Error", response['message']);
-      }
+      Get.snackbar("Success", response['message'] ?? "OTP sent to your email");
+      Get.toNamed('/verify-otp', arguments: {'email': email});
     } catch (e) {
-      Get.snackbar("Error", "Server error");
+      Get.snackbar("Error", e.toString().replaceAll("Exception: ", ""));
     }
   }
 

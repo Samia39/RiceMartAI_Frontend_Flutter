@@ -52,4 +52,5 @@ class AppRoutes {
   static const airesult = "/airesult";
   static const airecommendation = "/ai-recommendation";
   static const airecommendationresult = "/ai-recommendation-result";
+  static const verifyOtp = "/verify-otp";
 }

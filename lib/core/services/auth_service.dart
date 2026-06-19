@@ -45,6 +45,41 @@ class AuthService {
     }
   }
 
+  static Future<Map<String, dynamic>> verifyOtp(
+    String email,
+    String otp,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/verify-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'otp': otp}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return data;
+    } else {
+      throw Exception(data['message']);
+    }
+  }
+
+  static Future<Map<String, dynamic>> resendOtp(String email) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/resend-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return data;
+    } else {
+      throw Exception(data['message']);
+    }
+  }
+
   // ME (VERY IMPORTANT)
   static Future<Map<String, dynamic>> me(String token) async {
     final response = await http.get(

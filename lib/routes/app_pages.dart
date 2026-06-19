@@ -1,3 +1,4 @@
+import 'package:frontend/screens/auth/otp_verification.dart';
 import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import 'package:frontend/screens/chats/chat.dart';
 import 'package:frontend/screens/chats/conversation.dart';
@@ -229,6 +230,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.airecommendationresult,
       page: () => const AiRecommendationResultScreen(query: "", result: {}),
+    ),
+    GetPage(
+      name: AppRoutes.verifyOtp,
+      page: () => const OtpVerificationScreen(),
     ),
   ];
 }
