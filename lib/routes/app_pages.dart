@@ -1,3 +1,4 @@
+import 'package:frontend/screens/auth/forget_password.dart';
 import 'package:frontend/screens/auth/otp_verification.dart';
 import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import 'package:frontend/screens/chats/chat.dart';
@@ -234,6 +235,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.verifyOtp,
       page: () => const OtpVerificationScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.forgotpassword,
+      page: () => const ForgotPasswordScreen(),
     ),
   ];
 }

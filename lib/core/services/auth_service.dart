@@ -95,4 +95,42 @@ class AuthService {
       throw Exception(data['message']);
     }
   }
+
+  // FORGOT PASSWORD - sends OTP
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/forgot-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return data;
+    } else {
+      throw Exception(data['message']);
+    }
+  }
+
+  // RESET PASSWORD - verifies OTP and updates password
+  static Future<Map<String, dynamic>> resetPassword(
+    String email,
+    String otp,
+    String newPassword,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/reset-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'otp': otp, 'password': newPassword}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return data;
+    } else {
+      throw Exception(data['message']);
+    }
+  }
 }
