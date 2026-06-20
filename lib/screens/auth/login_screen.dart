@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../core/utils/themes.dart';
+import '../../routes/app_routes.dart'; // adjust path to wherever AppRoutes lives
 
+// ...
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -157,6 +159,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
 
                   SizedBox(height: verticalSpacing),
+                  SizedBox(height: verticalSpacing),
+
+                  // FORGOT PASSWORD LINK
+                  GestureDetector(
+                    onTap: () => Get.toNamed(AppRoutes.forgotpassword),
+                    child: Text(
+                      "Forgot Password?",
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.darkGreen,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

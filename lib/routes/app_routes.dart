@@ -5,6 +5,8 @@ class AppRoutes {
   // Authentication
   static const login = "/login";
   static const register = "/register";
+  static const verifyOtp = "/verify-otp";
+  static const forgotpassword = "/forgot-password";
   static const accessDenied = "/access-denied";
 
   // =========================

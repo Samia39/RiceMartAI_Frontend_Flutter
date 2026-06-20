@@ -18,6 +18,8 @@ import '../screens/admin_screens/shops/shop_approvals_screen.dart';
 import '../screens/admin_screens/user_management/assign_permissions_screen.dart';
 import '../screens/admin_screens/user_management/roles_screen.dart';
 import '../screens/admin_screens/user_management/users_screen.dart';
+import '../screens/auth/forget_password.dart';
+import '../screens/auth/otp_verification.dart';
 import '../screens/buyer/cart/checkout_screen.dart';
 import '../screens/buyer/orders/my_orders_screen.dart';
 import '../screens/buyer/orders/order_details_screen.dart';
@@ -47,6 +49,15 @@ class AppPages {
 
     // Register Screen
     GetPage(name: AppRoutes.register, page: () => RegisterScreen()),
+
+    GetPage(
+      name: AppRoutes.verifyOtp,
+      page: () => const OtpVerificationScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.forgotpassword,
+      page: () => const ForgotPasswordScreen(),
+    ),
 
     // Access Denied Screen
     GetPage(
