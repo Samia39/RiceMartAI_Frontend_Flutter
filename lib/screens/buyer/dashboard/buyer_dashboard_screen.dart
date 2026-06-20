@@ -34,6 +34,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
         onCartUpdated: () {
           setState(() {});
         },
+        initialSearchQuery: '',
       ),
 
       const ShopsScreen(),

@@ -31,7 +31,7 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/admin_screens/dashboard/admin_dashboard.dart';
 import '../screens/seller/dashboard/seller_dashboard_screen.dart';
-// import '../screens/buyer/home/ai_result.dart';
+import '../screens/buyer/home/ai_result.dart';
 import 'app_routes.dart';
 import '../middleware/permission_middleware.dart';
 
@@ -215,9 +215,9 @@ class AppPages {
     ),
     GetPage(name: AppRoutes.chat, page: () => ChatScreen()),
     GetPage(name: AppRoutes.conversation, page: () => ConversationsScreen()),
-    // GetPage(
-    //   name: AppRoutes.airesult,
-    //   page: () => const AIResultScreen(result: {}),
-    // ),
+    GetPage(
+      name: AppRoutes.airesult,
+      page: () => const AIResultScreen(result: {}),
+    ),
   ];
 }

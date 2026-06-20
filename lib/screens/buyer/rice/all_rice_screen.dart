@@ -8,7 +8,11 @@ import '../../../core/services/cart_service.dart';
 class AllRiceScreen extends StatefulWidget {
   final VoidCallback? onCartUpdated;
 
-  const AllRiceScreen({super.key, this.onCartUpdated});
+  const AllRiceScreen({
+    super.key,
+    this.onCartUpdated,
+    required String initialSearchQuery,
+  });
 
   @override
   State<AllRiceScreen> createState() => _AllRiceScreenState();
