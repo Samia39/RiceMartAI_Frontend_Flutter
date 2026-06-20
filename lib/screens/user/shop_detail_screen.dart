@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/utils/themes.dart';
 import '../../core/services/shop_service.dart';
+import '../../core/services/chat_service.dart';
 import '../../models/shop_model.dart';
 import '../../models/product_model.dart';
 import '../../widgets/bottom_nav.dart';
@@ -17,6 +18,7 @@ class ShopDetailScreen extends StatefulWidget {
 class _ShopDetailScreenState extends State<ShopDetailScreen> {
   Shop? shop;
   bool isLoading = true;
+  bool isChatLoading = false;
 
   @override
   void initState() {
@@ -29,6 +31,18 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     setState(() => isLoading = true);
     shop = await ShopService.getShop(id);
     setState(() => isLoading = false);
+  }
+
+  Future<void> startChat() async {
+    setState(() => isChatLoading = true);
+    final conv = await ChatService.startConversation(shop!.id);
+    setState(() => isChatLoading = false);
+    if (conv != null) {
+      Get.toNamed('/chat-screen', arguments: conv);
+    } else {
+      Get.snackbar('Error', 'Chat start nahi ho saka!',
+          backgroundColor: const Color(0xFFD4C9A8));
+    }
   }
 
   @override
@@ -52,8 +66,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                         Padding(
                           padding: const EdgeInsets.all(20),
                           child: Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               GestureDetector(
                                 onTap: () => Get.back(),
@@ -61,12 +74,10 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                                   padding: const EdgeInsets.all(8),
                                   decoration: AppDecorations.iconButton,
                                   child: Icon(Icons.arrow_back,
-                                      color: AppColors.darkGreen,
-                                      size: 24),
+                                      color: AppColors.darkGreen, size: 24),
                                 ),
                               ),
-                              Text('Marketplace',
-                                  style: AppTextStyles.heading3),
+                              Text('Marketplace', style: AppTextStyles.heading3),
                               GestureDetector(
                                 onTap: () => Get.toNamed('/cart'),
                                 child: Container(
@@ -82,8 +93,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
                         Expanded(
                           child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -93,46 +103,33 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                                   decoration: AppDecorations.card,
                                   child: Row(
                                     children: [
-                                      // Logo
                                       ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(12),
                                         child: shop!.logo != null
                                             ? Image.network(
-                                                'http://10.0.2.2/sheezabackend/public/storage/${shop!.logo}',
+                                                'http://127.0.0.1:8000/storage/${shop!.logo}',
                                                 width: 70,
                                                 height: 70,
                                                 fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (_, __, ___) =>
-                                                        _noLogo(),
+                                                errorBuilder: (_, __, ___) => _noLogo(),
                                               )
                                             : _noLogo(),
                                       ),
                                       const SizedBox(width: 14),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(shop!.name,
-                                                style:
-                                                    AppTextStyles.heading3),
+                                            Text(shop!.name, style: AppTextStyles.heading3),
                                             if (shop!.address != null)
                                               Row(
                                                 children: [
-                                                  Icon(
-                                                      Icons
-                                                          .location_on_outlined,
-                                                      size: 14,
-                                                      color:
-                                                          AppColors.iconMuted),
+                                                  Icon(Icons.location_on_outlined,
+                                                      size: 14, color: AppColors.iconMuted),
                                                   const SizedBox(width: 4),
                                                   Expanded(
-                                                    child: Text(
-                                                        shop!.address!,
-                                                        style: AppTextStyles
-                                                            .bodySmall),
+                                                    child: Text(shop!.address!,
+                                                        style: AppTextStyles.bodySmall),
                                                   ),
                                                 ],
                                               ),
@@ -140,14 +137,49 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                                             Text(
                                               '${shop!.products.length} Products',
                                               style: AppTextStyles.label
-                                                  .copyWith(
-                                                      color:
-                                                          AppColors.golden),
+                                                  .copyWith(color: AppColors.golden),
                                             ),
                                           ],
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                                // ── Chat with Seller Button ─
+                                GestureDetector(
+                                  onTap: isChatLoading ? null : startChat,
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.darkGreen,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        if (isChatLoading)
+                                          const SizedBox(
+                                            width: 20, height: 20,
+                                            child: CircularProgressIndicator(
+                                                color: Colors.white, strokeWidth: 2),
+                                          )
+                                        else ...[
+                                          const Icon(Icons.chat_bubble_outline,
+                                              color: Colors.white, size: 20),
+                                          const SizedBox(width: 8),
+                                          const Text('Chat with Seller',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.white,
+                                              )),
+                                        ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -159,34 +191,28 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                                     padding: const EdgeInsets.all(16),
                                     decoration: AppDecorations.card,
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('About Shop',
-                                            style: AppTextStyles.heading4),
+                                        Text('About Shop', style: AppTextStyles.heading4),
                                         const SizedBox(height: 8),
-                                        Text(shop!.description,
-                                            style: AppTextStyles.bodyLarge),
+                                        Text(shop!.description, style: AppTextStyles.bodyLarge),
                                       ],
                                     ),
                                   ),
                                 const SizedBox(height: 16),
 
                                 // ── Products ───────────────
-                                Text('Products',
-                                    style: AppTextStyles.heading3),
+                                Text('Products', style: AppTextStyles.heading3),
                                 const SizedBox(height: 12),
 
                                 shop!.products.isEmpty
                                     ? Center(
                                         child: Text('Koi product nahi',
-                                            style:
-                                                AppTextStyles.bodyLarge),
+                                            style: AppTextStyles.bodyLarge),
                                       )
                                     : GridView.builder(
                                         shrinkWrap: true,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
+                                        physics: const NeverScrollableScrollPhysics(),
                                         gridDelegate:
                                             const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,
@@ -199,61 +225,39 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
                                           final p = shop!.products[i];
                                           return GestureDetector(
                                             onTap: () => Get.toNamed(
-                                                '/product-detail',
-                                                arguments: p),
+                                                '/product-detail', arguments: p),
                                             child: Container(
-                                              decoration:
-                                                  AppDecorations.card,
+                                              decoration: AppDecorations.card,
                                               child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Expanded(
                                                     child: ClipRRect(
-                                                      borderRadius:
-                                                          const BorderRadius
-                                                              .vertical(
-                                                              top: Radius
-                                                                  .circular(
-                                                                      16)),
+                                                      borderRadius: const BorderRadius.vertical(
+                                                          top: Radius.circular(16)),
                                                       child: p.image != null
                                                           ? Image.network(
-                                                              'http://10.0.2.2/sheezabackend/public/storage/${p.image}',
-                                                              width: double
-                                                                  .infinity,
-                                                              fit: BoxFit
-                                                                  .cover,
-                                                              errorBuilder:
-                                                                  (_, __,
-                                                                          ___) =>
-                                                                      _noProductImage(),
+                                                              'http://127.0.0.1:8000/storage/${p.image}',
+                                                              width: double.infinity,
+                                                              fit: BoxFit.cover,
+                                                              errorBuilder: (_, __, ___) =>
+                                                                  _noProductImage(),
                                                             )
                                                           : _noProductImage(),
                                                     ),
                                                   ),
                                                   Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8),
+                                                    padding: const EdgeInsets.all(8),
                                                     child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
                                                       children: [
                                                         Text(p.name,
-                                                            style: AppTextStyles
-                                                                .heading4,
+                                                            style: AppTextStyles.heading4,
                                                             maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis),
-                                                        Text(
-                                                            'Rs. ${p.price}',
-                                                            style: AppTextStyles
-                                                                .label
-                                                                .copyWith(
-                                                                    color: AppColors
-                                                                        .golden)),
+                                                            overflow: TextOverflow.ellipsis),
+                                                        Text('Rs. ${p.price}',
+                                                            style: AppTextStyles.label
+                                                                .copyWith(color: AppColors.golden)),
                                                       ],
                                                     ),
                                                   ),
@@ -277,8 +281,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
 
   Widget _noLogo() {
     return Container(
-      width: 70,
-      height: 70,
+      width: 70, height: 70,
       decoration: BoxDecoration(
         color: AppColors.cardFill,
         borderRadius: BorderRadius.circular(12),

@@ -10,6 +10,9 @@ import '../screens/user/shops_screen.dart';
 import '../screens/user/shop_detail_screen.dart';
 import '../screens/admin/admin_shops_screen.dart';
 import '../screens/admin/admin_shop_detail_screen.dart';
+import '../screens/user/conversations_screen.dart';
+import '../screens/user/chat_screen.dart';
+
 
 
 
@@ -38,9 +41,11 @@ class AppRoutes {
     
     GetPage(name: shops,           page: () => const ShopsScreen()),
     GetPage(name: shopDetail,      page: () => const ShopDetailScreen()),
-    // pages list mein add karo:
+  
    GetPage(name: '/admin-shops',       page: () => const AdminShopsScreen()),
-   GetPage(name: '/admin-shop-detail', page: () => const AdminShopDetailScreen()), 
+   GetPage(name: '/admin-shop-detail', page: () => const AdminShopDetailScreen()),
+   GetPage(name: '/conversations', page: () => const ConversationsScreen()),
+   GetPage(name: '/chat-screen',   page: () => const ChatScreen()), 
     
   ];
 }

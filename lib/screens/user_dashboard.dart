@@ -3,8 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'rice_marketplace_page.dart';
-import 'user/shops_screen.dart'; // ← SHOPS IMPORT ADD KIYA
+import 'user/shops_screen.dart';
 import 'user/profile_screen.dart';
+import 'user/conversations_screen.dart';
 
 // ─────────────────────────────────────────────
 //  THEME
@@ -111,16 +112,20 @@ class _UserDashboardState extends State<UserDashboard> {
   int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Widget> _pages = const [
-    HomePage(), RicePage(), ShopsPage(), ChatPage(), ProfilePage(),
-  ];
-
   final List<String> _titles = [
     'Marketplace', 'Rice', 'Shops', 'Chat', 'Profile',
   ];
 
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      const HomePage(),
+      const RicePage(),
+      const ShopsPage(),
+      const ChatPage(),
+      const ProfilePage(),
+    ];
+
     return Scaffold(
       key: _scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -171,7 +176,7 @@ class _UserDashboardState extends State<UserDashboard> {
         ],
       ),
       drawer: _buildDrawer(context),
-      body: _pages[_currentIndex],
+      body: pages[_currentIndex],
       bottomNavigationBar: _buildBottomNav(),
     );
   }
@@ -244,6 +249,10 @@ class _UserDashboardState extends State<UserDashboard> {
                   }),
                   _drawerTile(Icons.store_outlined, 'Shops', onTap: () {
                     setState(() => _currentIndex = 2);
+                    Navigator.pop(context);
+                  }),
+                  _drawerTile(Icons.chat_bubble_outline, 'Chat', onTap: () {
+                    setState(() => _currentIndex = 3);
                     Navigator.pop(context);
                   }),
                   _drawerTile(Icons.shopping_cart_outlined, 'My Cart',
@@ -326,19 +335,16 @@ class _UserDashboardState extends State<UserDashboard> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.cream,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Logout',
             style: TextStyle(
                 color: AppColors.darkGreen, fontWeight: FontWeight.bold)),
         content: Text('Are you sure you want to logout?',
-            style:
-                TextStyle(color: AppColors.darkGreen.withOpacity(0.75))),
+            style: TextStyle(color: AppColors.darkGreen.withOpacity(0.75))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child:
-                Text('Cancel', style: TextStyle(color: AppColors.darkGreen)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.darkGreen)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -348,8 +354,7 @@ class _UserDashboardState extends State<UserDashboard> {
             ),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Logout',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -463,7 +468,6 @@ class RicePage extends StatelessWidget {
   Widget build(BuildContext context) => const RiceMarketplacePage();
 }
 
-// ← SHOPS PAGE FIX — ShopsScreen use kar raha hai ab
 class ShopsPage extends StatelessWidget {
   const ShopsPage({super.key});
   @override
@@ -477,16 +481,29 @@ class ShopsPage extends StatelessWidget {
   }
 }
 
+// ← CHAT PAGE — ConversationsScreen connect kiya
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
   @override
-  Widget build(BuildContext context) =>
-      _Placeholder(icon: Icons.chat_bubble_rounded, label: 'Chat');
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + kToolbarHeight,
+      ),
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF5A8A6E), Color(0xFF9D7E3F)],
+          ),
+        ),
+        child: const ConversationsScreen(),
+      ),
+    );
+  }
 }
 
-// Import add karo file ke upar
-
-// ProfilePage class replace karo
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
   @override
@@ -496,51 +513,6 @@ class ProfilePage extends StatelessWidget {
         top: MediaQuery.of(context).padding.top + kToolbarHeight,
       ),
       child: const ProfileScreen(),
-    );
-  }
-}
-class _Placeholder extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _Placeholder({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(gradient: AppGradients.background),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80, height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.cream.withOpacity(0.22),
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: AppColors.borderGold.withOpacity(0.45),
-                    width: 1.5),
-              ),
-              child: Icon(icon,
-                  size: 38,
-                  color: AppColors.darkGreen.withOpacity(0.55)),
-            ),
-            const SizedBox(height: 16),
-            Text(label,
-                style: TextStyle(
-                  fontFamily: 'Poppins', fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkGreen,
-                )),
-            const SizedBox(height: 6),
-            Text('Coming soon...',
-                style: TextStyle(
-                  fontFamily: 'Poppins', fontSize: 13,
-                  color: AppColors.darkGreen.withOpacity(0.55),
-                )),
-          ],
-        ),
-      ),
     );
   }
 }

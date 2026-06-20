@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import '../core/utils/themes.dart';
 import '../core/services/auth_service.dart';
 import 'seller/seller_orders_screen.dart';
-import 'seller/seller_shop_screen.dart'; // ← ADD KIYA
+import 'seller/seller_shop_screen.dart';
+import 'seller/seller_conversations_screen.dart';
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -26,8 +27,8 @@ class _SellerDashboardState extends State<SellerDashboard> {
     final pages = [
       const _HomePage(),
       const _RicePage(),
-      const _MyShopPage(), // ← Yahan fix hai
-      const _ChatPage(),
+      const _MyShopPage(),
+      _ChatPage(context: context), // ← Fix
       _OrdersPage(context: context),
       const _ProfilePage(),
     ];
@@ -132,6 +133,10 @@ class _SellerDashboardState extends State<SellerDashboard> {
                   }),
                   _drawerTile(Icons.rice_bowl_outlined, 'My Rice', onTap: () {
                     setState(() => _currentIndex = 1);
+                    Navigator.pop(context);
+                  }),
+                  _drawerTile(Icons.chat_bubble_outline, 'Chat', onTap: () {
+                    setState(() => _currentIndex = 3);
                     Navigator.pop(context);
                   }),
                   _drawerTile(Icons.shopping_bag_outlined, 'Orders', onTap: () {
@@ -302,7 +307,6 @@ class _RicePage extends StatelessWidget {
       );
 }
 
-// ← FIX — SellerShopScreen add kiya
 class _MyShopPage extends StatelessWidget {
   const _MyShopPage();
   @override
@@ -319,12 +323,22 @@ class _MyShopPage extends StatelessWidget {
   }
 }
 
+// ← FIX — SellerConversationsScreen connect kiya
 class _ChatPage extends StatelessWidget {
-  const _ChatPage();
+  final BuildContext context;
+  const _ChatPage({required this.context});
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: AppDecorations.gradientBackground,
-      );
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: AppDecorations.gradientBackground,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + kToolbarHeight,
+        ),
+        child: const SellerConversationsScreen(),
+      ),
+    );
+  }
 }
 
 class _OrdersPage extends StatelessWidget {
