@@ -34,6 +34,8 @@ import '../screens/seller/dashboard/seller_dashboard_screen.dart';
 import '../screens/buyer/home/ai_result.dart';
 import 'app_routes.dart';
 import '../middleware/permission_middleware.dart';
+import '../screens/buyer/home/ai_recommendation_screen.dart';
+import '../screens/buyer/home/recommendation_result_screen.dart';
 
 class AppPages {
   static final routes = [
@@ -218,6 +220,15 @@ class AppPages {
     GetPage(
       name: AppRoutes.airesult,
       page: () => const AIResultScreen(result: {}),
+    ),
+
+    GetPage(
+      name: AppRoutes.airecommendation,
+      page: () => const AiRecommendationScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.airecommendationresult,
+      page: () => const AiRecommendationResultScreen(query: "", result: {}),
     ),
   ];
 }

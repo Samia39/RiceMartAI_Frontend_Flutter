@@ -18,6 +18,8 @@ class AppRoutes {
   static const myOrders = "/my-orders";
   static const orderDetails = "/order-details";
   static const createShop = "/create-shop";
+  static const airecommendation = "/ai-recommendation";
+  static const airecommendationresult = "/ai-recommendation-result";
 
   // =========================
   // Seller Dashboard
