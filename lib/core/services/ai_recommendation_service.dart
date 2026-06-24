@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AiRecommendationService {
-  final String baseUrl = "http://127.0.0.1:8000/api";
+  final String baseUrl = "http://ricemart.sandbox.pk/api";
 
   // =========================
   // GET AI RECOMMENDATION

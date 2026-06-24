@@ -3,7 +3,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ShopService {
-  final String baseUrl = "http://127.0.0.1:8000/api";
+  static const String baseUrl = "http://ricemart.sandbox.pk/api";
 
   // create shop
   Future<Map<String, dynamic>> createShop({
