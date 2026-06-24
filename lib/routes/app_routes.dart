@@ -5,6 +5,8 @@ class AppRoutes {
   // Authentication
   static const login = "/login";
   static const register = "/register";
+  static const verifyOtp = "/verify-otp";
+  static const forgotpassword = "/forgot-password";
   static const accessDenied = "/access-denied";
 
   // =========================
@@ -18,6 +20,8 @@ class AppRoutes {
   static const myOrders = "/my-orders";
   static const orderDetails = "/order-details";
   static const createShop = "/create-shop";
+  static const airecommendation = "/ai-recommendation";
+  static const airecommendationresult = "/ai-recommendation-result";
 
   // =========================
   // Seller Dashboard
@@ -50,8 +54,4 @@ class AppRoutes {
   static const chat = "/chat";
   static const conversation = "/conversation";
   static const airesult = "/airesult";
-  static const airecommendation = "/ai-recommendation";
-  static const airecommendationresult = "/ai-recommendation-result";
-  static const verifyOtp = "/verify-otp";
-  static const forgotpassword = "/forgot-password";
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../core/utils/themes.dart';
 import 'ai_detection_screen.dart';
@@ -9,6 +10,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final box = GetStorage();
+    final userName = box.read("name") ?? "User"; // 👈 read from storage
+
     return Scaffold(
       body: Container(
         decoration: AppDecorations.gradientBackground,
@@ -34,7 +38,6 @@ class HomeScreen extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
-
                     decoration: AppDecorations.card,
 
                     child: Row(
@@ -42,7 +45,6 @@ class HomeScreen extends StatelessWidget {
                         // Rice Image
                         ClipRRect(
                           borderRadius: BorderRadius.circular(14),
-
                           child: Image.network(
                             "https://images.unsplash.com/photo-1516684732162-798a0062be99",
                             width: 90,
@@ -67,7 +69,10 @@ class HomeScreen extends StatelessWidget {
 
                               const SizedBox(height: 6),
 
-                              Text("Sami Noor", style: AppTextStyles.heading2),
+                              Text(
+                                userName,
+                                style: AppTextStyles.heading2,
+                              ), // 👈 dynamic name
 
                               const SizedBox(height: 6),
 
@@ -139,7 +144,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ================= FEATURE CARD =================
   Widget featureCard({
     required IconData icon,
     required String title,
@@ -147,16 +151,13 @@ class HomeScreen extends StatelessWidget {
   }) {
     return Container(
       padding: const EdgeInsets.all(18),
-
       decoration: AppDecorations.card,
 
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(14),
-
             decoration: AppDecorations.iconButton,
-
             child: Icon(icon, size: 30, color: AppColors.darkGreen),
           ),
 

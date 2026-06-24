@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // TITLE
                   Text(
-                    "Welcome Back to Rice Mart\nLogin to Continue!",
+                    "Welcome  to Rice Mart\nLogin to Continue!",
 
                     textAlign: TextAlign.center,
 

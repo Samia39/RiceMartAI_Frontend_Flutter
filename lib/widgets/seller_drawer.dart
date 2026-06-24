@@ -126,11 +126,6 @@ class SellerDrawer extends StatelessWidget {
             onTap: () {},
           ),
 
-          // =========================
-          // SETTINGS
-          // =========================
-          drawerItem(icon: Icons.settings, title: "Settings", onTap: () {}),
-
           const Spacer(),
 
           // =========================

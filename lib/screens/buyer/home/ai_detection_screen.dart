@@ -11,6 +11,8 @@ import 'package:permission_handler/permission_handler.dart'
     if (dart.library.html) 'package:frontend/core/utils/permission_stubs.dart';
 
 import '../../../core/services/test_service.dart';
+import '../../../core/utils/permission_stubs.dart'
+    hide Permission, openAppSettings;
 import '../../../core/utils/themes.dart';
 
 class AIDetectionScreen extends StatefulWidget {
