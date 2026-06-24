@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../routes/app_routes.dart';
 import '../../../core/utils/themes.dart';
-import '../../../core/services/auth_service.dart';
+import '../../../core/services/profile_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,9 +13,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // ── Storage & token ─────────────────────────────────────
-  final _box = GetStorage();
-  String _token = '';
+  // ── Service ──────────────────────────────────────────────
+  final _service = ProfileService();
 
   // ── User data ────────────────────────────────────────────
   String _name = '';
@@ -39,7 +38,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _token = _box.read('token') ?? '';
     _fetchProfile();
   }
 
@@ -51,27 +49,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  // ── Parse role from list ─────────────────────────────────
-  String _parseRole(dynamic apiRoles) {
-    // Try from API response first
-    if (apiRoles != null && apiRoles is List && apiRoles.isNotEmpty) {
-      final first = apiRoles[0];
-      return first is Map ? first['name'].toString() : first.toString();
-    }
-
-    // Fallback to GetStorage 'roles' list (saved at login)
-    final storedRoles = _box.read('roles');
-    if (storedRoles is List && storedRoles.isNotEmpty) {
-      final first = storedRoles[0];
-      return first is Map ? first['name'].toString() : first.toString();
-    }
-
-    return 'customer';
-  }
-
-  // ── Fetch authenticated user ─────────────────────────────
+  // ── Fetch profile ────────────────────────────────────────
   Future<void> _fetchProfile() async {
-    if (_token.isEmpty) {
+    if (_service.token.isEmpty) {
       Get.offAllNamed(AppRoutes.login);
       return;
     }
@@ -79,20 +59,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _loadingProfile = true);
 
     try {
-      final data = await AuthService.me(_token);
-      final user = data['user'] ?? data;
+      final profile = await _service.fetchProfile();
 
       setState(() {
-        _name = user['name'] ?? '';
-        _email = user['email'] ?? '';
-        _role = _parseRole(user['roles'] ?? data['roles']);
-        _isVerified = (user['is_verified'] == 1 || user['is_verified'] == true);
-        _hasShop =
-            (user['has_shop'] == 1 || user['has_shop'] == true) ||
-            (_box.read('has_shop') ?? false);
+        _name = profile['name'];
+        _email = profile['email'];
+        _role = profile['role'];
+        _isVerified = profile['is_verified'];
+        _hasShop = profile['has_shop'];
       });
 
-      // Prefill edit controllers with current values
       _nameController.text = _name;
       _emailController.text = _email;
     } catch (e) {
@@ -107,28 +83,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // ── Save profile changes ─────────────────────────────────
+  // ── Save profile ─────────────────────────────────────────
   Future<void> _saveProfile() async {
     final newName = _nameController.text.trim();
     final newEmail = _emailController.text.trim();
     final newPassword = _passwordController.text.trim();
 
-    // ── Validation ───────────────────────────────────────
     if (newName.isEmpty) {
       _showError("Name cannot be empty.");
       return;
     }
-
     if (!_isVerified && newEmail.isEmpty) {
       _showError("Email cannot be empty.");
       return;
     }
-
     if (!_isVerified && !GetUtils.isEmail(newEmail)) {
       _showError("Please enter a valid email address.");
       return;
     }
-
     if (newPassword.isNotEmpty && newPassword.length < 6) {
       _showError("Password must be at least 6 characters.");
       return;
@@ -137,8 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _savingProfile = true);
 
     try {
-      await AuthService.updateProfile(
-        _token,
+      await _service.updateProfile(
         name: newName,
         email: _isVerified ? null : newEmail,
         password: newPassword.isEmpty ? null : newPassword,
@@ -172,7 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
       onConfirm: () {
-        _box.erase();
+        _service.clearSession();
         Get.offAllNamed(AppRoutes.login);
       },
     );
@@ -227,70 +198,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40)),
           const SizedBox(height: 16),
 
-          // Name
           Text(_name.isNotEmpty ? _name : "—", style: AppTextStyles.heading3),
           const SizedBox(height: 6),
 
-          // Email
           Text(
             _email.isNotEmpty ? _email : "—",
             style: AppTextStyles.bodyLarge,
           ),
           const SizedBox(height: 10),
 
-          // Verified badge only
+          // Verified / Unverified badge
           if (_isVerified)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.green, width: 1.2),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.verified, color: Colors.green, size: 13),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Verified",
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            )
+            _badge(label: "Verified", icon: Icons.verified, color: Colors.green)
           else
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.orange, width: 1.2),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.warning_amber_rounded,
-                    color: Colors.orange,
-                    size: 13,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "Unverified",
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: Colors.orange,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
+            _badge(
+              label: "Unverified",
+              icon: Icons.warning_amber_rounded,
+              color: Colors.orange,
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _badge({
+    required String label,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color, width: 1.2),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 13),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
@@ -304,7 +259,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header row with toggle
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -318,7 +272,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
 
-          // Collapsible form
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 250),
             crossFadeState: _showEditForm
@@ -330,7 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const SizedBox(height: 12),
 
-                // ── Name field ──────────────────────────
+                // Name
                 Container(
                   decoration: AppDecorations.inputField,
                   child: TextField(
@@ -345,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // ── Email (only if not verified) ─────────
+                // Email — only if not verified
                 if (!_isVerified) ...[
                   Container(
                     decoration: AppDecorations.inputField,
@@ -371,7 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 12),
                 ],
 
-                // ── Password field ───────────────────────
+                // Password
                 Container(
                   decoration: AppDecorations.inputField,
                   child: TextField(
@@ -395,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // ── Save button ──────────────────────────
+                // Save button
                 SizedBox(
                   height: 52,
                   child: ElevatedButton.icon(
@@ -428,7 +381,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         const SizedBox(height: 10),
 
-        // Become Seller — only for customers without a shop
+        // Become Seller — customer with no shop
         if (_role.toLowerCase() == 'customer' && !_hasShop)
           SizedBox(
             height: 55,
