@@ -9,7 +9,7 @@ class TestService {
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://127.0.0.1:8000/api/test-image'),
+        Uri.parse('https://ricemart.sandbox.pk/api/test-image'),
       );
 
       request.files.add(

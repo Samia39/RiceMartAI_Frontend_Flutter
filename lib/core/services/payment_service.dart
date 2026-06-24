@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 class PaymentService {
   final box = GetStorage();
 
-  final String baseUrl = "http://127.0.0.1:8000/api";
+  final String baseUrl = "https://ricemart.sandbox.pk/api";
 
   // =========================
   // GET ADMIN PAYMENTS

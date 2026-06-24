@@ -4,7 +4,7 @@ import 'package:get_storage/get_storage.dart';
 class ReviewService {
   final box = GetStorage();
 
-  final String baseUrl = "http://127.0.0.1:8000/api";
+  final String baseUrl = "https://ricemart.sandbox.pk/api";
 
   Future<bool> submitReview({
     required int orderItemId,

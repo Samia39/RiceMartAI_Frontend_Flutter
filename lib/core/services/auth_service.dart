@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const baseUrl = "http://127.0.0.1:8000/api";
+  static const baseUrl = "https://ricemart.sandbox.pk/api";
 
   // LOGIN
   static Future<Map<String, dynamic>> login(
@@ -131,6 +131,57 @@ class AuthService {
       return data;
     } else {
       throw Exception(data['message']);
+    }
+  }
+
+  // UPDATE PROFILE - edit name, and optionally email/password
+  static Future<Map<String, dynamic>> updateProfile(
+    String token, {
+    required String name,
+    String? email,
+    String? password,
+    String? passwordConfirmation,
+  }) async {
+    final Map<String, dynamic> body = {'name': name};
+
+    if (email != null && email.isNotEmpty) {
+      body['email'] = email;
+    }
+
+    if (password != null && password.isNotEmpty) {
+      body['password'] = password;
+      body['password_confirmation'] = passwordConfirmation ?? password;
+    }
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/update-profile'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(body),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return data;
+    } else {
+      throw Exception(data['message'] ?? 'Failed to update profile');
+    }
+  }
+
+  // LOGOUT - revokes the token on the server too, not just locally
+  static Future<void> logout(String token) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/logout'),
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+
+    if (response.statusCode != 200) {
+      final data = jsonDecode(response.body);
+      throw Exception(data['message'] ?? 'Logout failed');
     }
   }
 }

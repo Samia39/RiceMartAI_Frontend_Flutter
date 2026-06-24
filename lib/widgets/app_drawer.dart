@@ -6,9 +6,6 @@ import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
 
 class AppDrawer extends StatelessWidget {
-  // =========================
-  // TAB SWITCH CALLBACK
-  // =========================
   final Function(int) onTabSelected;
 
   const AppDrawer({super.key, required this.onTabSelected});
@@ -32,13 +29,11 @@ class AppDrawer extends StatelessWidget {
               // =========================
               UserAccountsDrawerHeader(
                 decoration: const BoxDecoration(color: AppColors.darkGreen),
-
                 accountName: Text(userName),
                 accountEmail: Text(userEmail),
 
                 currentAccountPicture: const CircleAvatar(
                   backgroundColor: AppColors.cream,
-
                   child: Icon(
                     Icons.person,
                     size: 40,
@@ -53,11 +48,8 @@ class AppDrawer extends StatelessWidget {
               drawerItem(
                 icon: Icons.home,
                 title: "Home",
-
                 onTap: () {
                   Navigator.pop(context);
-
-                  // SWITCH TO HOME TAB
                   onTabSelected(0);
                 },
               ),
@@ -68,11 +60,8 @@ class AppDrawer extends StatelessWidget {
               drawerItem(
                 icon: Icons.rice_bowl,
                 title: "Rice Marketplace",
-
                 onTap: () {
                   Navigator.pop(context);
-
-                  // SWITCH TO RICE TAB
                   onTabSelected(1);
                 },
               ),
@@ -83,11 +72,8 @@ class AppDrawer extends StatelessWidget {
               drawerItem(
                 icon: Icons.store,
                 title: "Shops",
-
                 onTap: () {
                   Navigator.pop(context);
-
-                  // SWITCH TO SHOPS TAB
                   onTabSelected(2);
                 },
               ),
@@ -98,11 +84,8 @@ class AppDrawer extends StatelessWidget {
               drawerItem(
                 icon: Icons.shopping_cart,
                 title: "My Cart",
-
                 onTap: () {
                   Navigator.pop(context);
-
-                  // OPEN NEW PAGE
                   Get.toNamed(AppRoutes.cart);
                 },
               ),
@@ -113,11 +96,8 @@ class AppDrawer extends StatelessWidget {
               drawerItem(
                 icon: Icons.person,
                 title: "Profile",
-
                 onTap: () {
                   Navigator.pop(context);
-
-                  // SWITCH TO PROFILE TAB
                   onTabSelected(4);
                 },
               ),
@@ -128,11 +108,8 @@ class AppDrawer extends StatelessWidget {
               drawerItem(
                 icon: Icons.shopping_bag,
                 title: "My Orders",
-
                 onTap: () {
                   Navigator.pop(context);
-
-                  // OPEN NEW PAGE
                   Get.toNamed(AppRoutes.myOrders);
                 },
               ),
@@ -146,16 +123,6 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {},
               ),
 
-              // =========================
-              // SETTINGS
-              // =========================
-              drawerItem(icon: Icons.settings, title: "Settings", onTap: () {}),
-
-              // =========================
-              // FEEDBACK
-              // =========================
-              drawerItem(icon: Icons.feedback, title: "Feedback", onTap: () {}),
-
               const SizedBox(height: 20),
 
               // =========================
@@ -164,12 +131,9 @@ class AppDrawer extends StatelessWidget {
               drawerItem(
                 icon: Icons.logout,
                 title: "Logout",
-
                 color: Colors.red,
-
                 onTap: () {
                   box.erase();
-
                   Get.offAllNamed(AppRoutes.login);
                 },
               ),
@@ -182,9 +146,6 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  // =========================
-  // DRAWER ITEM WIDGET
-  // =========================
   Widget drawerItem({
     required IconData icon,
     required String title,
@@ -193,13 +154,10 @@ class AppDrawer extends StatelessWidget {
   }) {
     return ListTile(
       leading: Icon(icon, color: color),
-
       title: Text(
         title,
-
         style: TextStyle(color: color, fontWeight: FontWeight.w600),
       ),
-
       onTap: onTap,
     );
   }

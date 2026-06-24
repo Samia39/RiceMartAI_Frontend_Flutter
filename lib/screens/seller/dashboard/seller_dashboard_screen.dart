@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/buyer/home/home_screen.dart';
+import 'package:frontend/screens/buyer/profile/profile_screen.dart';
 import 'package:frontend/screens/chats/conversation.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -50,7 +52,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     // SCREENS (PERMISSION BASED)
     // =========================
     final List<Widget> screens = [
-      Center(child: Text("Seller Home", style: AppTextStyles.heading2)),
+      const HomeScreen(),
 
       // ADD RICE (permission required)
       PermissionService.hasPermission('create products')
@@ -69,7 +71,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           : const _NoAccess(),
 
       // PROFILE (always allowed)
-      Center(child: Text("Profile", style: AppTextStyles.heading2)),
+      const ProfileScreen(),
     ];
 
     return Container(
