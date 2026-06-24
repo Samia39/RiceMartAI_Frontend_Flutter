@@ -43,6 +43,7 @@ import 'app_routes.dart';
 import '../middleware/permission_middleware.dart';
 import '../screens/buyer/home/ai_recommendation_screen.dart';
 import '../screens/buyer/home/recommendation_result_screen.dart';
+import '../screens/buyer/profile/profile_screen.dart';
 
 class AppPages {
   static final routes = [
@@ -80,6 +81,12 @@ class AppPages {
         AuthMiddleware(),
         RoleMiddleware(['customer']),
       ],
+    ),
+
+    GetPage(
+      name: AppRoutes.profile,
+      page: () => const ProfileScreen(),
+      middlewares: [AuthMiddleware()],
     ),
 
     // Cart Screen
