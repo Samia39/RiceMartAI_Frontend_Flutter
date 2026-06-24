@@ -4,7 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
 class AdminService {
-  final String baseUrl = "https://ricemart.sandbox.pk/api";
+  final String baseUrl = "https://ricemart.sandbox.pk/api/login";
 
   final box = GetStorage();
 

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class RiceTypeService {
-  final String baseUrl = "https://ricemart.sandbox.pk/api";
+  final String baseUrl = "http://ricemart.sandbox.pk/api";
 
   Future<List<Map<String, dynamic>>> fetchRiceTypes() async {
     final response = await http.get(Uri.parse("$baseUrl/rice-types"));

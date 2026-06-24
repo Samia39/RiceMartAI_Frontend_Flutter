@@ -3,7 +3,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ChatService {
-  final String baseUrl = "https://ricemart.sandbox.pk/api";
+  final String baseUrl = "http://ricemart.sandbox.pk/api";
 
   String get _token => GetStorage().read("token") ?? "";
 

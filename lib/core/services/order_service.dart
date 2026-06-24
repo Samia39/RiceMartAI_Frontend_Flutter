@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class OrderService {
   final box = GetStorage();
-  final String baseUrl = "https://ricemart.sandbox.pk/api";
+  final String baseUrl = "http://ricemart.sandbox.pk/api";
 
   // =========================
   // CHECKOUT API CALL

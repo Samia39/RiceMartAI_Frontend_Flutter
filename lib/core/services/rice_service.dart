@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class RiceService {
-  final String baseUrl = "https://ricemart.sandbox.pk/api";
+  final String baseUrl = "http://ricemart.sandbox.pk/api";
 
   Future<Map<String, dynamic>> addRice({
     required String token,
