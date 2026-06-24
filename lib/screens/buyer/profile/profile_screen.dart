@@ -391,19 +391,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
 
-        // Seller Dashboard — anyone who has a shop
-        if (_hasShop)
-          SizedBox(
-            height: 55,
-            child: ElevatedButton.icon(
-              onPressed: () => Get.toNamed(AppRoutes.sellerDashboard),
-              icon: const Icon(Icons.dashboard),
-              label: const Text("Seller Dashboard"),
-            ),
-          ),
-
-        const SizedBox(height: 14),
-
         // Logout
         SizedBox(
           height: 55,
