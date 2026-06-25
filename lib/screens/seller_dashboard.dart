@@ -6,6 +6,7 @@ import '../core/services/auth_service.dart';
 import 'seller/seller_orders_screen.dart';
 import 'seller/seller_shop_screen.dart';
 import 'seller/seller_conversations_screen.dart';
+import 'seller/seller_products_screen.dart';
 
 class SellerDashboard extends StatefulWidget {
   const SellerDashboard({super.key});
@@ -302,9 +303,17 @@ class _HomePage extends StatelessWidget {
 class _RicePage extends StatelessWidget {
   const _RicePage();
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: AppDecorations.gradientBackground,
-      );
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: AppDecorations.gradientBackground,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + kToolbarHeight,
+        ),
+        child: const SellerProductsScreen(),
+      ),
+    );
+  }
 }
 
 class _MyShopPage extends StatelessWidget {

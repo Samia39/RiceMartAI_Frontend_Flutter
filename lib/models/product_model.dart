@@ -1,4 +1,4 @@
-class Product {
+class ProductModel {
   final int id;
   final int sellerId;
   final int? shopId;
@@ -10,7 +10,7 @@ class Product {
   final String category;
   final String status;
 
-  Product({
+  ProductModel({
     required this.id,
     required this.sellerId,
     this.shopId,
@@ -23,15 +23,17 @@ class Product {
     required this.status,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    return ProductModel(
       id: json['id'],
       sellerId: json['seller_id'],
       shopId: json['shop_id'],
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       price: double.parse(json['price'].toString()),
-      stock: json['stock'],
+      stock: json['stock'] is int
+          ? json['stock']
+          : int.parse(json['stock'].toString()),
       image: json['image'],
       category: json['category'] ?? 'rice',
       status: json['status'] ?? 'pending',

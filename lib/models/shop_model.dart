@@ -1,4 +1,5 @@
 import 'product_model.dart';
+
 class Shop {
   final int id;
   final int sellerId;
@@ -12,7 +13,7 @@ class Shop {
   final String? cnicNumber;
   final String? cnicImage;
   final String? sellerName;
-  final List<Product> products;
+  final List<ProductModel> products; // ← FIX: String? → List<ProductModel>
 
   Shop({
     required this.id,
@@ -46,7 +47,7 @@ class Shop {
       sellerName: json['seller'] != null ? json['seller']['name'] : null,
       products: json['products'] != null
           ? (json['products'] as List)
-              .map((e) => Product.fromJson(e))
+              .map((e) => ProductModel.fromJson(e))
               .toList()
           : [],
     );
