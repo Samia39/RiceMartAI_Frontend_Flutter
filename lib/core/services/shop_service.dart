@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import '../constants/app_icons.dart';
 
 class ShopService {
-  static const String baseUrl = "http://ricemart.sandbox.pk/api";
+  static const String baseUrl = BaseUrl.url;
 
   // create shop
   Future<Map<String, dynamic>> createShop({

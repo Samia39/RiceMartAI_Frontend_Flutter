@@ -13,7 +13,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  // Arguments passed via Get.toNamed(AppRoutes.chat, arguments: {...})
   int get conversationId => (Get.arguments as Map)["conversation_id"] as int;
   String get otherName =>
       (Get.arguments as Map)["other_name"] as String? ?? "Chat";
@@ -26,15 +25,12 @@ class _ChatScreenState extends State<ChatScreen> {
   bool isSending = false;
   Timer? _pollTimer;
 
-  // Current user's id (stored in GetStorage on login)
   int get myUserId => GetStorage().read("user_id") ?? 0;
 
   @override
   void initState() {
     super.initState();
     fetchMessages();
-
-    // Poll every 5 seconds
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       fetchMessages(silent: true);
     });
@@ -60,7 +56,6 @@ class _ChatScreenState extends State<ChatScreen> {
         isLoading = false;
       });
 
-      // Scroll to bottom when new messages arrive
       if (data.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
@@ -113,6 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
       decoration: AppDecorations.gradientBackground,
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: true, // ← FIX 1
         appBar: AppBar(
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,9 +123,6 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         body: Column(
           children: [
-            // =====================
-            // MESSAGES LIST
-            // =====================
             Expanded(
               child: isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -158,15 +151,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
             ),
 
-            // =====================
             // INPUT BAR
-            // =====================
             Container(
               padding: EdgeInsets.only(
                 left: 16,
                 right: 8,
                 top: 8,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+                bottom:
+                    MediaQuery.of(context).viewPadding.bottom + 8, // ← FIX 2
               ),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -233,9 +225,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-// ============================================================
-// MESSAGE BUBBLE WIDGET
-// ============================================================
 class _MessageBubble extends StatelessWidget {
   final String body;
   final bool isMine;

@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../constants/app_icons.dart';
+import 'package:http_parser/http_parser.dart';
 
 class ProductService {
-  final String baseUrl = "http://ricemart.sandbox.pk/api";
+  final String baseUrl = BaseUrl.url;
 
   // =========================
   // FETCH ACTIVE CATEGORIES

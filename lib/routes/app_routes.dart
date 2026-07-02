@@ -30,6 +30,8 @@ class AppRoutes {
 
   // Seller Edit Shop
   static const editShop = "/edit-shop";
+  static const myShop = "/my-shop";
+  static const addProduct = "/add-product";
 
   // =========================
   // ADMIN DASHBOARD

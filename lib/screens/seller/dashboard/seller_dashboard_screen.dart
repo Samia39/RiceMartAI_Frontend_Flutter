@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/buyer/home/home_screen.dart';
+import 'package:frontend/screens/seller/dashboard/seller_home.dart';
 import 'package:frontend/screens/chats/conversation.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -22,11 +22,17 @@ class SellerDashboardScreen extends StatefulWidget {
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   int currentIndex = 0;
 
+  // Called by SellerHomeScreen buttons and SellerDrawer to switch tabs
+  void _switchTab(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final box = GetStorage();
     final shopStatus = box.read('shop_status');
-    final hasShop = box.read('has_shop') ?? false;
 
     // =========================
     // SHOP PENDING STATE
@@ -51,7 +57,9 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     // SCREENS (PERMISSION BASED)
     // =========================
     final List<Widget> screens = [
-      const HomeScreen(),
+      // HOME — passes _switchTab so dashboard buttons can change tabs
+      SellerHomeScreen(onTabChange: _switchTab),
+
       // ADD RICE (permission required)
       PermissionService.hasPermission('create products')
           ? const AddRiceScreen()
@@ -63,6 +71,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           : const _NoAccess(),
 
       ConversationsScreen(),
+
       // ORDERS (permission required)
       PermissionService.hasPermission('view orders')
           ? const SellerOrdersScreen()
@@ -79,41 +88,25 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
 
         appBar: AppBar(title: const Text("Seller Dashboard")),
 
-        drawer: SellerDrawer(
-          onTabSelected: (index) {
-            setState(() {
-              currentIndex = index;
-            });
-          },
-        ),
+        drawer: SellerDrawer(onTabSelected: _switchTab),
 
         body: screens[currentIndex],
 
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: currentIndex,
-          onTap: (index) {
-            setState(() {
-              currentIndex = index;
-            });
-          },
-
+          onTap: _switchTab,
           selectedItemColor: AppColors.darkGreen,
           unselectedItemColor: AppColors.darkGreen.withOpacity(0.5),
           type: BottomNavigationBarType.fixed,
-
           items: const [
             BottomNavigationBarItem(icon: Icon(AppIcons.home), label: "Home"),
-
             BottomNavigationBarItem(icon: Icon(Icons.rice_bowl), label: "Rice"),
-
             BottomNavigationBarItem(icon: Icon(Icons.store), label: "My Shop"),
             BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
-
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_bag),
               label: "Orders",
             ),
-
             BottomNavigationBarItem(
               icon: Icon(AppIcons.profile),
               label: "Profile",

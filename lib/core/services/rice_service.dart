@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../constants/app_icons.dart';
 
 class RiceService {
-  static const String baseUrl = "https://ricemart.sandbox.pk/api";
+  static const String baseUrl = BaseUrl.url;
 
   Future<Map<String, dynamic>> addRice({
     required String token,

@@ -1,10 +1,11 @@
 import 'package:http/http.dart' as http;
 import 'package:get_storage/get_storage.dart';
+import '../constants/app_icons.dart';
 
 class ReviewService {
   final box = GetStorage();
 
-  static const String baseUrl = "https://ricemart.sandbox.pk/api";
+  static const String baseUrl = BaseUrl.url;
 
   Future<bool> submitReview({
     required int orderItemId,

@@ -3,6 +3,8 @@ import 'package:frontend/screens/auth/otp_verification.dart';
 import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import 'package:frontend/screens/chats/chat.dart';
 import 'package:frontend/screens/chats/conversation.dart';
+import 'package:frontend/screens/seller/rice/add_rice_screen.dart';
+import 'package:frontend/screens/seller/shop/my_shop_screen.dart';
 import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';
@@ -140,6 +142,18 @@ class AppPages {
       name: AppRoutes.editShop,
       page: () => const EditShopScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('manage shop')],
+    ),
+
+    GetPage(
+      name: AppRoutes.myShop,
+      page: () => const MyShopScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view shop')],
+    ),
+
+    GetPage(
+      name: AppRoutes.addProduct,
+      page: () => const AddRiceScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('add product')],
     ),
 
     // =========================

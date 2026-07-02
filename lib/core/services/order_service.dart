@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import '../constants/app_icons.dart';
 
 class OrderService {
   final box = GetStorage();
-  final String baseUrl = "https://ricemart.sandbox.pk/api";
+  final String baseUrl = BaseUrl.url;
 
   // =========================
   // CHECKOUT API CALL

@@ -9,15 +9,9 @@ import '../../../core/services/cart_service.dart';
 
 class AllRiceScreen extends StatefulWidget {
   final VoidCallback? onCartUpdated;
-
-  // ✅ NEW: optional pre-filter from AI result
   final String? initialSearchQuery;
 
-  const AllRiceScreen({
-    super.key,
-    this.onCartUpdated,
-    this.initialSearchQuery, // pass rice_type from AIResultScreen
-  });
+  const AllRiceScreen({super.key, this.onCartUpdated, this.initialSearchQuery});
 
   @override
   State<AllRiceScreen> createState() => _AllRiceScreenState();
@@ -26,10 +20,11 @@ class AllRiceScreen extends StatefulWidget {
 class _AllRiceScreenState extends State<AllRiceScreen> {
   List<Map<String, dynamic>> productList = [];
   List<Map<String, dynamic>> filteredProducts = [];
-
   bool isLoading = true;
-
   final searchController = TextEditingController();
+
+  // ✅ Base URL for images
+  final String imageBaseUrl = "http://ricemart.sandbox.pk/storage/";
 
   @override
   void initState() {
@@ -43,12 +38,17 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   Future<void> fetchProducts() async {
     final data = await ProductService().fetchAllProducts();
 
+    // ✅ Debug: print keys to confirm image field name
+    if (data.isNotEmpty) {
+      debugPrint("Product keys: ${data.first.keys}");
+      debugPrint("Sample product: ${data.first}");
+    }
+
     setState(() {
       productList = data;
       isLoading = false;
     });
 
-    // ✅ After fetch: apply AI filter if passed
     if (widget.initialSearchQuery != null &&
         widget.initialSearchQuery!.isNotEmpty) {
       searchController.text = widget.initialSearchQuery!;
@@ -78,9 +78,32 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   }
 
   // =========================
+  // HELPER: Build image URL
+  // =========================
+  String? _getImageUrl(Map<String, dynamic> product) {
+    // Try common field names your API might use
+    final raw =
+        product["image"] ??
+        product["image_url"] ??
+        product["photo"] ??
+        product["thumbnail"] ??
+        product["img"];
+
+    if (raw == null || raw.toString().trim().isEmpty) return null;
+
+    final str = raw.toString().trim();
+    if (str.startsWith("http://") || str.startsWith("https://")) {
+      return str;
+    }
+    return "$imageBaseUrl$str";
+  }
+
+  // =========================
   // PRODUCT CARD
   // =========================
   Widget productCard(Map<String, dynamic> product, double imageHeight) {
+    final imageUrl = _getImageUrl(product);
+
     return GestureDetector(
       onTap: () async {
         final result = await Get.toNamed(
@@ -107,22 +130,54 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // IMAGE
-            Container(
-              height: imageHeight,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.cream,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(18),
-                ),
+            // ✅ IMAGE
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
               ),
-              child: const Icon(
-                Icons.rice_bowl,
-                size: 50,
-                color: AppColors.darkGreen,
+              child: Container(
+                height: imageHeight,
+                width: double.infinity,
+                color: AppColors.cream,
+                child: imageUrl != null
+                    ? Image.network(
+                        imageUrl,
+                        height: imageHeight,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: progress.expectedTotalBytes != null
+                                  ? progress.cumulativeBytesLoaded /
+                                        progress.expectedTotalBytes!
+                                  : null,
+                              strokeWidth: 2,
+                              color: AppColors.darkGreen,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                            child: Icon(
+                              Icons.rice_bowl,
+                              size: 50,
+                              color: AppColors.darkGreen,
+                            ),
+                          );
+                        },
+                      )
+                    : const Center(
+                        child: Icon(
+                          Icons.rice_bowl,
+                          size: 50,
+                          color: AppColors.darkGreen,
+                        ),
+                      ),
               ),
             ),
+
             // CONTENT
             Expanded(
               child: Padding(
@@ -227,7 +282,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("Rice Marketplace"),
-          // ✅ Show active filter badge in appbar
           bottom:
               widget.initialSearchQuery != null &&
                   widget.initialSearchQuery!.isNotEmpty &&
@@ -268,7 +322,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              // Clear filter
                               GestureDetector(
                                 onTap: () {
                                   searchController.clear();
@@ -328,7 +381,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                           "No products found",
                           style: AppTextStyles.bodyLarge,
                         ),
-                        // ✅ If AI filter active + no results
                         if (widget.initialSearchQuery != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),

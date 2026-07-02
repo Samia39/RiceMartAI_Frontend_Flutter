@@ -157,6 +157,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
       return;
     }
+
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         title: const Text("Confirm Order"),
@@ -214,7 +215,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           snackPosition: SnackPosition.TOP,
         );
 
-        Get.offAllNamed(AppRoutes.myOrders);
+        // ✅ FIXED: Go to dashboard first, then push myOrders
+        // Now back button on MyOrders will return to dashboard
+        Get.offAllNamed(AppRoutes.dashboard);
+        Get.toNamed(AppRoutes.myOrders);
       } else {
         Get.snackbar(
           "Error",

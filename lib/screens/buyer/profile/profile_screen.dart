@@ -148,10 +148,127 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // ── Step 1: Request deletion OTP ─────────────────────────
+  Future<void> _requestAccountDeletion() async {
+    final confirmed = await Get.defaultDialog<bool>(
+      title: "Delete Account",
+      middleText:
+          "This will permanently delete your account.\n\nAn OTP will be sent to $_email to confirm.",
+      textConfirm: "Send OTP",
+      textCancel: "Cancel",
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.red,
+      onConfirm: () => Get.back(result: true),
+      onCancel: () => Get.back(result: false),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _service.requestAccountDeletion();
+      Get.snackbar(
+        "OTP Sent",
+        "Check your email for the deletion OTP.",
+        backgroundColor: Colors.blue.withOpacity(0.85),
+        colorText: Colors.white,
+      );
+      _showOtpDeletionDialog();
+    } catch (e) {
+      _showError(e.toString().replaceAll("Exception: ", ""));
+    }
+  }
+
+  // ── Step 2: OTP dialog + confirm deletion ─────────────────
+  void _showOtpDeletionDialog() {
+    final otpController = TextEditingController();
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setDialogState) {
+          bool isDeleting = false;
+
+          return AlertDialog(
+            title: const Text("Confirm Deletion"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Enter the OTP sent to your email to permanently delete your account.",
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: otpController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  decoration: const InputDecoration(
+                    hintText: "Enter 6-digit OTP",
+                    prefixIcon: Icon(Icons.lock_outline),
+                    counterText: '',
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isDeleting ? null : () => Get.back(),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: isDeleting
+                    ? null
+                    : () async {
+                        final otp = otpController.text.trim();
+
+                        if (otp.isEmpty || otp.length < 6) {
+                          _showError("Please enter the 6-digit OTP.");
+                          return;
+                        }
+
+                        setDialogState(() => isDeleting = true);
+
+                        try {
+                          await _service.confirmAccountDeletion(otp);
+                          Get.back();
+                          Get.snackbar(
+                            "Deleted",
+                            "Your account has been deleted.",
+                            backgroundColor: Colors.red.withOpacity(0.85),
+                            colorText: Colors.white,
+                          );
+                          _service.clearSession();
+                          Get.offAllNamed(AppRoutes.login);
+                        } catch (e) {
+                          setDialogState(() => isDeleting = false);
+                          _showError(
+                            e.toString().replaceAll("Exception: ", ""),
+                          );
+                        }
+                      },
+                child: isDeleting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text("Delete My Account"),
+              ),
+            ],
+          );
+        },
+      ),
+      barrierDismissible: false,
+    );
+  }
+
   // ── Helper ───────────────────────────────────────────────
   void _showError(String msg) {
     Get.snackbar(
-      "Validation Error",
+      "Error",
       msg,
       backgroundColor: Colors.red.withOpacity(0.85),
       colorText: Colors.white,
@@ -206,7 +323,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 10),
 
-          // Verified / Unverified badge
           if (_isVerified)
             _badge(label: "Verified", icon: Icons.verified, color: Colors.green)
           else
@@ -381,7 +497,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 10),
 
         // Become Seller — customer with no shop
-        if (_role.toLowerCase() == 'customer' && !_hasShop)
+        if (_role.toLowerCase() == 'customer' && !_hasShop) ...[
           SizedBox(
             height: 55,
             child: ElevatedButton.icon(
@@ -390,19 +506,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: const Text("Become Seller"),
             ),
           ),
-
-        // Seller Dashboard — anyone who has a shop
-        if (_hasShop)
-          SizedBox(
-            height: 55,
-            child: ElevatedButton.icon(
-              onPressed: () => Get.toNamed(AppRoutes.sellerDashboard),
-              icon: const Icon(Icons.dashboard),
-              label: const Text("Seller Dashboard"),
-            ),
-          ),
-
-        const SizedBox(height: 14),
+          const SizedBox(height: 14),
+        ],
 
         // Logout
         SizedBox(
@@ -412,6 +517,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: _logout,
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Delete Account
+        SizedBox(
+          height: 55,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+            ),
+            onPressed: _requestAccountDeletion,
+            icon: const Icon(Icons.delete_forever_outlined),
+            label: const Text("Delete Account"),
           ),
         ),
       ],

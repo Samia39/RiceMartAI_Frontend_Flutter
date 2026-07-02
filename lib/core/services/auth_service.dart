@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../constants/app_icons.dart';
 
 class AuthService {
-  static const baseUrl = "http://ricemart.sandbox.pk/api";
+  static const baseUrl = BaseUrl.url;
 
   // LOGIN
   static Future<Map<String, dynamic>> login(

@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../constants/app_icons.dart';
 
 class AiRecommendationService {
-  final String baseUrl = "http://ricemart.sandbox.pk/api";
+  final String baseUrl = BaseUrl.url;
 
   // =========================
   // GET AI RECOMMENDATION

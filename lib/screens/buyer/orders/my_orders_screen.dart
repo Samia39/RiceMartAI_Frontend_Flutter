@@ -63,7 +63,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
         appBar: AppBar(
           title: const Text("My Orders"),
-
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           bottom: TabBar(
             controller: tabController,
 

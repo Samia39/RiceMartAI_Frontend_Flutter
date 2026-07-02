@@ -98,7 +98,7 @@ class SellerDrawer extends StatelessWidget {
               Navigator.pop(context);
 
               // ORDERS TAB
-              onTabSelected(3);
+              onTabSelected(4);
             },
           ),
 
@@ -113,7 +113,7 @@ class SellerDrawer extends StatelessWidget {
               Navigator.pop(context);
 
               // PROFILE TAB
-              onTabSelected(4);
+              onTabSelected(5);
             },
           ),
 

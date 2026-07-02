@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
 import '../../../core/services/auth_service.dart';
 
 class ProfileService {
@@ -59,8 +61,45 @@ class ProfileService {
     );
   }
 
-  // ── Logout ───────────────────────────────────────────────
+  // ── Clear session ────────────────────────────────────────
   void clearSession() {
     _box.erase();
+  }
+
+  // ── Request account deletion OTP ─────────────────────────
+  Future<void> requestAccountDeletion() async {
+    final response = await http.post(
+      Uri.parse('${AuthService.baseUrl}/delete-account/request'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200) {
+      throw Exception(data['message'] ?? 'Something went wrong');
+    }
+  }
+
+  // ── Confirm account deletion with OTP ────────────────────
+  Future<void> confirmAccountDeletion(String otp) async {
+    final response = await http.post(
+      Uri.parse('${AuthService.baseUrl}/delete-account/confirm'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'otp': otp}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200) {
+      throw Exception(data['message'] ?? 'Something went wrong');
+    }
   }
 }
