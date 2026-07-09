@@ -10,7 +10,7 @@ import '../order/seller_orders_screen.dart';
 
 import '../../../core/utils/themes.dart';
 import '../../../core/constants/app_icons.dart';
-import '../../../core/services/permission_service.dart';
+import '../../../core/services/admin/permission_service.dart';
 import '../../../widgets/seller_drawer.dart';
 
 class SellerDashboardScreen extends StatefulWidget {
