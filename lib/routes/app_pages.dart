@@ -1,3 +1,4 @@
+import 'package:frontend/screens/admin_screens/payments/admin_payment_settings_screen.dart';
 import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import 'package:frontend/screens/chats/chat.dart';
 import 'package:frontend/screens/chats/conversation.dart';
@@ -175,6 +176,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.adminordersscreen,
       page: () => const AdminOrdersScreen(),
+    ),
+    // Admin Payment Settings
+    GetPage(
+      name: AppRoutes.adminPaymentSettings,
+      page: () => const AdminPaymentSettingsScreen(),
     ),
 
     // Admin Reports

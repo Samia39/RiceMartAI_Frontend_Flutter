@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class OrderService {
   final box = GetStorage();
-  final String baseUrl = "http://ricemart.sandbox.pk/api";
+  final String baseUrl = "http://127.0.0.1:8000/api";
 
   // =========================
   // CHECKOUT API CALL
@@ -12,6 +12,7 @@ class OrderService {
   Future<Map<String, dynamic>> checkout({
     required String customerName,
     required String phone,
+    required String city,
     required String address,
     required String paymentMethod,
     required String transactionId,
@@ -35,7 +36,7 @@ class OrderService {
       request.fields['customer_name'] = customerName;
       request.fields['phone'] = phone;
       request.fields['address'] = address;
-      request.fields['city'] = '';
+      request.fields['city'] = city;
       request.fields['payment_method'] = paymentMethod;
       request.fields['transaction_id'] = transactionId;
 

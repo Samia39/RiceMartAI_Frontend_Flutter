@@ -192,6 +192,15 @@ class AdminDrawer extends StatelessWidget {
                     Get.toNamed(AppRoutes.paymentScreen);
                   },
                 ),
+                // PAYMENT SETTINGS
+                drawerItem(
+                  icon: Icons.payment,
+                  title: "Payment Settings",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.toNamed(AppRoutes.adminPaymentSettings);
+                  },
+                ),
 
                 // REPORTS
                 drawerItem(
