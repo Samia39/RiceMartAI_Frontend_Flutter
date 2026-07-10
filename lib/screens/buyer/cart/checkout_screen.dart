@@ -333,7 +333,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
           Text(
             number.isNotEmpty ? number : "Number not set yet",
-            style: AppTextStyles.heading3.copyWith(color: AppColors.golden),
+            style: AppTextStyles.heading3.copyWith(color: AppColors.darkGreen),
           ),
 
           if (accountName.isNotEmpty) ...[
