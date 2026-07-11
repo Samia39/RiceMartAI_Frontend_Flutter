@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../core/utils/themes.dart';
-import '../../routes/app_routes.dart'; // adjust path to wherever AppRoutes lives
+import '../../routes/app_routes.dart';
 
 // ...
 class LoginScreen extends StatefulWidget {

@@ -22,25 +22,32 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   final _shopController = TextEditingController();
   final _ownerController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _cityController = TextEditingController();
   final _addressController = TextEditingController();
   final _descController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
 
-  Uint8List? cnicImage;
+  Uint8List? cnicFrontImage;
+  Uint8List? cnicBackImage;
+
   bool isLoading = false;
 
   // -----------------------
-  // Pick CNIC
+  // Pick CNIC (front or back)
   // -----------------------
-  Future<void> pickCnic() async {
+  Future<void> pickCnic(bool isFront) async {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
 
     if (file != null) {
       final bytes = await file.readAsBytes();
 
       setState(() {
-        cnicImage = bytes;
+        if (isFront) {
+          cnicFrontImage = bytes;
+        } else {
+          cnicBackImage = bytes;
+        }
       });
     }
   }
@@ -51,10 +58,10 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   Future<void> createShop() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (cnicImage == null) {
+    if (cnicFrontImage == null || cnicBackImage == null) {
       Get.snackbar(
         "Error",
-        "Upload CNIC image",
+        "Upload both sides of your CNIC",
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -73,8 +80,11 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         shopName: _shopController.text,
         ownerName: _ownerController.text,
         phone: _phoneController.text,
+        city: _cityController.text,
         address: _addressController.text,
         description: _descController.text,
+        cnicFrontImage: cnicFrontImage!,
+        cnicBackImage: cnicBackImage!,
       );
 
       setState(() {
@@ -93,6 +103,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         box.write("shop_name", _shopController.text);
         box.write("owner_name", _ownerController.text);
         box.write("phone", _phoneController.text);
+        box.write("city", _cityController.text);
         box.write("address", _addressController.text);
         box.write("description", _descController.text);
 
@@ -162,6 +173,50 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
           errorStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
         ),
       ),
+    );
+  }
+
+  // -----------------------
+  // CNIC image tile (front or back)
+  // -----------------------
+  Widget cnicImageTile({
+    required String label,
+    required Uint8List? image,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.label),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 120,
+            width: double.infinity,
+            decoration: AppDecorations.inputField,
+            child: image != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.memory(
+                      image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  )
+                : Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.upload_file, color: AppColors.iconMuted),
+                        const SizedBox(height: 6),
+                        Text("Upload $label", style: AppTextStyles.bodyMedium),
+                      ],
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -243,43 +298,18 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 15),
 
-                              GestureDetector(
-                                onTap: pickCnic,
+                              cnicImageTile(
+                                label: "CNIC Front",
+                                image: cnicFrontImage,
+                                onTap: () => pickCnic(true),
+                              ),
 
-                                child: Container(
-                                  height: 120,
-                                  width: double.infinity,
+                              const SizedBox(height: 15),
 
-                                  decoration: AppDecorations.inputField,
-
-                                  child: cnicImage != null
-                                      ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          child: Image.memory(
-                                            cnicImage!,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                          ),
-                                        )
-                                      : Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.upload_file,
-                                                color: AppColors.iconMuted,
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                "Upload CNIC Image",
-                                                style: AppTextStyles.bodyMedium,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                ),
+                              cnicImageTile(
+                                label: "CNIC Back",
+                                image: cnicBackImage,
+                                onTap: () => pickCnic(false),
                               ),
                             ],
                           ),
@@ -318,6 +348,14 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                                 hint: "Phone",
                                 icon: Icons.phone,
                                 keyboard: TextInputType.phone,
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              inputField(
+                                controller: _cityController,
+                                hint: "City",
+                                icon: Icons.location_city,
                               ),
 
                               const SizedBox(height: 12),
@@ -373,6 +411,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     _shopController.dispose();
     _ownerController.dispose();
     _phoneController.dispose();
+    _cityController.dispose();
     _addressController.dispose();
     _descController.dispose();
 

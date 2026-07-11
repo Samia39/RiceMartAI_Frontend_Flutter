@@ -391,6 +391,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
 
+        const SizedBox(height: 15),
+
         // Logout
         SizedBox(
           height: 55,
