@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/admin_screens/courier_management/courier_charge_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';
 import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
+import '../screens/admin_screens/courier_management/city_screen.dart';
 
 class AdminDrawer extends StatelessWidget {
   const AdminDrawer({super.key});
@@ -139,6 +141,48 @@ class AdminDrawer extends StatelessWidget {
                   ],
                 ),
 
+                // COURIER MaNAGEMENT
+                ExpansionTile(
+                  leading: const Icon(
+                    Icons.local_shipping,
+                    color: AppColors.darkGreen,
+                  ),
+                  title: const Text(
+                    "Courier Management",
+                    style: TextStyle(
+                      color: AppColors.darkGreen,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  childrenPadding: const EdgeInsets.only(left: 20),
+                  children: [
+                    //city screen
+                    ListTile(
+                      leading: const Icon(
+                        Icons.location_city,
+                        color: AppColors.darkGreen,
+                      ),
+                      title: const Text("Cities"),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.to(() => const CityScreen());
+                      },
+                    ),
+                    // COURIER CHARGES
+                    ListTile(
+                      leading: const Icon(
+                        Icons.attach_money,
+                        color: AppColors.darkGreen,
+                      ),
+                      title: const Text("Courier Charges"),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Get.to(() => const CourierChargeScreen());
+                      },
+                    ),
+                  ],
+                ),
+
                 // PAYMENT APPROVALS
                 drawerItem(
                   icon: Icons.pending_actions,
@@ -146,6 +190,15 @@ class AdminDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Get.toNamed(AppRoutes.paymentScreen);
+                  },
+                ),
+                // PAYMENT SETTINGS
+                drawerItem(
+                  icon: Icons.payment,
+                  title: "Payment Settings",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.toNamed(AppRoutes.adminPaymentSettings);
                   },
                 ),
 

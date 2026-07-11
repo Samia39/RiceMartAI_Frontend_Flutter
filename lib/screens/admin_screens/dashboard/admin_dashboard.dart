@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 import '../../../widgets/admin_drawer.dart';
-import '../../../core/services/permission_service.dart';
+import '../../../core/services/admin/permission_service.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});

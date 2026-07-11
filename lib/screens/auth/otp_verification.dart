@@ -31,6 +31,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final args = Get.arguments as Map<String, dynamic>?;
     email = args?['email'] ?? '';
     startTimer();
+
+    // Auto-focus first box when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(focusNodes[0]);
+    });
   }
 
   void startTimer() {
@@ -84,6 +89,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       var response = await AuthService.resendOtp(email);
       Get.snackbar("Success", response['message'] ?? "OTP resent");
       startTimer();
+
+      // Clear all boxes and re-focus first box
+      for (var c in otpControllers) {
+        c.clear();
+      }
+      FocusScope.of(context).requestFocus(focusNodes[0]);
     } catch (e) {
       Get.snackbar("Error", e.toString().replaceAll("Exception: ", ""));
     } finally {
@@ -103,19 +114,47 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           textAlign: TextAlign.center,
           keyboardType: TextInputType.number,
           maxLength: 1,
-          style: AppTextStyles.heading2,
+
+          // FIX 1: explicit style so text is always visible
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkGreen,
+          ),
+
+          // FIX 2: fully override theme decoration — no fill conflict
           decoration: const InputDecoration(
             counterText: '',
             border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            filled: true,
+            fillColor: Colors.transparent,
+            contentPadding: EdgeInsets.symmetric(vertical: 14),
           ),
+
+          // FIX 3: select all text on tap so re-typing replaces old digit
+          onTap: () {
+            otpControllers[index].selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: otpControllers[index].text.length,
+            );
+          },
+
           onChanged: (value) {
-            if (value.isNotEmpty && index < 5) {
-              FocusScope.of(context).requestFocus(focusNodes[index + 1]);
-            } else if (value.isEmpty && index > 0) {
-              FocusScope.of(context).requestFocus(focusNodes[index - 1]);
-            }
-            if (index == 5 && value.isNotEmpty) {
-              FocusScope.of(context).unfocus();
+            if (value.isNotEmpty) {
+              // digit typed — move to next box
+              if (index < 5) {
+                FocusScope.of(context).requestFocus(focusNodes[index + 1]);
+              } else {
+                // last box — close keyboard
+                FocusScope.of(context).unfocus();
+              }
+            } else {
+              // digit deleted (backspace) — go back to previous box
+              if (index > 0) {
+                FocusScope.of(context).requestFocus(focusNodes[index - 1]);
+              }
             }
           },
         ),
@@ -126,6 +165,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -137,24 +177,63 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  SizedBox(height: screenHeight * 0.06),
+
+                  // Lock icon
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: AppColors.cream.withOpacity(0.30),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.borderGold.withOpacity(0.50),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.mark_email_read_outlined,
+                      size: 38,
+                      color: AppColors.darkGreen,
+                    ),
+                  ),
+
+                  SizedBox(height: screenHeight * 0.025),
+
+                  // Title
                   Text(
                     "Verify Your Email",
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.heading1.copyWith(fontSize: 20),
+                    style: AppTextStyles.heading1.copyWith(fontSize: 22),
                   ),
+
                   const SizedBox(height: 10),
+
+                  // Subtitle — shows the email
                   Text(
-                    "We sent a 6-digit code to\n$email",
+                    "We sent a 6-digit code to",
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodyMedium,
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 4),
+                  Text(
+                    email,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.label.copyWith(
+                      color: Color.fromARGB(255, 0, 0, 12),
+                    ),
+                  ),
+
+                  SizedBox(height: screenHeight * 0.04),
+
+                  // OTP boxes
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(6, buildOtpBox),
                   ),
-                  const SizedBox(height: 30),
+
+                  SizedBox(height: screenHeight * 0.04),
+
+                  // Verify button
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -166,14 +245,29 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               height: 22,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text("Verify"),
+                          : const Text("Verify OTP"),
                     ),
                   ),
-                  const SizedBox(height: 20),
+
+                  SizedBox(height: screenHeight * 0.025),
+
+                  // Resend OTP
                   secondsLeft > 0
-                      ? Text(
-                          "Resend OTP in $secondsLeft s",
-                          style: AppTextStyles.bodyMedium,
+                      ? RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: AppTextStyles.bodyMedium,
+                            children: [
+                              const TextSpan(text: "Resend OTP in "),
+                              TextSpan(
+                                text: "$secondsLeft s",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 0, 0, 12),
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       : GestureDetector(
                           onTap: isResending ? null : resendOtp,
@@ -181,9 +275,26 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             isResending ? "Resending..." : "Resend OTP",
                             style: AppTextStyles.bodyLarge.copyWith(
                               decoration: TextDecoration.underline,
+                              color: Color.fromARGB(255, 0, 0, 12),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
+
+                  SizedBox(height: screenHeight * 0.02),
+
+                  // Back to register
+                  GestureDetector(
+                    onTap: () => Get.back(),
+                    child: Text(
+                      " Back",
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: screenHeight * 0.03),
                 ],
               ),
             ),

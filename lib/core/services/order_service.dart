@@ -13,6 +13,7 @@ class OrderService {
   Future<Map<String, dynamic>> checkout({
     required String customerName,
     required String phone,
+    required String city,
     required String address,
     required String paymentMethod,
     required String transactionId,
@@ -36,7 +37,7 @@ class OrderService {
       request.fields['customer_name'] = customerName;
       request.fields['phone'] = phone;
       request.fields['address'] = address;
-      request.fields['city'] = '';
+      request.fields['city'] = city;
       request.fields['payment_method'] = paymentMethod;
       request.fields['transaction_id'] = transactionId;
 

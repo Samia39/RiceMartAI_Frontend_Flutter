@@ -18,6 +18,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
   final shopController = TextEditingController();
   final ownerController = TextEditingController();
   final phoneController = TextEditingController();
+  final cityController = TextEditingController();
   final addressController = TextEditingController();
   final descriptionController = TextEditingController();
 
@@ -39,6 +40,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
     shopController.text = box.read("shop_name") ?? "";
     ownerController.text = box.read("owner_name") ?? "";
     phoneController.text = box.read("phone") ?? "";
+    cityController.text = box.read("city") ?? "";
     addressController.text = box.read("address") ?? "";
     descriptionController.text = box.read("description") ?? "";
   }
@@ -68,6 +70,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
       shopName: shopController.text,
       ownerName: ownerController.text,
       phone: phoneController.text,
+      city: cityController.text,
       address: addressController.text,
       description: descriptionController.text,
     );
@@ -180,6 +183,14 @@ class _EditShopScreenState extends State<EditShopScreen> {
                 const SizedBox(height: 14),
 
                 inputField(
+                  controller: cityController,
+                  hint: "City",
+                  icon: Icons.location_city,
+                ),
+
+                const SizedBox(height: 14),
+
+                inputField(
                   controller: descriptionController,
                   hint: "Description",
                   icon: Icons.info,
@@ -216,6 +227,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
     ownerController.dispose();
     phoneController.dispose();
     addressController.dispose();
+    cityController.dispose();
     descriptionController.dispose();
 
     super.dispose();

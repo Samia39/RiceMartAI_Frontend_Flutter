@@ -1,43 +1,74 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import '../constants/app_icons.dart';
 
 class ShopService {
+<<<<<<< HEAD
   static const String baseUrl = BaseUrl.url;
+=======
+  final String baseUrl = "http://127.0.0.1:8000/api";
+>>>>>>> cc899ecb5abbfee9fb35d7039704424dd3eda3c9
 
-  // create shop
+  // =========================
+  // CREATE SHOP
+  // (multipart — required so the CNIC front/back images actually
+  // reach the backend; a plain JSON POST can't carry files)
+  // =========================
   Future<Map<String, dynamic>> createShop({
     required String token,
     required String cnic,
     required String shopName,
     required String ownerName,
     required String phone,
+    required String city,
     required String address,
     required String description,
+    required Uint8List cnicFrontImage,
+    required Uint8List cnicBackImage,
+    String? cnicFrontFileName,
+    String? cnicBackFileName,
   }) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/shops"),
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/shops"));
 
-      headers: {
+      request.headers.addAll({
         "Authorization": "Bearer $token",
         "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
+      });
 
-      body: jsonEncode({
-        "cnic": cnic,
-        "shop_name": shopName,
-        "owner_name": ownerName,
-        "phone": phone,
-        "address": address,
-        "description": description,
-        "status": "pending",
-        "is_approved": 0,
-      }),
-    );
+      request.fields['cnic'] = cnic;
+      request.fields['shop_name'] = shopName;
+      request.fields['owner_name'] = ownerName;
+      request.fields['phone'] = phone;
+      request.fields['city'] = city;
+      request.fields['address'] = address;
+      request.fields['description'] = description;
 
-    return jsonDecode(response.body);
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'cnic_image',
+          cnicFrontImage,
+          filename: cnicFrontFileName ?? "cnic_front.jpg",
+        ),
+      );
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'cnic_back_image',
+          cnicBackImage,
+          filename: cnicBackFileName ?? "cnic_back.jpg",
+        ),
+      );
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      return jsonDecode(responseBody);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 
   // fetch pending shops for admin
@@ -101,7 +132,34 @@ class ShopService {
   }
 
   // =========================
+  // ADMIN REQUEST CORRECTION
+  // =========================
+  Future<Map<String, dynamic>> requestCorrection({
+    required String token,
+    required int shopId,
+    required String reason,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/shops/$shopId/request-correction"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"reason": reason}),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  // =========================
   // UPDATE SHOP
+  // (multipart — CNIC images are optional here; only attached if the
+  // seller actually picks a replacement while resubmitting)
   // =========================
   Future<Map<String, dynamic>> updateShop({
     required String token,
@@ -109,31 +167,64 @@ class ShopService {
     required String shopName,
     required String ownerName,
     required String phone,
+    required String city,
     required String address,
     required String description,
+    Uint8List? cnicFrontImage,
+    Uint8List? cnicBackImage,
+    String? cnicFrontFileName,
+    String? cnicBackFileName,
   }) async {
-    final response = await http.put(
-      Uri.parse("$baseUrl/shops/$shopId"),
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$baseUrl/shops/$shopId"),
+      );
 
-      headers: {
+      // Laravel doesn't parse multipart bodies on native PUT requests,
+      // so we POST with a _method override, which Laravel's built-in
+      // method-spoofing middleware reads and treats as PUT.
+      request.fields['_method'] = 'PUT';
+
+      request.headers.addAll({
         "Authorization": "Bearer $token",
         "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
+      });
 
-      body: jsonEncode({
-        "shop_name": shopName,
-        "owner_name": ownerName,
-        "phone": phone,
-        "address": address,
-        "description": description,
-      }),
-    );
+      request.fields['shop_name'] = shopName;
+      request.fields['owner_name'] = ownerName;
+      request.fields['phone'] = phone;
+      request.fields['city'] = city;
+      request.fields['address'] = address;
+      request.fields['description'] = description;
 
-    print(response.statusCode);
-    print(response.body);
+      if (cnicFrontImage != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'cnic_image',
+            cnicFrontImage,
+            filename: cnicFrontFileName ?? "cnic_front.jpg",
+          ),
+        );
+      }
 
-    return jsonDecode(response.body);
+      if (cnicBackImage != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'cnic_back_image',
+            cnicBackImage,
+            filename: cnicBackFileName ?? "cnic_back.jpg",
+          ),
+        );
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      return jsonDecode(responseBody);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 
   // =========================

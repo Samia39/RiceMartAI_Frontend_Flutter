@@ -5,7 +5,11 @@ import 'package:http/http.dart' as http;
 import '../../constants/app_icons.dart';
 
 class AdminService {
+<<<<<<< HEAD
   final String baseUrl = BaseUrl.url;
+=======
+  final String baseUrl = "http://127.0.0.1:8000/api";
+>>>>>>> cc899ecb5abbfee9fb35d7039704424dd3eda3c9
 
   final box = GetStorage();
 
