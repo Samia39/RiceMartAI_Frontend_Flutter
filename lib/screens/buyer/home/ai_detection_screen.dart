@@ -383,47 +383,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
                 const SizedBox(height: 20),
 
-                // ── Platform badge ────────────────────────
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.darkGreen.withOpacity(0.55),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _isDesktop
-                              ? Icons.computer
-                              : kIsWeb
-                              ? Icons.web
-                              : Icons.smartphone,
-                          color: AppColors.cream,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _isDesktop
-                              ? "Desktop Mode"
-                              : kIsWeb
-                              ? "Web Mode"
-                              : "Mobile Mode",
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.cream,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
                 // ── Image / Camera Preview ────────────────
                 Stack(
                   children: [

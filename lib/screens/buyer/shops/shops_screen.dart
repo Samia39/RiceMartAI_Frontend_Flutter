@@ -163,20 +163,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
 
                                   const SizedBox(height: 8),
 
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.phone),
-
-                                      const SizedBox(width: 8),
-
-                                      Text(
-                                        shop["phone"] ?? "",
-
-                                        style: AppTextStyles.bodyLarge,
-                                      ),
-                                    ],
-                                  ),
-
                                   const SizedBox(height: 8),
 
                                   Row(

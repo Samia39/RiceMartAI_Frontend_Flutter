@@ -47,7 +47,6 @@ class AIResultScreen extends StatelessWidget {
     final bool isRice = result['is_rice'] ?? false;
     final String riceType = result['rice_type'] ?? 'Unknown';
     final String quality = result['quality'] ?? 'unknown';
-    final int score = (result['quality_score'] ?? 0).toInt();
     final double confidence = ((result['confidence'] ?? 0) * 100).toDouble();
     final List observations = result['observations'] ?? [];
     final List defects = result['defects'] ?? [];
@@ -144,55 +143,26 @@ class AIResultScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  // ── Score bar ──
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: AppDecorations.card,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Quality Score', style: AppTextStyles.label),
-                            Text(
-                              '$score / 100',
-                              style: AppTextStyles.label.copyWith(
-                                color: _qualityColor(quality),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: score / 100,
-                            minHeight: 14,
-                            backgroundColor: AppColors.darkGreen.withOpacity(
-                              0.10,
-                            ),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              _qualityColor(quality),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
                   // ✅ ══════════════ SHOP THIS RICE BUTTON ══════════════
                   if (canSearch)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.golden.withOpacity(0.15),
+                        color: const Color.fromARGB(
+                          255,
+                          22,
+                          22,
+                          21,
+                        ).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.golden.withOpacity(0.50),
+                          color: const Color.fromARGB(
+                            255,
+                            23,
+                            23,
+                            21,
+                          ).withOpacity(0.50),
                         ),
                       ),
                       child: Column(
@@ -204,7 +174,7 @@ class AIResultScreen extends StatelessWidget {
                               Icon(
                                 Icons.storefront_outlined,
                                 size: 16,
-                                color: AppColors.golden,
+                                color: const Color.fromARGB(255, 16, 15, 15),
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -315,10 +285,20 @@ class AIResultScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.golden.withOpacity(0.15),
+                      color: const Color.fromARGB(
+                        255,
+                        32,
+                        31,
+                        30,
+                      ).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.golden.withOpacity(0.45),
+                        color: const Color.fromARGB(
+                          255,
+                          19,
+                          19,
+                          18,
+                        ).withOpacity(0.45),
                       ),
                     ),
                     child: Row(
@@ -326,7 +306,7 @@ class AIResultScreen extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.lightbulb_outline,
-                          color: AppColors.golden,
+                          color: const Color.fromARGB(255, 28, 27, 26),
                           size: 20,
                         ),
                         const SizedBox(width: 10),
@@ -337,7 +317,7 @@ class AIResultScreen extends StatelessWidget {
                               Text(
                                 'Recommendation',
                                 style: AppTextStyles.label.copyWith(
-                                  color: AppColors.golden,
+                                  color: const Color.fromARGB(255, 20, 20, 19),
                                 ),
                               ),
                               const SizedBox(height: 6),

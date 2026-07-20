@@ -64,37 +64,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
                     decoration: AppDecorations.card,
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: Image.network(
-                            "https://images.unsplash.com/photo-1516684732162-798a0062be99",
-                            width: 90,
-                            height: 90,
-                            fit: BoxFit.cover,
+                        Text(
+                          "Welcome 👋",
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.darkGreen.withOpacity(0.75),
                           ),
                         ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Welcome 👋",
-                                style: AppTextStyles.bodyLarge.copyWith(
-                                  color: AppColors.darkGreen.withOpacity(0.75),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(userName, style: AppTextStyles.heading2),
-                              const SizedBox(height: 6),
-                              Text(
-                                "Explore Smart Rice AI",
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 6),
+                        Text(userName, style: AppTextStyles.heading2),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Explore Smart Rice AI",
+                          style: AppTextStyles.bodyMedium,
                         ),
                       ],
                     ),

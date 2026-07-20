@@ -90,11 +90,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "Phone: ${shop["phone"]}",
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
                       "Address: ${shop["address"]}",
                       style: AppTextStyles.bodyLarge,
                     ),

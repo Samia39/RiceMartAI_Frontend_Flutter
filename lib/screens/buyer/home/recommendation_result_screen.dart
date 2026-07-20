@@ -39,7 +39,12 @@ class AiRecommendationResultScreen extends StatelessWidget {
                   color: AppColors.darkGreen.withOpacity(0.10),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.borderGold.withOpacity(0.50),
+                    color: const Color.fromARGB(
+                      255,
+                      11,
+                      11,
+                      10,
+                    ).withOpacity(0.50),
                   ),
                 ),
                 child: Row(
@@ -139,7 +144,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
                         Text(
                           "Ingredients",
                           style: AppTextStyles.label.copyWith(
-                            color: AppColors.golden,
+                            color: const Color.fromARGB(255, 0, 0, 0),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -150,7 +155,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
                         Text(
                           "Steps",
                           style: AppTextStyles.label.copyWith(
-                            color: AppColors.golden,
+                            color: const Color.fromARGB(255, 5, 5, 4),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -178,7 +183,11 @@ class AiRecommendationResultScreen extends StatelessWidget {
               // ── Available Products ─────────────────────────────
               Row(
                 children: [
-                  const Icon(Icons.store, color: AppColors.golden, size: 22),
+                  const Icon(
+                    Icons.store,
+                    color: Color.fromARGB(255, 0, 0, 0),
+                    size: 22,
+                  ),
                   const SizedBox(width: 8),
                   Text("Available in Our Shop", style: AppTextStyles.heading3),
                 ],
@@ -238,12 +247,17 @@ class AiRecommendationResultScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: AppColors.golden.withOpacity(0.12),
+                              color: const Color.fromARGB(
+                                255,
+                                4,
+                                4,
+                                4,
+                              ).withOpacity(0.12),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
                               Icons.rice_bowl,
-                              color: AppColors.golden,
+                              color: Color.fromARGB(255, 0, 0, 0),
                               size: 24,
                             ),
                           ),
@@ -269,13 +283,13 @@ class AiRecommendationResultScreen extends StatelessWidget {
                                     _infoBadge(
                                       "Rs ${p["price"]} / kg",
                                       Icons.currency_rupee,
-                                      AppColors.golden,
+                                      const Color.fromARGB(255, 37, 37, 37),
                                     ),
                                     const SizedBox(width: 8),
                                     _infoBadge(
                                       "${p["stock"]} kg",
                                       Icons.inventory,
-                                      AppColors.lightGreen,
+                                      const Color.fromARGB(255, 0, 239, 100),
                                     ),
                                   ],
                                 ),
@@ -343,10 +357,14 @@ class AiRecommendationResultScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: AppColors.golden.withOpacity(0.15),
+                  color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: AppColors.golden, size: 18),
+                child: Icon(
+                  icon,
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 10),
               Text(title, style: AppTextStyles.heading4),
@@ -397,7 +415,11 @@ class AiRecommendationResultScreen extends StatelessWidget {
             children: [
               const Padding(
                 padding: EdgeInsets.only(top: 5),
-                child: Icon(Icons.circle, size: 6, color: AppColors.golden),
+                child: Icon(
+                  Icons.circle,
+                  size: 6,
+                  color: Color.fromARGB(255, 41, 41, 41),
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -426,7 +448,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
                 width: 22,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: AppColors.golden.withOpacity(0.15),
+                  color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
