@@ -13,7 +13,7 @@ class OrderService {
   Future<Map<String, dynamic>> checkout({
     required String customerName,
     required String phone,
-    required String city,
+    required int cityId,
     required String address,
     required String paymentMethod,
     required String transactionId,
@@ -37,7 +37,7 @@ class OrderService {
       request.fields['customer_name'] = customerName;
       request.fields['phone'] = phone;
       request.fields['address'] = address;
-      request.fields['city'] = city;
+      request.fields['city_id'] = cityId.toString();
       request.fields['payment_method'] = paymentMethod;
       request.fields['transaction_id'] = transactionId;
 
@@ -59,11 +59,7 @@ class OrderService {
       }
 
       final response = await request.send();
-
       final responseBody = await response.stream.bytesToString();
-
-      print(response.statusCode);
-      print(responseBody);
 
       return jsonDecode(responseBody);
     } catch (e) {

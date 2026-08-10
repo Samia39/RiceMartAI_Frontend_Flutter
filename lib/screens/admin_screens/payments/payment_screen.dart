@@ -119,6 +119,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
+  void openFullScreenImage(String imageUrl) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _FullScreenImageViewer(imageUrl: imageUrl),
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
   // =========================
   // PAYMENT STATUS COLOR (pending / paid / rejected)
   // =========================
@@ -170,6 +179,45 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
+  // =========================
+  // ORDER ITEMS LIST (product, shop, qty, price)
+  // =========================
+  Widget itemsList(List items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: items.map<Widget>((item) {
+        final product = item["product"];
+        final shop = item["shop"];
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product?["name"] ?? "Product",
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                    Text(
+                      "Shop: ${shop?["shop_name"] ?? "-"}",
+                      style: AppTextStyles.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Text("x${item["quantity"]}", style: AppTextStyles.bodySmall),
+              const SizedBox(width: 10),
+              Text("Rs ${item["price"]}", style: AppTextStyles.bodySmall),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -205,6 +253,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             final p = payments[index];
                             final order = p["order"];
                             final status = p["status"].toString();
+                            final items = (order["items"] ?? []) as List;
+
+                            final deliveryCharge =
+                                order["delivery_charge"]?.toString() ?? "0";
+                            final totalPrice =
+                                order["total_price"]?.toString() ?? "-";
+                            final subtotal =
+                                (double.tryParse(totalPrice) ?? 0) -
+                                (double.tryParse(deliveryCharge) ?? 0);
 
                             return Container(
                               margin: const EdgeInsets.only(bottom: 12),
@@ -229,12 +286,59 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                                   const SizedBox(height: 10),
 
+                                  // =========================
+                                  // CUSTOMER + DELIVERY INFO
+                                  // =========================
                                   infoRow(
                                     "Customer",
                                     order["customer_name"].toString(),
                                   ),
                                   infoRow("Phone", order["phone"].toString()),
-                                  infoRow("Amount", "Rs ${p["amount"]}"),
+                                  infoRow(
+                                    "City",
+                                    (order["city"] ?? "-").toString(),
+                                  ),
+                                  infoRow(
+                                    "Address",
+                                    (order["address"] ?? "-").toString(),
+                                  ),
+                                  infoRow(
+                                    "Order Status",
+                                    (order["status"] ?? "-").toString(),
+                                  ),
+
+                                  const SizedBox(height: 10),
+                                  Divider(color: AppColors.divider),
+                                  const SizedBox(height: 6),
+
+                                  // =========================
+                                  // ORDER ITEMS
+                                  // =========================
+                                  Text("Items", style: AppTextStyles.label),
+                                  const SizedBox(height: 6),
+                                  itemsList(items),
+
+                                  const SizedBox(height: 6),
+                                  Divider(color: AppColors.divider),
+                                  const SizedBox(height: 6),
+
+                                  // =========================
+                                  // PRICE BREAKDOWN
+                                  // =========================
+                                  infoRow(
+                                    "Subtotal",
+                                    "Rs ${subtotal.toStringAsFixed(0)}",
+                                  ),
+                                  infoRow("Delivery", "Rs $deliveryCharge"),
+                                  infoRow("Total", "Rs $totalPrice"),
+
+                                  const SizedBox(height: 6),
+                                  Divider(color: AppColors.divider),
+                                  const SizedBox(height: 6),
+
+                                  // =========================
+                                  // PAYMENT INFO
+                                  // =========================
                                   infoRow(
                                     "Method",
                                     p["payment_method"].toString(),
@@ -252,43 +356,79 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                         final imageUrl =
                                             "$imageBaseUrl/storage/${p["screenshot_path"]}";
 
-                                        return ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: AppColors.cardBorder,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Image.network(
-                                              imageUrl,
-                                              height: 180,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                    return Container(
-                                                      height: 180,
-                                                      alignment:
-                                                          Alignment.center,
+                                        return GestureDetector(
+                                          onTap: () =>
+                                              openFullScreenImage(imageUrl),
+                                          child: Stack(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
                                                       color:
-                                                          AppColors.inputFill,
-                                                      child: Text(
-                                                        "Failed to load image",
-                                                        style: AppTextStyles
-                                                            .bodySmall
-                                                            .copyWith(
-                                                              color: AppColors
-                                                                  .error,
+                                                          AppColors.cardBorder,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
+                                                  child: Image.network(
+                                                    imageUrl,
+                                                    height: 180,
+                                                    width: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) {
+                                                          return Container(
+                                                            height: 180,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            color: AppColors
+                                                                .inputFill,
+                                                            child: Text(
+                                                              "Failed to load image",
+                                                              style: AppTextStyles
+                                                                  .bodySmall
+                                                                  .copyWith(
+                                                                    color: AppColors
+                                                                        .error,
+                                                                  ),
                                                             ),
-                                                      ),
-                                                    );
-                                                  },
-                                            ),
+                                                          );
+                                                        },
+                                                  ),
+                                                ),
+                                              ),
+                                              Positioned(
+                                                right: 8,
+                                                bottom: 8,
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(
+                                                    6,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black
+                                                        .withOpacity(0.55),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.zoom_in,
+                                                    size: 18,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         );
                                       },
@@ -347,6 +487,42 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   );
                 },
               ),
+      ),
+    );
+  }
+}
+
+// =========================
+// FULL SCREEN ZOOMABLE IMAGE VIEWER
+// =========================
+class _FullScreenImageViewer extends StatelessWidget {
+  final String imageUrl;
+
+  const _FullScreenImageViewer({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          minScale: 1,
+          maxScale: 5,
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Text(
+                "Failed to load image",
+                style: TextStyle(color: Colors.white),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

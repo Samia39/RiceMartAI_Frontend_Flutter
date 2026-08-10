@@ -134,4 +134,26 @@ class CityService {
       return {"success": false, "message": e.toString()};
     }
   }
+
+  // =========================
+  // GET CITIES WITH DELIVERY CHARGES (public, for checkout)
+  // =========================
+  Future<List> getCitiesWithCharges() async {
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/cities-with-charges"),
+        headers: {"Accept": "application/json"},
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (data["success"] == true) {
+        return data["data"];
+      }
+
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
 }

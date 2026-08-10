@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/services/admin/city_service.dart';
 import '../../../core/services/cart_service.dart';
 import '../../../core/services/order_service.dart';
 import '../../../core/services/payment_service.dart';
@@ -23,7 +24,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // =========================
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
-  final cityController = TextEditingController();
+  // =========================
+  // CITY / DELIVERY
+  // =========================
+  final CityService _cityService = CityService();
+  List _cities = []; // [{id, name, code, delivery_charge}]
+  int? selectedCityId;
+  double deliveryCharge = 0;
+  bool loadingCities = true;
   final addressController = TextEditingController();
   final transactionIdController = TextEditingController();
 
@@ -67,13 +75,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     total = CartService().totalPrice();
 
     _loadPaymentSettings();
+    _loadCities();
+  }
+
+  Future<void> _loadCities() async {
+    final cities = await _cityService.getCitiesWithCharges();
+
+    if (!mounted) return;
+
+    setState(() {
+      _cities = cities;
+      loadingCities = false;
+    });
   }
 
   @override
   void dispose() {
     nameController.dispose();
     phoneController.dispose();
-    cityController.dispose();
     addressController.dispose();
     transactionIdController.dispose();
     super.dispose();
@@ -167,11 +186,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // =========================
     if (nameController.text.trim().isEmpty ||
         phoneController.text.trim().isEmpty ||
-        cityController.text.trim().isEmpty ||
+        selectedCityId == null ||
         addressController.text.trim().isEmpty) {
       Get.snackbar(
         "Error",
-        "Please fill all required fields",
+        selectedCityId == null
+            ? "Please select a delivery city"
+            : "Please fill all required fields",
         snackPosition: SnackPosition.TOP,
       );
       return;
@@ -219,7 +240,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       AlertDialog(
         title: const Text("Confirm Order"),
         content: Text(
-          "Are you sure you want to place this order for Rs ${total.toStringAsFixed(0)}?",
+          "Are you sure you want to place this order for Rs ${(total + deliveryCharge).toStringAsFixed(0)}?",
         ),
         actions: [
           TextButton(
@@ -251,7 +272,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final result = await OrderService().checkout(
         customerName: nameController.text.trim(),
         phone: phoneController.text.trim(),
-        city: cityController.text.trim(),
+        cityId: selectedCityId!,
         address: addressController.text.trim(),
         paymentMethod: paymentMethod,
         transactionId: transactionIdController.text.trim(),
@@ -397,12 +418,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       const SizedBox(height: 16),
 
                       // =========================
-                      // CITY
+                      // CITY (delivery charge dropdown)
                       // =========================
-                      TextField(
-                        controller: cityController,
-                        decoration: const InputDecoration(labelText: "City"),
-                      ),
+                      loadingCities
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Center(
+                                child: SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : DropdownButtonFormField<int>(
+                              initialValue: selectedCityId,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: "Delivery City",
+                              ),
+                              items: _cities.map<DropdownMenuItem<int>>((city) {
+                                return DropdownMenuItem<int>(
+                                  value: city['id'],
+                                  child: Text(
+                                    "${city['name']} (Rs ${city['delivery_charge']})",
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                final city = _cities.firstWhere(
+                                  (c) => c['id'] == value,
+                                  orElse: () => null,
+                                );
+                                setState(() {
+                                  selectedCityId = value;
+                                  deliveryCharge = city != null
+                                      ? double.tryParse(
+                                              city['delivery_charge']
+                                                  .toString(),
+                                            ) ??
+                                            0
+                                      : 0;
+                                });
+                              },
+                            ),
 
                       const SizedBox(height: 16),
 
@@ -477,9 +538,41 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Total", style: AppTextStyles.heading3),
+                                Text(
+                                  "Subtotal",
+                                  style: AppTextStyles.bodyMedium,
+                                ),
                                 Text(
                                   "Rs ${total.toStringAsFixed(0)}",
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Delivery",
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                Text(
+                                  "Rs ${deliveryCharge.toStringAsFixed(0)}",
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                              ],
+                            ),
+
+                            const Divider(),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Total", style: AppTextStyles.heading3),
+                                Text(
+                                  "Rs ${(total + deliveryCharge).toStringAsFixed(0)}",
                                   style: AppTextStyles.heading3,
                                 ),
                               ],
@@ -613,9 +706,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Total", style: AppTextStyles.heading3),
+                          Text("Subtotal", style: AppTextStyles.bodyMedium),
                           Text(
                             "Rs ${total.toStringAsFixed(0)}",
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Delivery", style: AppTextStyles.bodyMedium),
+                          Text(
+                            "Rs ${deliveryCharge.toStringAsFixed(0)}",
+                            style: AppTextStyles.bodyMedium,
+                          ),
+                        ],
+                      ),
+
+                      const Divider(),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Total", style: AppTextStyles.heading3),
+                          Text(
+                            "Rs ${(total + deliveryCharge).toStringAsFixed(0)}",
                             style: AppTextStyles.heading3,
                           ),
                         ],
