@@ -115,17 +115,6 @@ class AppDrawer extends StatelessWidget {
               ),
 
               // =========================
-              // NOTIFICATIONS
-              // =========================
-              drawerItem(
-                icon: Icons.notifications,
-                title: "Notifications",
-                onTap: () {},
-              ),
-
-              const SizedBox(height: 20),
-
-              // =========================
               // LOGOUT
               // =========================
               drawerItem(

@@ -46,6 +46,7 @@ class AdminDrawer extends StatelessWidget {
                   title: "Dashboard",
                   onTap: () {
                     Navigator.pop(context);
+                    Get.toNamed(AppRoutes.sellerDashboard);
                   },
                 ),
 
@@ -213,8 +214,8 @@ class AdminDrawer extends StatelessWidget {
 
                 // SETTINGS → navigates to profile.dart
                 drawerItem(
-                  icon: Icons.settings,
-                  title: "Settings",
+                  icon: Icons.person,
+                  title: "profiles",
                   onTap: () {
                     Navigator.pop(context);
                     Get.toNamed(AppRoutes.profile);

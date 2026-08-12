@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/utils/themes.dart';
 import '../../../core/services/product_service.dart';
+import '../../../core/services/cart_service.dart';
 import '../../../routes/app_routes.dart';
 import 'ai_detection_screen.dart';
 import 'ai_recommendation_screen.dart';
@@ -193,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         )
                       : SizedBox(
-                          height: 210,
+                          height: 230,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: productList.length,
@@ -201,6 +202,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 14),
                             itemBuilder: (context, index) {
                               final product = productList[index];
+                              final imageUrl = ProductService.getImageUrl(
+                                product,
+                              );
+
                               return GestureDetector(
                                 onTap: () {
                                   Get.toNamed(
@@ -225,22 +230,59 @@ class _HomeScreenState extends State<HomeScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // PRODUCT IMAGE PLACEHOLDER
-                                      Container(
-                                        height: 100,
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
+                                      // ✅ PRODUCT IMAGE
+                                      ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(18),
+                                            ),
+                                        child: Container(
+                                          height: 100,
+                                          width: double.infinity,
                                           color: AppColors.darkGreen
                                               .withOpacity(0.1),
-                                          borderRadius:
-                                              const BorderRadius.vertical(
-                                                top: Radius.circular(18),
-                                              ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.rice_bowl,
-                                          size: 48,
-                                          color: AppColors.darkGreen,
+                                          child: imageUrl != null
+                                              ? Image.network(
+                                                  imageUrl,
+                                                  height: 100,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                  loadingBuilder:
+                                                      (
+                                                        context,
+                                                        child,
+                                                        progress,
+                                                      ) {
+                                                        if (progress == null) {
+                                                          return child;
+                                                        }
+                                                        return const Center(
+                                                          child: SizedBox(
+                                                            height: 20,
+                                                            width: 20,
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                                  strokeWidth:
+                                                                      2,
+                                                                ),
+                                                          ),
+                                                        );
+                                                      },
+                                                  errorBuilder:
+                                                      (context, error, stack) {
+                                                        return const Icon(
+                                                          Icons.rice_bowl,
+                                                          size: 40,
+                                                          color: AppColors
+                                                              .darkGreen,
+                                                        );
+                                                      },
+                                                )
+                                              : const Icon(
+                                                  Icons.rice_bowl,
+                                                  size: 48,
+                                                  color: AppColors.darkGreen,
+                                                ),
                                         ),
                                       ),
 
@@ -271,13 +313,65 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ),
                                             ),
                                             const SizedBox(height: 8),
-                                            Text(
-                                              "Rs ${product["price"]}/KG",
-                                              style: AppTextStyles.heading4
-                                                  .copyWith(
-                                                    color: AppColors.darkGreen,
-                                                    fontSize: 14,
+
+                                            // ✅ PRICE + ADD TO CART
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    "Rs ${product["price"]}/KG",
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: AppTextStyles
+                                                        .heading4
+                                                        .copyWith(
+                                                          color: AppColors
+                                                              .darkGreen,
+                                                          fontSize: 13,
+                                                        ),
                                                   ),
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    CartService().addToCart(
+                                                      rice: product,
+                                                      quantity: 1,
+                                                    );
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          "${product["name"]} added to cart",
+                                                        ),
+                                                        duration:
+                                                            const Duration(
+                                                              seconds: 1,
+                                                            ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: Container(
+                                                    height: 28,
+                                                    width: 28,
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          AppColors.darkGreen,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            8,
+                                                          ),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons
+                                                          .add_shopping_cart_rounded,
+                                                      color: Colors.white,
+                                                      size: 15,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),

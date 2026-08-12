@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/services/chat_service.dart';
+import '../../../core/services/cart_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 
@@ -162,56 +163,125 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
-                    childAspectRatio: 0.72,
+                    childAspectRatio: 0.68,
                   ),
                   itemBuilder: (context, index) {
                     final product = productList[index];
-                    return Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: AppDecorations.card,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: 90,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: AppColors.cream,
+                    final imageUrl = ProductService.getImageUrl(product);
+
+                    // ✅ Whole card is now clickable -> goes to product details
+                    return GestureDetector(
+                      onTap: () async {
+                        final result = await Get.toNamed(
+                          AppRoutes.riceDetails,
+                          arguments: product,
+                        );
+                        if (result == true) {
+                          setState(() {});
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: AppDecorations.card,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ✅ PRODUCT IMAGE
+                            ClipRRect(
                               borderRadius: BorderRadius.circular(14),
+                              child: Container(
+                                height: 90,
+                                width: double.infinity,
+                                color: AppColors.cream,
+                                child: imageUrl != null
+                                    ? Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: 90,
+                                        errorBuilder: (c, e, s) => const Icon(
+                                          Icons.rice_bowl,
+                                          size: 50,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.rice_bowl,
+                                        size: 50,
+                                        color: AppColors.darkGreen,
+                                      ),
+                              ),
                             ),
-                            child: const Icon(
-                              Icons.rice_bowl,
-                              size: 50,
-                              color: AppColors.darkGreen,
+                            const SizedBox(height: 12),
+                            Text(
+                              product["name"] ?? "",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.heading4,
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            product["name"] ?? "",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.heading4,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            product["rice_category"]?["name"] ?? "",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Rs ${product["price"]}",
-                            style: AppTextStyles.heading4.copyWith(
-                              color: AppColors.darkGreen,
+                            const SizedBox(height: 4),
+                            Text(
+                              product["rice_category"]?["name"] ?? "",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.bodyMedium,
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "${product["stock"]} KG",
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+
+                            // ✅ PRICE + ADD TO CART
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "Rs ${product["price"]}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTextStyles.heading4.copyWith(
+                                      color: AppColors.darkGreen,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    CartService().addToCart(
+                                      rice: product,
+                                      quantity: 1,
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "${product["name"]} added to cart",
+                                        ),
+                                        duration: const Duration(seconds: 1),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    height: 28,
+                                    width: 28,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.darkGreen,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                      Icons.add_shopping_cart_rounded,
+                                      color: Colors.white,
+                                      size: 15,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "${product["stock"]} KG left",
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
