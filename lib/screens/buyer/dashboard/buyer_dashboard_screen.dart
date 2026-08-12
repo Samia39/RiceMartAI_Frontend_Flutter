@@ -11,6 +11,7 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/services/cart_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../widgets/app_drawer.dart';
+import '../../../widgets/notification_bell.dart';
 import '../home/home_screen.dart';
 
 class BuyerDashboardScreen extends StatefulWidget {
@@ -54,6 +55,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           title: const Text("Marketplace"),
 
           actions: [
+            // =========================
+            // NOTIFICATIONS
+            // =========================
+            const NotificationBell(iconColor: Colors.white, size: 24),
+
             // CART ICON
             Stack(
               children: [

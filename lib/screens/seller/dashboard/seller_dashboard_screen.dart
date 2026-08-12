@@ -11,6 +11,7 @@ import '../../../core/utils/themes.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/services/admin/permission_service.dart';
 import '../../../widgets/seller_drawer.dart';
+import '../../../widgets/notification_bell.dart';
 
 class SellerDashboardScreen extends StatefulWidget {
   const SellerDashboardScreen({super.key});
@@ -86,7 +87,15 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        appBar: AppBar(title: const Text("Seller Dashboard")),
+        appBar: AppBar(
+          title: const Text("Seller Dashboard"),
+          actions: const [
+            // =========================
+            // NOTIFICATIONS
+            // =========================
+            NotificationBell(iconColor: Colors.white, size: 24),
+          ],
+        ),
 
         drawer: SellerDrawer(onTabSelected: _switchTab),
 

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 import '../../../widgets/admin_drawer.dart';
+import '../../../widgets/notification_bell.dart';
 import '../../../core/services/admin/permission_service.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -104,43 +105,15 @@ class AdminDashboard extends StatelessWidget {
               ),
 
             // =========================
-            // NOTIFICATIONS
+            // NOTIFICATIONS — now backed by the real unread count + list
+            // (was a static icon linking to AppRoutes.adminNotifications;
+            // NotificationBell pushes straight to NotificationsScreen, so
+            // that route is no longer required, but you can keep it too)
             // =========================
             if (PermissionService.hasPermission('view notifications'))
               Padding(
                 padding: const EdgeInsets.only(right: 12),
-
-                child: GestureDetector(
-                  onTap: () {
-                    Get.toNamed(AppRoutes.adminNotifications);
-                  },
-
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.orange,
-                        ),
-
-                        child: const Icon(
-                          Icons.notifications,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                      ),
-
-                      const SizedBox(height: 2),
-
-                      const Text("Alerts", style: TextStyle(fontSize: 10)),
-                    ],
-                  ),
-                ),
+                child: NotificationBell(iconColor: Colors.white, size: 24),
               ),
           ],
         ),
