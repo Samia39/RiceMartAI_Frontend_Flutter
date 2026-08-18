@@ -17,7 +17,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   List payments = [];
   bool isLoading = true;
 
-  static const String imageBaseUrl = "http://localhost:8000";
+  static const String imageBaseUrl = "http://127.0.0.1:8000";
 
   @override
   void initState() {
