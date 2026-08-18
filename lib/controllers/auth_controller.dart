@@ -21,6 +21,7 @@ class AuthController extends GetxController {
 
     try {
       final res = await AuthService.login(email, password);
+      debugPrint("LOGIN RESPONSE: $res");
 
       if (res['token'] != null) {
         token.value = res['token'];
@@ -38,6 +39,11 @@ class AuthController extends GetxController {
         box.write('has_shop', res['has_shop']);
         box.write('name', res['user']?['name'] ?? ''); // ✅ safe null check
         box.write('email', res['user']?['email'] ?? ''); // ✅ save email too
+
+        // ✅ SAVE SHOP INFO — this was missing, causing "No approved shop found"
+        box.write('shop_id', res['shop']?['id']);
+        box.write('shop_status', res['shop_status'] ?? 'none');
+        box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
 
         redirectUser(res);
       } else {
@@ -132,6 +138,11 @@ class AuthController extends GetxController {
         'email',
         res['user']?['email'] ?? '',
       ); // ✅ refresh email on app restart
+
+      // ✅ SAVE SHOP INFO — was missing here too (needed on app restart)
+      box.write('shop_id', res['shop']?['id']);
+      box.write('shop_status', res['shop_status'] ?? 'none');
+      box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
     } catch (e) {
       await logout();
     }

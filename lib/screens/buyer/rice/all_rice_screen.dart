@@ -23,9 +23,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   bool isLoading = true;
   final searchController = TextEditingController();
 
-  // ✅ Base URL for images
-  final String imageBaseUrl = "http://ricemart.sandbox.pk/storage/";
-
   @override
   void initState() {
     super.initState();
@@ -37,12 +34,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   // =========================
   Future<void> fetchProducts() async {
     final data = await ProductService().fetchAllProducts();
-
-    // ✅ Debug: print keys to confirm image field name
-    if (data.isNotEmpty) {
-      debugPrint("Product keys: ${data.first.keys}");
-      debugPrint("Sample product: ${data.first}");
-    }
 
     setState(() {
       productList = data;
@@ -78,31 +69,10 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   }
 
   // =========================
-  // HELPER: Build image URL
-  // =========================
-  String? _getImageUrl(Map<String, dynamic> product) {
-    // Try common field names your API might use
-    final raw =
-        product["image"] ??
-        product["image_url"] ??
-        product["photo"] ??
-        product["thumbnail"] ??
-        product["img"];
-
-    if (raw == null || raw.toString().trim().isEmpty) return null;
-
-    final str = raw.toString().trim();
-    if (str.startsWith("http://") || str.startsWith("https://")) {
-      return str;
-    }
-    return "$imageBaseUrl$str";
-  }
-
-  // =========================
   // PRODUCT CARD
   // =========================
   Widget productCard(Map<String, dynamic> product, double imageHeight) {
-    final imageUrl = _getImageUrl(product);
+    final imageUrl = ProductService.getImageUrl(product);
 
     return GestureDetector(
       onTap: () async {

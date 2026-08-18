@@ -9,7 +9,6 @@ import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';
 import '../screens/access_denied_screen.dart';
 import '../screens/admin_screens/analytics/analytics_screen.dart';
-import '../screens/admin_screens/notifications/admin_notifications_screen.dart';
 import '../screens/admin_screens/orders/admin_orders_screen.dart';
 import '../screens/admin_screens/payments/payment_screen.dart';
 import '../screens/admin_screens/reports/reports_screen.dart';
@@ -211,13 +210,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.adminSettings,
       page: () => const AdminSettingsScreen(),
-      middlewares: [AuthMiddleware()],
-    ),
-
-    // Admin Notifications
-    GetPage(
-      name: AppRoutes.adminNotifications,
-      page: () => const AdminNotificationsScreen(),
       middlewares: [AuthMiddleware()],
     ),
 

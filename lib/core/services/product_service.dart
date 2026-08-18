@@ -25,7 +25,7 @@ class ProductService {
   }
 
   // =========================
-  // ADD PRODUCT (with optional image bytes)
+  // ADD PRODUCT (with optional image bytes — web + mobile safe)
   // =========================
   Future<Map<String, dynamic>> addProduct({
     required String token,
@@ -52,12 +52,14 @@ class ProductService {
     request.fields['stock'] = stock;
 
     if (imageBytes != null) {
-      final ext = (imageName?.split('.').last.toLowerCase()) ?? 'jpg';
+      final fileName = imageName ?? 'product.jpg';
+      final ext = fileName.split('.').last.toLowerCase();
+
       request.files.add(
         http.MultipartFile.fromBytes(
           'image',
           imageBytes,
-          filename: imageName ?? 'product.$ext',
+          filename: fileName,
           contentType: MediaType('image', ext == 'jpg' ? 'jpeg' : ext),
         ),
       );
@@ -145,12 +147,14 @@ class ProductService {
     request.fields['stock'] = stock;
 
     if (imageBytes != null) {
-      final ext = (imageName?.split('.').last.toLowerCase()) ?? 'jpg';
+      final fileName = imageName ?? 'product.jpg';
+      final ext = fileName.split('.').last.toLowerCase();
+
       request.files.add(
         http.MultipartFile.fromBytes(
           'image',
           imageBytes,
-          filename: imageName ?? 'product.$ext',
+          filename: fileName,
           contentType: MediaType('image', ext == 'jpg' ? 'jpeg' : ext),
         ),
       );
@@ -177,6 +181,11 @@ class ProductService {
     if (str.startsWith("http://") || str.startsWith("https://")) {
       return str;
     }
-    return "http://ricemart.sandbox.pk/storage/$str";
+
+    // ✅ Strip trailing "/api" (or any trailing path) from baseUrl
+    // so we get just the host, e.g. "http://127.0.0.1:8000"
+    final host = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
+
+    return "$host/storage/$str";
   }
 }

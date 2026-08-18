@@ -110,11 +110,13 @@ class AdminDashboard extends StatelessWidget {
             // NotificationBell pushes straight to NotificationsScreen, so
             // that route is no longer required, but you can keep it too)
             // =========================
-            if (PermissionService.hasPermission('view notifications'))
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: NotificationBell(iconColor: Colors.white, size: 24),
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: NotificationBell(
+                iconColor: const Color.fromARGB(255, 179, 60, 60),
+                size: 24,
               ),
+            ),
           ],
         ),
 
