@@ -17,7 +17,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
   List activeOrders = [];
   List historyOrders = [];
-
   bool isLoading = true;
 
   @override
@@ -28,12 +27,9 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
   Future<void> fetchOrders() async {
     setState(() => isLoading = true);
-
     try {
       final active = await orderService.getAdminOrders();
-
       final history = await orderService.getAdminOrderHistory();
-
       setState(() {
         activeOrders = active;
         historyOrders = history;
@@ -43,10 +39,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     }
   }
 
-  // =========================
-  // ORDER / ITEM STATUS COLOR
-  // (pending / processing / shipped / delivered / cancelled)
-  // =========================
   Color statusColor(String status) {
     switch (status) {
       case "processing":
@@ -62,9 +54,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     }
   }
 
-  // =========================
-  // PAYMENT STATUS COLOR (pending / paid / rejected)
-  // =========================
   Color paymentStatusColor(String status) {
     switch (status) {
       case "paid":
@@ -76,9 +65,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     }
   }
 
-  // =========================
-  // "Label: value" ROW
-  // =========================
   Widget infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -94,9 +80,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     );
   }
 
-  // =========================
-  // STATUS CHIP
-  // =========================
   Widget statusChip(String status) {
     final color = statusColor(status);
 
@@ -151,7 +134,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                           isHistory: isHistory,
                         ),
                       );
-
                       fetchOrders();
                     },
                     child: Container(
@@ -173,23 +155,17 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                               statusChip(status),
                             ],
                           ),
-
                           const SizedBox(height: 10),
-
                           infoRow("Customer", o["customer_name"].toString()),
                           infoRow("Phone", o["phone"].toString()),
-
                           const SizedBox(height: 6),
-
                           Text(
                             "Payment: $paymentStatus",
                             style: AppTextStyles.label.copyWith(
                               color: paymentStatusColor(paymentStatus),
                             ),
                           ),
-
                           const SizedBox(height: 10),
-
                           Text(
                             "Total: Rs ${o["total_price"]}",
                             style: AppTextStyles.heading4,
@@ -229,7 +205,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               ],
             ),
           ),
-
           body: isLoading
               ? const Center(child: CircularProgressIndicator())
               : TabBarView(

@@ -191,6 +191,20 @@ class OrderService {
   }
 
   // =========================
+  // CUSTOMER CONFIRMS RECEIPT
+  // =========================
+  Future<Map<String, dynamic>> confirmReceived(int itemId) async {
+    final token = box.read("token");
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/order-item/$itemId/confirm-received"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // =========================
   // ADMIN ALL ORDERS
   // =========================
   Future<List> getAdminOrders() async {
