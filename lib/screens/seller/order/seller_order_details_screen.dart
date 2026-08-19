@@ -153,6 +153,14 @@ class SellerOrderDetailScreen extends StatelessWidget {
                             ),
                             infoRow("Phone", order["phone"].toString()),
 
+                            if (item["net_amount"] != null) ...[
+                              const SizedBox(height: 6),
+                              infoRow(
+                                "You'll receive",
+                                "Rs ${item["net_amount"]} (after 5% commission)",
+                              ),
+                            ],
+
                             // No cancel button here — sellers only see paid, approved
                             // orders and can only progress them, never cancel.
                             if (status != "delivered") ...[

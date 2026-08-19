@@ -264,4 +264,33 @@ class ShopService {
       return {"success": false, "message": e.toString()};
     }
   }
+
+  // Update payout details
+
+  Future<Map<String, dynamic>> updatePayoutDetails({
+    required String token,
+    required String payoutMethod,
+    required String accountNumber,
+    required String accountName,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$baseUrl/my-shop/payout-details"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "payout_method": payoutMethod,
+          "payout_account_number": accountNumber,
+          "payout_account_name": accountName,
+        }),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
 }

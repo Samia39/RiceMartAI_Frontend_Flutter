@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 import '../review/shop_review_dialog.dart';
 
@@ -135,6 +137,7 @@ class OrderDetailsScreen extends StatelessWidget {
               ...shopItems.map((item) {
                 final product = item["product"];
                 final status = (item["status"] ?? "pending").toString();
+                final confirmed = item["customer_confirmed_at"] != null;
 
                 return Container(
                   margin: const EdgeInsets.only(top: 8),
@@ -161,17 +164,64 @@ class OrderDetailsScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       infoRow("Price", "Rs ${item["price"]}"),
                       infoRow("Quantity", item["quantity"].toString()),
+
                       if (status == "delivered") ...[
+                        const SizedBox(height: 10),
+
+                        // =========================
+                        // CONFIRM RECEIVED
+                        // =========================
+                        if (!confirmed)
+                          Builder(
+                            builder: (ctx) => SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  final res = await OrderService()
+                                      .confirmReceived(item["id"]);
+
+                                  Get.snackbar(
+                                    res["success"] == true
+                                        ? "Thanks!"
+                                        : "Error",
+                                    res["message"] ?? "",
+                                  );
+                                },
+                                child: const Text("Confirm Received"),
+                              ),
+                            ),
+                          )
+                        else
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 18,
+                                color: AppColors.success,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                "Received",
+                                style: AppTextStyles.label.copyWith(
+                                  color: AppColors.success,
+                                ),
+                              ),
+                            ],
+                          ),
+
                         const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) =>
-                                  ShopReviewDialog(orderItemId: item["id"]),
-                            );
-                          },
-                          child: const Text("Rate Shop"),
+
+                        Builder(
+                          builder: (ctx) => ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: ctx,
+                                builder: (_) =>
+                                    ShopReviewDialog(orderItemId: item["id"]),
+                              );
+                            },
+                            child: const Text("Rate Shop"),
+                          ),
                         ),
                       ],
                     ],

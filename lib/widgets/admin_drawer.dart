@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/admin_screens/courier_management/courier_charge_screen.dart';
+import 'package:frontend/screens/admin_screens/payout/admin_payouts_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';
@@ -199,6 +200,16 @@ class AdminDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Get.toNamed(AppRoutes.adminPaymentSettings);
+                  },
+                ),
+
+                // SELLER PAYOUTS
+                drawerItem(
+                  icon: Icons.account_balance_wallet,
+                  title: "Seller Payouts",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.to(() => const AdminPayoutsScreen());
                   },
                 ),
 

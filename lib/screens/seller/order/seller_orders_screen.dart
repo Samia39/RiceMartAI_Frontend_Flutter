@@ -128,6 +128,14 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
               "Order #: ${order["order_number"]}",
               style: AppTextStyles.bodyMedium,
             ),
+
+            if (item["net_amount"] != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                "You'll receive: Rs ${item["net_amount"]}",
+                style: AppTextStyles.bodyMedium,
+              ),
+            ],
           ],
         ),
       ),
