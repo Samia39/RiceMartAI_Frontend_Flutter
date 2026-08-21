@@ -269,9 +269,10 @@ class ShopService {
 
   Future<Map<String, dynamic>> updatePayoutDetails({
     required String token,
-    required String payoutMethod,
-    required String accountNumber,
-    required String accountName,
+    String? easypaisaNumber,
+    String? easypaisaAccountName,
+    String? jazzcashNumber,
+    String? jazzcashAccountName,
   }) async {
     try {
       final response = await http.put(
@@ -282,9 +283,10 @@ class ShopService {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "payout_method": payoutMethod,
-          "payout_account_number": accountNumber,
-          "payout_account_name": accountName,
+          "easypaisa_number": easypaisaNumber,
+          "easypaisa_account_name": easypaisaAccountName,
+          "jazzcash_number": jazzcashNumber,
+          "jazzcash_account_name": jazzcashAccountName,
         }),
       );
 

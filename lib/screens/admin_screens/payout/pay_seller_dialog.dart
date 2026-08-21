@@ -95,6 +95,15 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
     final netAmount = widget.payout["net_amount"]?.toString() ?? "0";
 
     final isEasypaisa = payoutMethod == "easypaisa";
+
+    final sellerNumber = isEasypaisa
+        ? (shop["payout_easypaisa_number"] ?? "")
+        : (shop["payout_jazzcash_number"] ?? "");
+
+    final sellerAccountName = isEasypaisa
+        ? (shop["payout_easypaisa_account_name"] ?? "")
+        : (shop["payout_jazzcash_account_name"] ?? "");
+
     final myNumber = isEasypaisa
         ? (paymentSettings?["easypaisa_number"] ?? "")
         : (paymentSettings?["jazzcash_number"] ?? "");
@@ -115,7 +124,9 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
               ),
               const SizedBox(height: 4),
               Text(
-                "Send to (${shop["payout_method"] ?? "-"}): ${shop["payout_account_number"] ?? "not set"}",
+                sellerNumber.isNotEmpty
+                    ? "Send to (${isEasypaisa ? "EasyPaisa" : "JazzCash"}): $sellerNumber — $sellerAccountName"
+                    : "Seller hasn't added a ${isEasypaisa ? "EasyPaisa" : "JazzCash"} account yet",
                 style: AppTextStyles.bodySmall,
               ),
 
