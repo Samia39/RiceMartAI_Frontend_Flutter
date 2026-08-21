@@ -151,7 +151,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
             // CONTENT
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -159,16 +159,16 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                       product["name"] ?? "",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.heading4.copyWith(fontSize: 15),
+                      style: AppTextStyles.heading4.copyWith(fontSize: 13),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       product["rice_category"]?["name"] ?? "",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: Colors.grey[700],
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                     ),
                     const Spacer(),
@@ -181,16 +181,16 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.heading4.copyWith(
                               color: AppColors.darkGreen,
-                              fontSize: 15,
+                              fontSize: 13,
                             ),
                           ),
                         ),
                         Container(
-                          height: 34,
-                          width: 34,
+                          height: 28,
+                          width: 28,
                           decoration: BoxDecoration(
                             color: AppColors.darkGreen,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: IconButton(
                             padding: EdgeInsets.zero,
@@ -212,7 +212,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                             icon: const Icon(
                               Icons.shopping_cart_outlined,
                               color: Colors.white,
-                              size: 18,
+                              size: 15,
                             ),
                           ),
                         ),
@@ -232,18 +232,18 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    int crossAxisCount = 2;
-    double childAspectRatio = 0.78;
-    double imageHeight = 110;
+    // Bound the card's own width instead of a fixed column count —
+    // this keeps cards small and consistent on both mobile and wide
+    // desktop/web windows, where a fixed crossAxisCount would otherwise
+    // stretch each cell (and its aspect-ratio-derived height) hugely.
+    double maxCardWidth = 170;
+    double childAspectRatio = 0.68;
+    double imageHeight = 85;
 
     if (width < 360) {
-      crossAxisCount = 2;
-      childAspectRatio = 0.72;
-      imageHeight = 90;
-    } else if (width > 700) {
-      crossAxisCount = 3;
-      childAspectRatio = 0.85;
-      imageHeight = 140;
+      maxCardWidth = 150;
+      childAspectRatio = 0.62;
+      imageHeight = 75;
     }
 
     return Container(
@@ -317,7 +317,10 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
             children: [
               // SEARCH BAR
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Container(
                   decoration: AppDecorations.inputField,
                   child: TextField(
@@ -374,10 +377,10 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                       vertical: 8,
                     ),
                     itemCount: filteredProducts.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: maxCardWidth,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
                       childAspectRatio: childAspectRatio,
                     ),
                     itemBuilder: (context, index) {

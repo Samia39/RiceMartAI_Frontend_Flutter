@@ -5,6 +5,13 @@ import '../constants/app_icons.dart';
 class AuthService {
   static const baseUrl = BaseUrl.url;
 
+  // Common headers used on every request so Laravel always treats us as an
+  // API client and returns JSON (never a redirect) on validation errors.
+  static const Map<String, String> _jsonHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
   // ── Safe JSON decode with debug visibility ───────────────
   static dynamic _safeDecode(http.Response response) {
     if (response.body.isEmpty) {
@@ -32,7 +39,7 @@ class AuthService {
   ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'email': email, 'password': password}),
     );
 
@@ -53,7 +60,7 @@ class AuthService {
   ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/register'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'name': name, 'email': email, 'password': password}),
     );
 
@@ -72,7 +79,7 @@ class AuthService {
   ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/verify-otp'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'email': email, 'otp': otp}),
     );
 
@@ -88,7 +95,7 @@ class AuthService {
   static Future<Map<String, dynamic>> resendOtp(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/resend-otp'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'email': email}),
     );
 
@@ -123,7 +130,7 @@ class AuthService {
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/forgot-password'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'email': email}),
     );
 
@@ -144,7 +151,7 @@ class AuthService {
   ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/reset-password'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders,
       body: jsonEncode({'email': email, 'otp': otp, 'password': newPassword}),
     );
 
