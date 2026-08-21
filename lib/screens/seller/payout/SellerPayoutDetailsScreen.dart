@@ -17,9 +17,10 @@ class _SellerPayoutDetailsScreenState extends State<SellerPayoutDetailsScreen> {
   final box = GetStorage();
   final ShopService shopService = ShopService();
 
-  String payoutMethod = "easypaisa";
-  final accountNumberController = TextEditingController();
-  final accountNameController = TextEditingController();
+  final easypaisaNumberController = TextEditingController();
+  final easypaisaAccountNameController = TextEditingController();
+  final jazzcashNumberController = TextEditingController();
+  final jazzcashAccountNameController = TextEditingController();
 
   bool isLoading = true;
   bool isSaving = false;
@@ -30,6 +31,15 @@ class _SellerPayoutDetailsScreenState extends State<SellerPayoutDetailsScreen> {
     _loadShop();
   }
 
+  @override
+  void dispose() {
+    easypaisaNumberController.dispose();
+    easypaisaAccountNameController.dispose();
+    jazzcashNumberController.dispose();
+    jazzcashAccountNameController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadShop() async {
     final token = box.read("token");
     final result = await shopService.getMyShop(token);
@@ -38,20 +48,23 @@ class _SellerPayoutDetailsScreenState extends State<SellerPayoutDetailsScreen> {
 
     if (result["success"] == true) {
       final shop = result["shop"];
-      setState(() {
-        payoutMethod = shop["payout_method"] ?? "easypaisa";
-        accountNumberController.text = shop["payout_account_number"] ?? "";
-        accountNameController.text = shop["payout_account_name"] ?? "";
-      });
+      easypaisaNumberController.text = shop["payout_easypaisa_number"] ?? "";
+      easypaisaAccountNameController.text =
+          shop["payout_easypaisa_account_name"] ?? "";
+      jazzcashNumberController.text = shop["payout_jazzcash_number"] ?? "";
+      jazzcashAccountNameController.text =
+          shop["payout_jazzcash_account_name"] ?? "";
     }
 
     setState(() => isLoading = false);
   }
 
   Future<void> _save() async {
-    if (accountNumberController.text.trim().isEmpty ||
-        accountNameController.text.trim().isEmpty) {
-      Get.snackbar("Error", "Please fill in all fields");
+    final hasEasypaisa = easypaisaNumberController.text.trim().isNotEmpty;
+    final hasJazzcash = jazzcashNumberController.text.trim().isNotEmpty;
+
+    if (!hasEasypaisa && !hasJazzcash) {
+      Get.snackbar("Error", "Please add at least one payout account");
       return;
     }
 
@@ -60,9 +73,16 @@ class _SellerPayoutDetailsScreenState extends State<SellerPayoutDetailsScreen> {
     final token = box.read("token");
     final result = await shopService.updatePayoutDetails(
       token: token,
-      payoutMethod: payoutMethod,
-      accountNumber: accountNumberController.text.trim(),
-      accountName: accountNameController.text.trim(),
+      easypaisaNumber: hasEasypaisa
+          ? easypaisaNumberController.text.trim()
+          : null,
+      easypaisaAccountName: hasEasypaisa
+          ? easypaisaAccountNameController.text.trim()
+          : null,
+      jazzcashNumber: hasJazzcash ? jazzcashNumberController.text.trim() : null,
+      jazzcashAccountName: hasJazzcash
+          ? jazzcashAccountNameController.text.trim()
+          : null,
     );
 
     setState(() => isSaving = false);
@@ -70,6 +90,35 @@ class _SellerPayoutDetailsScreenState extends State<SellerPayoutDetailsScreen> {
     Get.snackbar(
       result["success"] == true ? "Success" : "Error",
       result["message"] ?? "",
+    );
+  }
+
+  Widget _methodSection({
+    required String title,
+    required TextEditingController numberController,
+    required TextEditingController accountNameController,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: AppDecorations.card,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(title, style: AppTextStyles.heading4),
+          const SizedBox(height: 14),
+          TextField(
+            controller: numberController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(labelText: "Account Number"),
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: accountNameController,
+            decoration: const InputDecoration(labelText: "Account Name"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -98,64 +147,31 @@ class _SellerPayoutDetailsScreenState extends State<SellerPayoutDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              "This is where the admin sends your payout after a customer "
+                              "Add one or both — admin will send your payout to "
+                              "whichever account you've filled in, after a customer "
                               "confirms they received your item.",
                               style: AppTextStyles.bodyMedium,
                             ),
                             const SizedBox(height: 20),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: AppDecorations.card,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Text(
-                                    "Receiving method",
-                                    style: AppTextStyles.label,
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          value: "easypaisa",
-                                          groupValue: payoutMethod,
-                                          contentPadding: EdgeInsets.zero,
-                                          title: const Text("EasyPaisa"),
-                                          onChanged: (v) =>
-                                              setState(() => payoutMethod = v!),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: RadioListTile<String>(
-                                          value: "jazzcash",
-                                          groupValue: payoutMethod,
-                                          contentPadding: EdgeInsets.zero,
-                                          title: const Text("JazzCash"),
-                                          onChanged: (v) =>
-                                              setState(() => payoutMethod = v!),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  TextField(
-                                    controller: accountNumberController,
-                                    keyboardType: TextInputType.phone,
-                                    decoration: const InputDecoration(
-                                      labelText: "Account Number",
-                                    ),
-                                  ),
-                                  const SizedBox(height: 14),
-                                  TextField(
-                                    controller: accountNameController,
-                                    decoration: const InputDecoration(
-                                      labelText: "Account Name",
-                                    ),
-                                  ),
-                                ],
-                              ),
+
+                            _methodSection(
+                              title: "EasyPaisa",
+                              numberController: easypaisaNumberController,
+                              accountNameController:
+                                  easypaisaAccountNameController,
                             ),
+
+                            const SizedBox(height: 20),
+
+                            _methodSection(
+                              title: "JazzCash",
+                              numberController: jazzcashNumberController,
+                              accountNameController:
+                                  jazzcashAccountNameController,
+                            ),
+
                             const SizedBox(height: 24),
+
                             SizedBox(
                               height: 55,
                               child: ElevatedButton(

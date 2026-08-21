@@ -5,6 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
 import '../screens/seller/payout/SellerPayoutDetailsScreen.dart';
+import '../screens/seller/payout/SellerPayoutsScreen.dart';
 
 class SellerDrawer extends StatelessWidget {
   // =========================
@@ -90,7 +91,6 @@ class SellerDrawer extends StatelessWidget {
 
           // =========================
           // PAYOUT DETAILS
-          // (where the shop receives commission-adjusted payments from admin)
           // =========================
           drawerItem(
             icon: Icons.account_balance_wallet_outlined,
@@ -100,6 +100,18 @@ class SellerDrawer extends StatelessWidget {
               Navigator.pop(context);
 
               Get.to(() => const SellerPayoutDetailsScreen());
+            },
+          ),
+
+          // =========================
+          // PAYOUTS TAB
+          // (where the shop sees their payouts from admin)
+          drawerItem(
+            icon: Icons.receipt_long,
+            title: "My Payouts",
+            onTap: () {
+              Navigator.pop(context);
+              Get.to(() => const SellerPayoutsScreen());
             },
           ),
 

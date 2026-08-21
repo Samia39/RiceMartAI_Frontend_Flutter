@@ -5,6 +5,26 @@ import '../constants/app_icons.dart';
 class AuthService {
   static const baseUrl = BaseUrl.url;
 
+  // ── Safe JSON decode with debug visibility ───────────────
+  static dynamic _safeDecode(http.Response response) {
+    if (response.body.isEmpty) {
+      throw Exception(
+        'Empty response from server (status ${response.statusCode})',
+      );
+    }
+    try {
+      return jsonDecode(response.body);
+    } catch (e) {
+      // Check the browser console for the real body while debugging
+      print(
+        '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
+      );
+      throw Exception(
+        'Server returned an invalid response (status ${response.statusCode})',
+      );
+    }
+  }
+
   // LOGIN
   static Future<Map<String, dynamic>> login(
     String email,
@@ -16,7 +36,7 @@ class AuthService {
       body: jsonEncode({'email': email, 'password': password}),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200) {
       return data;
@@ -37,7 +57,7 @@ class AuthService {
       body: jsonEncode({'name': name, 'email': email, 'password': password}),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200) {
       return data;
@@ -56,7 +76,7 @@ class AuthService {
       body: jsonEncode({'email': email, 'otp': otp}),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
@@ -72,7 +92,7 @@ class AuthService {
       body: jsonEncode({'email': email}),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200) {
       return data;
@@ -88,12 +108,14 @@ class AuthService {
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200) {
       return data;
     } else {
-      throw Exception(data['message']);
+      throw Exception(
+        data['message'] ?? 'Session invalid. Please log in again.',
+      );
     }
   }
 
@@ -105,7 +127,7 @@ class AuthService {
       body: jsonEncode({'email': email}),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200) {
       return data;
@@ -126,7 +148,7 @@ class AuthService {
       body: jsonEncode({'email': email, 'otp': otp, 'password': newPassword}),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200) {
       return data;
@@ -164,7 +186,7 @@ class AuthService {
       body: jsonEncode(body),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode == 200) {
       return data;
@@ -181,7 +203,7 @@ class AuthService {
     );
 
     if (response.statusCode != 200) {
-      final data = jsonDecode(response.body);
+      final data = _safeDecode(response);
       throw Exception(data['message'] ?? 'Logout failed');
     }
   }

@@ -54,4 +54,19 @@ class PayoutService {
       return {"success": false, "message": e.toString()};
     }
   }
+
+  // Seller see their payouts
+
+  Future<List> getSellerPayouts() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/seller/payouts"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    final data = jsonDecode(response.body);
+    if (data["success"] == true) return data["payouts"];
+    return [];
+  }
 }

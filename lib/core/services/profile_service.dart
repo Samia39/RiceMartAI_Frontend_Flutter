@@ -8,6 +8,26 @@ class ProfileService {
 
   String get token => _box.read('token') ?? '';
 
+  // ── Safe JSON decode with debug visibility ───────────────
+  dynamic _safeDecode(http.Response response) {
+    if (response.body.isEmpty) {
+      throw Exception(
+        'Empty response from server (status ${response.statusCode})',
+      );
+    }
+    try {
+      return jsonDecode(response.body);
+    } catch (e) {
+      // Check the browser console for the real body while debugging
+      print(
+        '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
+      );
+      throw Exception(
+        'Server returned an invalid response (status ${response.statusCode})',
+      );
+    }
+  }
+
   // ── Parse role from list ─────────────────────────────────
   String parseRole(dynamic apiRoles) {
     if (apiRoles != null && apiRoles is List && apiRoles.isNotEmpty) {
@@ -77,7 +97,7 @@ class ProfileService {
       },
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode != 200) {
       throw Exception(data['message'] ?? 'Something went wrong');
@@ -96,7 +116,7 @@ class ProfileService {
       body: jsonEncode({'otp': otp}),
     );
 
-    final data = jsonDecode(response.body);
+    final data = _safeDecode(response);
 
     if (response.statusCode != 200) {
       throw Exception(data['message'] ?? 'Something went wrong');

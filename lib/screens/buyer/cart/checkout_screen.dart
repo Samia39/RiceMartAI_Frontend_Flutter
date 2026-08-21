@@ -57,6 +57,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // =========================
   List cart = [];
 
+  int get distinctShopCount {
+    final ids = cart
+        .map((item) => item["shop"]?["id"])
+        .where((id) => id != null)
+        .toSet();
+    return ids.isEmpty ? 1 : ids.length;
+  }
+
   // =========================
   // TOTAL
   // =========================
@@ -454,13 +462,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 );
                                 setState(() {
                                   selectedCityId = value;
-                                  deliveryCharge = city != null
+                                  final perShopCharge = city != null
                                       ? double.tryParse(
                                               city['delivery_charge']
                                                   .toString(),
                                             ) ??
                                             0
-                                      : 0;
+                                      : 0.0;
+                                  deliveryCharge =
+                                      perShopCharge * distinctShopCount;
                                 });
                               },
                             ),
