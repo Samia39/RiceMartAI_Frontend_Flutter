@@ -222,22 +222,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         actions: [
           TextButton(
             onPressed: _markAllRead,
-            child: const Text(
+            child: Text(
               "Mark all read",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.darkGreen.withOpacity(0.85)),
             ),
           ),
         ],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.darkGreen),
+            )
           : notifications.isEmpty
-          ? const Center(child: Text("No notifications yet"))
+          ? Center(
+              child: Text(
+                "No notifications yet",
+                style: AppTextStyles.bodyMedium,
+              ),
+            )
           : RefreshIndicator(
               onRefresh: _load,
+              color: AppColors.darkGreen,
               child: ListView.separated(
                 itemCount: notifications.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, __) =>
+                    Divider(height: 1, color: AppColors.divider),
                 itemBuilder: (context, index) {
                   final n = notifications[index];
                   final isRead = n['is_read'] == true;
@@ -249,26 +258,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         : AppColors.darkGreen.withOpacity(0.06),
                     leading: CircleAvatar(
                       backgroundColor: isRead
-                          ? Colors.grey.withOpacity(0.2)
+                          ? AppColors.darkGreen.withOpacity(0.05)
                           : AppColors.darkGreen.withOpacity(0.15),
                       child: Icon(
                         _iconForType(n['type']),
-                        color: isRead ? Colors.grey : AppColors.darkGreen,
+                        color: isRead
+                            ? AppColors.iconMuted
+                            : AppColors.darkGreen,
                         size: 20,
                       ),
                     ),
                     title: Text(
                       n['title'] ?? '',
                       style: TextStyle(
+                        color: AppColors.darkGreen,
                         fontWeight: isRead
                             ? FontWeight.normal
                             : FontWeight.bold,
                       ),
                     ),
-                    subtitle: Text(n['body'] ?? ''),
+                    subtitle: Text(
+                      n['body'] ?? '',
+                      style: AppTextStyles.bodySmall,
+                    ),
                     trailing: Text(
                       _timeAgo(n['created_at']),
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      style: TextStyle(fontSize: 11, color: AppColors.hintText),
                     ),
                   );
                 },

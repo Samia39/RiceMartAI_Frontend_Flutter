@@ -126,4 +126,31 @@ class PaymentService {
       return {"success": false, "message": e.toString()};
     }
   }
+
+  // =========================
+  // CREATE STRIPE PAYMENT INTENT
+  // Called from the checkout screen when the user picks "Card".
+  // Returns the clientSecret needed to open Stripe's payment sheet.
+  // =========================
+  Future<Map<String, dynamic>> createStripePaymentIntent({
+    required int orderId,
+  }) async {
+    try {
+      final token = box.read("token");
+
+      final response = await http.post(
+        Uri.parse("$baseUrl/stripe/create-intent"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"order_id": orderId}),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
 }

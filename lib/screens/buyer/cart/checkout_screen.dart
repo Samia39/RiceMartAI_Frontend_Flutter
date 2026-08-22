@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -159,10 +160,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // =========================
   // EXTRACT LARAVEL VALIDATION ERRORS
   // =========================
-  // Laravel validation failures (422) return:
-  // { "message": "The given data was invalid.", "errors": { "phone": ["The phone field is required."], ... } }
-  // This pulls out the first message per field and joins them into one
-  // readable string, instead of showing the generic top-level "message".
   String _extractErrorMessage(Map<String, dynamic> result) {
     final errors = result["errors"];
 
@@ -207,7 +204,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // =========================
-    // TRANSACTION ID REQUIRED
+    // TRANSACTION ID REQUIRED (manual methods only)
     // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         transactionIdController.text.trim().isEmpty) {
@@ -220,7 +217,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // =========================
-    // SCREENSHOT REQUIRED
+    // SCREENSHOT REQUIRED (manual methods only)
     // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         paymentImageBytes == null) {
@@ -277,43 +274,119 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
 
     try {
+      // =========================
+      // 1. CREATE THE ORDER (same for all payment methods)
+      // For "card", no transactionId/screenshot is sent — the order and
+      // its Payment row are created with status "pending", then Stripe
+      // takes over.
+      // =========================
       final result = await OrderService().checkout(
         customerName: nameController.text.trim(),
         phone: phoneController.text.trim(),
         cityId: selectedCityId!,
         address: addressController.text.trim(),
         paymentMethod: paymentMethod,
-        transactionId: transactionIdController.text.trim(),
-        imageBytes: paymentImageBytes,
-        fileName: paymentFileName,
+        transactionId: paymentMethod == "card"
+            ? null
+            : transactionIdController.text.trim(),
+        imageBytes: paymentMethod == "card" ? null : paymentImageBytes,
+        fileName: paymentMethod == "card" ? null : paymentFileName,
         cart: items,
       );
 
-      setState(() {
-        isLoading = false;
-      });
-
-      if (result["success"] == true) {
-        CartService().clearCart();
-
-        Get.snackbar(
-          "Success",
-          result["message"] ?? "Order placed successfully",
-          snackPosition: SnackPosition.TOP,
-        );
-
-        // ✅ FIXED: Go to dashboard first, then push myOrders
-        // Now back button on MyOrders will return to dashboard
-        Get.offAllNamed(AppRoutes.dashboard);
-        Get.toNamed(AppRoutes.myOrders);
-      } else {
+      if (result["success"] != true) {
+        setState(() => isLoading = false);
         Get.snackbar(
           "Error",
           _extractErrorMessage(result),
           snackPosition: SnackPosition.TOP,
           duration: const Duration(seconds: 5),
         );
+        return;
       }
+
+      // =========================
+      // 2. IF CARD — open Stripe's payment sheet using the new order's id
+      // =========================
+      if (paymentMethod == "card") {
+        final orderId = result["order"]?["id"] ?? result["order_id"];
+
+        if (orderId == null) {
+          setState(() => isLoading = false);
+          Get.snackbar(
+            "Error",
+            "Order created but no order ID returned — cannot start card payment",
+            snackPosition: SnackPosition.TOP,
+          );
+          return;
+        }
+
+        final intentResult = await PaymentService().createStripePaymentIntent(
+          orderId: orderId,
+        );
+
+        if (intentResult["success"] != true) {
+          setState(() => isLoading = false);
+          Get.snackbar(
+            "Error",
+            intentResult["message"] ?? "Could not start card payment",
+            snackPosition: SnackPosition.TOP,
+          );
+          return;
+        }
+
+        try {
+          await Stripe.instance.initPaymentSheet(
+            paymentSheetParameters: SetupPaymentSheetParameters(
+              paymentIntentClientSecret: intentResult["clientSecret"],
+              merchantDisplayName: "Rice Mart",
+            ),
+          );
+
+          await Stripe.instance.presentPaymentSheet();
+        } on StripeException catch (e) {
+          setState(() => isLoading = false);
+          Get.snackbar(
+            "Payment Cancelled",
+            e.error.localizedMessage ?? "Card payment was not completed",
+            snackPosition: SnackPosition.TOP,
+          );
+          return;
+        }
+
+        // Payment sheet succeeded on Stripe's side. The order flips to
+        // "paid" a moment later once Stripe's webhook reaches the backend
+        // — not instantly here.
+        setState(() => isLoading = false);
+
+        CartService().clearCart();
+
+        Get.snackbar(
+          "Success",
+          "Payment submitted — confirming your order...",
+          snackPosition: SnackPosition.TOP,
+        );
+
+        Get.offAllNamed(AppRoutes.dashboard);
+        Get.toNamed(AppRoutes.myOrders);
+        return;
+      }
+
+      // =========================
+      // 3. EASYPAISA / JAZZCASH — same as before
+      // =========================
+      setState(() => isLoading = false);
+
+      CartService().clearCart();
+
+      Get.snackbar(
+        "Success",
+        result["message"] ?? "Order placed successfully",
+        snackPosition: SnackPosition.TOP,
+      );
+
+      Get.offAllNamed(AppRoutes.dashboard);
+      Get.toNamed(AppRoutes.myOrders);
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -699,15 +772,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ],
                         ),
 
+                      // =========================
+                      // CARD — Stripe test-mode payment
+                      // =========================
                       if (paymentMethod == "card")
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: AppDecorations.card,
-                          child: Text(
-                            "Card payment gateway will be integrated in future versions. "
-                            "For project demonstration, card payment is shown as a UI option.",
-                            style: AppTextStyles.bodyMedium,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "You'll be asked for card details on the next step, "
+                                "via a secure Stripe payment sheet.",
+                                style: AppTextStyles.bodyMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Test mode — no real charge occurs.",
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.labelSecondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
 

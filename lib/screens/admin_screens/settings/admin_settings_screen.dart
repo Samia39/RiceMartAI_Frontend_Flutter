@@ -118,16 +118,27 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: AppDecorations.card,
 
-                child: SwitchListTile(
-                  title: const Text("Enable Shop Registration"),
+                // SwitchListTile paints its background/ink splash on the
+                // nearest Material ancestor. Without this Material wrap,
+                // the parent Container's own decoration sits on top and
+                // hides those effects — that's the
+                // "ListTile background color or ink splashes may be
+                // invisible" warning. Wrapping it here (transparent, so
+                // the card's own background/border still show through)
+                // gives SwitchListTile its own Material to paint on.
+                child: Material(
+                  color: Colors.transparent,
+                  child: SwitchListTile(
+                    title: const Text("Enable Shop Registration"),
 
-                  value: shopRegistration,
+                    value: shopRegistration,
 
-                  onChanged: (value) {
-                    setState(() {
-                      shopRegistration = value;
-                    });
-                  },
+                    onChanged: (value) {
+                      setState(() {
+                        shopRegistration = value;
+                      });
+                    },
+                  ),
                 ),
               ),
             ],

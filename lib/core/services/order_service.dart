@@ -16,7 +16,7 @@ class OrderService {
     required int cityId,
     required String address,
     required String paymentMethod,
-    required String transactionId,
+    String? transactionId,
     required List cart,
     List<int>? imageBytes,
     String? fileName,
@@ -39,7 +39,10 @@ class OrderService {
       request.fields['address'] = address;
       request.fields['city_id'] = cityId.toString();
       request.fields['payment_method'] = paymentMethod;
-      request.fields['transaction_id'] = transactionId;
+
+      if (transactionId != null) {
+        request.fields['transaction_id'] = transactionId;
+      }
 
       for (int i = 0; i < cart.length; i++) {
         request.fields['cart[$i][product_id]'] = cart[i]['product_id']

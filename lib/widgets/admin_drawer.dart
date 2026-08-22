@@ -11,6 +11,22 @@ import '../screens/admin_screens/courier_management/city_screen.dart';
 class AdminDrawer extends StatelessWidget {
   const AdminDrawer({super.key});
 
+  // =========================
+  // SAFE NAVIGATION HELPER
+  // Closes the drawer first, then waits for the NEXT frame (i.e. after
+  // the drawer's close animation has actually started/settled) before
+  // pushing the new route. Doing Navigator.pop(context) and
+  // Get.toNamed()/Get.to() back-to-back in the same callback causes the
+  // Navigator transition lock to clash, which is what was making the
+  // drawer "stuck" until a hot restart.
+  // =========================
+  void _navigate(BuildContext context, VoidCallback action) {
+    Navigator.pop(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      action();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final box = GetStorage();
@@ -46,8 +62,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.dashboard,
                   title: "Dashboard",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.sellerDashboard);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.sellerDashboard);
+                    });
                   },
                 ),
 
@@ -56,8 +73,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.pending_actions,
                   title: "Pending Shops",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.sellerApprovals);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.sellerApprovals);
+                    });
                   },
                 ),
 
@@ -66,8 +84,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.verified,
                   title: "Approved Shops",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.approvedShops);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.approvedShops);
+                    });
                   },
                 ),
 
@@ -76,8 +95,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.shopping_bag,
                   title: "Orders",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.adminordersscreen);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.adminordersscreen);
+                    });
                   },
                 ),
 
@@ -104,8 +124,9 @@ class AdminDrawer extends StatelessWidget {
                       ),
                       title: const Text("Users"),
                       onTap: () {
-                        Navigator.pop(context);
-                        Get.toNamed(AppRoutes.users);
+                        _navigate(context, () {
+                          Get.toNamed(AppRoutes.users);
+                        });
                       },
                     ),
 
@@ -117,8 +138,9 @@ class AdminDrawer extends StatelessWidget {
                       ),
                       title: const Text("Roles"),
                       onTap: () {
-                        Navigator.pop(context);
-                        Get.toNamed(AppRoutes.roles);
+                        _navigate(context, () {
+                          Get.toNamed(AppRoutes.roles);
+                        });
                       },
                     ),
 
@@ -130,20 +152,21 @@ class AdminDrawer extends StatelessWidget {
                       ),
                       title: const Text("Assign Permissions"),
                       onTap: () {
-                        Navigator.pop(context);
-                        if (!Get.isRegistered<PermissionsController>()) {
-                          Get.lazyPut<PermissionsController>(
-                            () => PermissionsController(),
-                            fenix: true,
-                          );
-                        }
-                        Get.toNamed(AppRoutes.assignPermissions);
+                        _navigate(context, () {
+                          if (!Get.isRegistered<PermissionsController>()) {
+                            Get.lazyPut<PermissionsController>(
+                              () => PermissionsController(),
+                              fenix: true,
+                            );
+                          }
+                          Get.toNamed(AppRoutes.assignPermissions);
+                        });
                       },
                     ),
                   ],
                 ),
 
-                // COURIER MaNAGEMENT
+                // COURIER MANAGEMENT
                 ExpansionTile(
                   leading: const Icon(
                     Icons.local_shipping,
@@ -158,7 +181,7 @@ class AdminDrawer extends StatelessWidget {
                   ),
                   childrenPadding: const EdgeInsets.only(left: 20),
                   children: [
-                    //city screen
+                    // CITY SCREEN
                     ListTile(
                       leading: const Icon(
                         Icons.location_city,
@@ -166,8 +189,9 @@ class AdminDrawer extends StatelessWidget {
                       ),
                       title: const Text("Cities"),
                       onTap: () {
-                        Navigator.pop(context);
-                        Get.to(() => const CityScreen());
+                        _navigate(context, () {
+                          Get.to(() => const CityScreen());
+                        });
                       },
                     ),
                     // COURIER CHARGES
@@ -178,8 +202,9 @@ class AdminDrawer extends StatelessWidget {
                       ),
                       title: const Text("Courier Charges"),
                       onTap: () {
-                        Navigator.pop(context);
-                        Get.to(() => const CourierChargeScreen());
+                        _navigate(context, () {
+                          Get.to(() => const CourierChargeScreen());
+                        });
                       },
                     ),
                   ],
@@ -190,8 +215,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.pending_actions,
                   title: "Payment Approvals",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.paymentScreen);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.paymentScreen);
+                    });
                   },
                 ),
                 // PAYMENT SETTINGS
@@ -199,8 +225,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.payment,
                   title: "Payment Settings",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.adminPaymentSettings);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.adminPaymentSettings);
+                    });
                   },
                 ),
 
@@ -209,8 +236,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.account_balance_wallet,
                   title: "Seller Payouts",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.to(() => const AdminPayoutsScreen());
+                    _navigate(context, () {
+                      Get.to(() => const AdminPayoutsScreen());
+                    });
                   },
                 ),
 
@@ -219,7 +247,9 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.report,
                   title: "Reports",
                   onTap: () {
-                    Navigator.pop(context);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.reports);
+                    });
                   },
                 ),
 
@@ -228,8 +258,18 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.person,
                   title: "profiles",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.toNamed(AppRoutes.profile);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.profile);
+                    });
+                  },
+                ),
+                drawerItem(
+                  icon: Icons.settings,
+                  title: "Settings",
+                  onTap: () {
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.adminSettings);
+                    });
                   },
                 ),
               ],
