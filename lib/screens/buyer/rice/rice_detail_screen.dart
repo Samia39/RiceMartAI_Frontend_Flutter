@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
 import 'package:frontend/routes/app_routes.dart';
 import '../../../core/services/cart_service.dart';
+import '../../../core/services/product_service.dart';
 
 class RiceDetailScreen extends StatefulWidget {
   const RiceDetailScreen({super.key});
@@ -14,34 +15,11 @@ class RiceDetailScreen extends StatefulWidget {
 class _RiceDetailScreenState extends State<RiceDetailScreen> {
   int quantity = 1;
 
-  // ✅ Base URL for images
-  final String imageBaseUrl = "http://ricemart.sandbox.pk/storage/";
-
-  // =========================
-  // HELPER: Build image URL
-  // =========================
-  String? _getImageUrl(Map<String, dynamic> product) {
-    final raw =
-        product["image"] ??
-        product["image_url"] ??
-        product["photo"] ??
-        product["thumbnail"] ??
-        product["img"];
-
-    if (raw == null || raw.toString().trim().isEmpty) return null;
-
-    final str = raw.toString().trim();
-    if (str.startsWith("http://") || str.startsWith("https://")) {
-      return str;
-    }
-    return "$imageBaseUrl$str";
-  }
-
   @override
   Widget build(BuildContext context) {
     final product = Get.arguments as Map<String, dynamic>;
     final shop = product["shop"];
-    final imageUrl = _getImageUrl(product);
+    final imageUrl = ProductService.getImageUrl(product);
 
     return Container(
       decoration: AppDecorations.gradientBackground,
