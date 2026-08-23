@@ -306,13 +306,19 @@ class ShopDetailsScreen extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.check_circle,
-                                color: AppColors.success,
+                                status == "rejected"
+                                    ? Icons.cancel
+                                    : Icons.check_circle,
+                                color: status == "rejected"
+                                    ? AppColors.error
+                                    : AppColors.success,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "This shop has already been approved.",
+                                  status == "rejected"
+                                      ? "This shop has been rejected."
+                                      : "This shop has already been approved.",
                                   style: AppTextStyles.bodyMedium,
                                 ),
                               ),

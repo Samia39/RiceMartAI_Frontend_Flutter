@@ -8,12 +8,11 @@ import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';
 import '../screens/access_denied_screen.dart';
-import '../screens/admin_screens/analytics/analytics_screen.dart';
+import '../screens/admin_screens/dashboard/admin_home_shell.dart';
 import '../screens/admin_screens/notifications/admin_notifications_screen.dart';
 import '../screens/admin_screens/orders/admin_orders_screen.dart';
 import '../screens/admin_screens/payments/payment_screen.dart';
 import '../screens/admin_screens/reports/reports_screen.dart';
-import '../screens/admin_screens/search/admin_search_results_screen.dart';
 import '../screens/admin_screens/settings/admin_settings_screen.dart';
 import '../screens/admin_screens/shops/add_seller_screen.dart';
 import '../screens/admin_screens/shops/approved_shops_screen.dart';
@@ -34,16 +33,12 @@ import '../screens/seller/shop/edit_shop_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
-import '../screens/admin_screens/dashboard/admin_dashboard.dart';
 import '../screens/seller/dashboard/seller_dashboard_screen.dart';
 import '../screens/buyer/home/ai_result.dart';
 import '../screens/buyer/home/ai_recommendation_screen.dart';
 import '../screens/buyer/home/recommendation_result_screen.dart';
-
 import 'app_routes.dart';
 import '../middleware/permission_middleware.dart';
-import '../screens/buyer/home/ai_recommendation_screen.dart';
-import '../screens/buyer/home/recommendation_result_screen.dart';
 import '../screens/buyer/profile/profile_screen.dart';
 
 class AppPages {
@@ -160,18 +155,11 @@ class AppPages {
     // =========================
     GetPage(
       name: AppRoutes.adminDashboard,
-      page: () => const AdminDashboard(),
+      page: () => const AdminHomeShell(),
       middlewares: [
         AuthMiddleware(),
         RoleMiddleware(['admin', 'super_admin']),
       ],
-    ),
-
-    // Admin Analytics
-    GetPage(
-      name: AppRoutes.analytics,
-      page: () => const AnalyticsScreen(),
-      middlewares: [AuthMiddleware(), PermissionMiddleware('view analytics')],
     ),
 
     // Admin Seller Approvals
@@ -226,13 +214,6 @@ class AppPages {
       name: AppRoutes.addSeller,
       page: () => const AddSellerScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('create shop')],
-    ),
-
-    // Admin Search
-    GetPage(
-      name: AppRoutes.adminSearch,
-      page: () => AdminSearchResultsScreen(query: Get.arguments),
-      middlewares: [AuthMiddleware()],
     ),
 
     // User Management
