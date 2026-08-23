@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
@@ -29,24 +30,21 @@ class AdminService {
     required String shopName,
     required String ownerName,
     required String phone,
+    required String city,
     required String address,
     required String cnic,
     required String description,
+    required Uint8List cnicFrontImage,
+    required Uint8List cnicBackImage,
+    String? cnicFrontFileName,
+    String? cnicBackFileName,
   }) async {
     var request = http.MultipartRequest(
       'POST',
       Uri.parse("$baseUrl/admin/create-seller"),
     );
 
-    // =========================
-    // HEADERS
-    // =========================
-
     request.headers.addAll(headers);
-
-    // =========================
-    // TEXT FIELDS
-    // =========================
 
     request.fields['name'] = name;
     request.fields['email'] = email;
@@ -55,16 +53,28 @@ class AdminService {
     request.fields['shop_name'] = shopName;
     request.fields['owner_name'] = ownerName;
     request.fields['phone'] = phone;
+    request.fields['city'] = city;
     request.fields['address'] = address;
     request.fields['cnic'] = cnic;
     request.fields['description'] = description;
 
-    // =========================
-    // SEND REQUEST
-    // =========================
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'cnic_image',
+        cnicFrontImage,
+        filename: cnicFrontFileName ?? "cnic_front.jpg",
+      ),
+    );
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'cnic_back_image',
+        cnicBackImage,
+        filename: cnicBackFileName ?? "cnic_back.jpg",
+      ),
+    );
 
     var response = await request.send();
-
     var responseData = await response.stream.bytesToString();
 
     print("STATUS CODE: ${response.statusCode}");
