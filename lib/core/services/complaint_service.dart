@@ -1,0 +1,273 @@
+import 'dart:convert';
+import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
+import '../constants/app_icons.dart';
+
+// =========================
+// MODELS (kept in this file — no separate models folder)
+// =========================
+
+class ComplaintMessage {
+  final int id;
+  final int senderId;
+  final String senderRole; // 'complainant' | 'super_admin'
+  final String message;
+  final String? attachmentPath;
+  final String createdAt;
+
+  ComplaintMessage({
+    required this.id,
+    required this.senderId,
+    required this.senderRole,
+    required this.message,
+    this.attachmentPath,
+    required this.createdAt,
+  });
+
+  factory ComplaintMessage.fromJson(Map<String, dynamic> json) {
+    return ComplaintMessage(
+      id: json['id'],
+      senderId: json['sender_id'],
+      senderRole: json['sender_role'],
+      message: json['message'],
+      attachmentPath: json['attachment_path'],
+      createdAt: json['created_at'] ?? '',
+    );
+  }
+}
+
+class Complaint {
+  final int id;
+  final String role; // 'customer' | 'seller'
+  final String category;
+  final String subject;
+  final String status; // 'open' | 'in_progress' | 'resolved'
+  final String createdAt;
+  final List<ComplaintMessage> messages;
+
+  Complaint({
+    required this.id,
+    required this.role,
+    required this.category,
+    required this.subject,
+    required this.status,
+    required this.createdAt,
+    this.messages = const [],
+  });
+
+  factory Complaint.fromJson(Map<String, dynamic> json) {
+    return Complaint(
+      id: json['id'],
+      role: json['role'] ?? '',
+      category: json['category'] ?? 'other',
+      subject: json['subject'] ?? '',
+      status: json['status'] ?? 'open',
+      createdAt: json['created_at'] ?? '',
+      messages: json['messages'] != null
+          ? (json['messages'] as List)
+                .map((m) => ComplaintMessage.fromJson(m))
+                .toList()
+          : [],
+    );
+  }
+}
+
+// =========================
+// SERVICE
+// =========================
+
+class ComplaintService {
+  final box = GetStorage();
+  final String baseUrl = BaseUrl.url;
+
+  // CREATE COMPLAINT (with optional attachment)
+  Future<Map<String, dynamic>> createComplaint({
+    required String category,
+    required String subject,
+    required String message,
+    List<int>? imageBytes,
+    String? fileName,
+  }) async {
+    try {
+      final token = box.read("token");
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$baseUrl/complaints"),
+      );
+
+      request.headers.addAll({
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      });
+
+      request.fields['category'] = category;
+      request.fields['subject'] = subject;
+      request.fields['message'] = message;
+
+      if (imageBytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'attachment',
+            imageBytes,
+            filename: fileName ?? "attachment.jpg",
+          ),
+        );
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      final data = jsonDecode(responseBody);
+
+      if (response.statusCode == 201) {
+        return {"success": true, "complaint": Complaint.fromJson(data)};
+      } else {
+        return {
+          "success": false,
+          "message": data['message'] ?? 'Failed to submit complaint',
+        };
+      }
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  // MY COMPLAINTS (customer/seller)
+  Future<List<Complaint>> getMyComplaints() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/complaints/my"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((c) => Complaint.fromJson(c)).toList();
+    }
+    return [];
+  }
+
+  // ALL COMPLAINTS (super admin)
+  Future<List<Complaint>> getAllComplaints({String? status}) async {
+    final token = box.read("token");
+
+    final uri = status != null
+        ? Uri.parse("$baseUrl/complaints?status=$status")
+        : Uri.parse("$baseUrl/complaints");
+
+    final response = await http.get(
+      uri,
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((c) => Complaint.fromJson(c)).toList();
+    }
+    return [];
+  }
+
+  // COMPLAINT DETAIL (thread)
+  Future<Complaint> getComplaintDetail(int id) async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/complaints/$id"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      return Complaint.fromJson(jsonDecode(response.body));
+    }
+    throw Exception("Complaint not found");
+  }
+
+  // ADD MESSAGE (reply — complainant or super admin)
+  Future<Map<String, dynamic>> addMessage({
+    required int complaintId,
+    required String message,
+    List<int>? imageBytes,
+    String? fileName,
+  }) async {
+    try {
+      final token = box.read("token");
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse("$baseUrl/complaints/$complaintId/messages"),
+      );
+
+      request.headers.addAll({
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      });
+
+      request.fields['message'] = message;
+
+      if (imageBytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'attachment',
+            imageBytes,
+            filename: fileName ?? "attachment.jpg",
+          ),
+        );
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      final data = jsonDecode(responseBody);
+
+      if (response.statusCode == 201) {
+        return {
+          "success": true,
+          "message_data": ComplaintMessage.fromJson(data),
+        };
+      } else {
+        return {
+          "success": false,
+          "message": data['message'] ?? 'Failed to send reply',
+        };
+      }
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  // UPDATE STATUS (super admin)
+  Future<Map<String, dynamic>> updateStatus({
+    required int complaintId,
+    required String status,
+  }) async {
+    final token = box.read("token");
+
+    final response = await http.patch(
+      Uri.parse("$baseUrl/complaints/$complaintId/status"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"status": status}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // EMERGENCY CONTACT (settings)
+  Future<Map<String, String>> getEmergencyContact() async {
+    final token = box.read("token");
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/settings/emergency-contact"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return {"email": data['email'] ?? '', "phone": data['phone'] ?? ''};
+    }
+    return {"email": "", "phone": ""};
+  }
+}

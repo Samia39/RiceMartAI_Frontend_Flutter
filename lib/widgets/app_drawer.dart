@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
+import '../screens/buyer/complaints/customer_complaint_list_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final Function(int) onTabSelected;
@@ -115,6 +116,18 @@ class AppDrawer extends StatelessWidget {
               ),
 
               // =========================
+              // COMPLAINTS PAGE
+              // =========================
+              drawerItem(
+                icon: Icons.report_problem,
+                title: "Complaints",
+                onTap: () {
+                  Navigator.pop(context);
+                  Get.to(() => const CustomerComplaintListScreen());
+                },
+              ),
+
+              // =========================
               // NOTIFICATIONS
               // =========================
               drawerItem(
@@ -122,8 +135,6 @@ class AppDrawer extends StatelessWidget {
                 title: "Notifications",
                 onTap: () {},
               ),
-
-              const SizedBox(height: 20),
 
               // =========================
               // LOGOUT
