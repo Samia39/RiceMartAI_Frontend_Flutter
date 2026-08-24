@@ -21,7 +21,7 @@ class AuthController extends GetxController {
 
     try {
       final res = await AuthService.login(email, password);
-      debugPrint("LOGIN RESPONSE: $res");
+      //debugPrint("LOGIN RESPONSE: $res");
 
       if (res['token'] != null) {
         token.value = res['token'];

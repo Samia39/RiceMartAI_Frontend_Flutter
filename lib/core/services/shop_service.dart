@@ -99,6 +99,22 @@ class ShopService {
     return jsonDecode(response.body);
   }
 
+  // reject shops
+  Future<List<Map<String, dynamic>>> fetchRejectedShops({
+    required String token,
+  }) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/rejected-shops"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    }
+
+    return [];
+  }
+
   // fetch approved shops for customers
   Future<List<Map<String, dynamic>>> fetchApprovedShops() async {
     String token = GetStorage().read("token") ?? "";

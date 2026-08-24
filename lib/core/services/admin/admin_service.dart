@@ -305,4 +305,19 @@ class AdminService {
 
     return jsonDecode(response.body);
   }
+
+  // =========================
+  // ADMIN DASHBOARD STATS
+  // =========================
+
+  Future<Map<String, dynamic>> getAdminDashboardStats() async {
+    final response = await http.get(
+      Uri.parse(
+        "$baseUrl/admin/dashboard",
+      ), // ⚠️ confirm this matches routes/api.php
+      headers: headers,
+    );
+
+    return jsonDecode(response.body);
+  }
 }
