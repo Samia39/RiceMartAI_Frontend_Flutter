@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/admin_screens/complaints/admin_complaint_list_screen.dart';
 import 'package:frontend/screens/admin_screens/courier_management/courier_charge_screen.dart';
 import 'package:frontend/screens/admin_screens/payout/admin_payouts_screen.dart';
 import 'package:get/get.dart';
@@ -213,12 +214,12 @@ class AdminDrawer extends StatelessWidget {
                   },
                 ),
 
-                // REPORTS
                 drawerItem(
-                  icon: Icons.report,
-                  title: "Reports",
+                  icon: Icons.report_problem,
+                  title: "Complaints",
                   onTap: () {
                     Navigator.pop(context);
+                    Get.to(() => const AdminComplaintListScreen());
                   },
                 ),
 

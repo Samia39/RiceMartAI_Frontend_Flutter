@@ -3,6 +3,11 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import '../constants/app_icons.dart';
 
+String attachmentUrl(String path) {
+  final storageBase = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
+  return '$storageBase/storage/$path';
+}
+
 // =========================
 // MODELS (kept in this file — no separate models folder)
 // =========================
@@ -30,7 +35,9 @@ class ComplaintMessage {
       senderId: json['sender_id'],
       senderRole: json['sender_role'],
       message: json['message'],
-      attachmentPath: json['attachment_path'],
+      attachmentPath: json['attachment_path'] != null
+          ? attachmentUrl(json['attachment_path'])
+          : null,
       createdAt: json['created_at'] ?? '',
     );
   }
@@ -38,31 +45,40 @@ class ComplaintMessage {
 
 class Complaint {
   final int id;
+  final int userId;
   final String role; // 'customer' | 'seller'
   final String category;
   final String subject;
   final String status; // 'open' | 'in_progress' | 'resolved'
   final String createdAt;
+  final String? userName;
+  final String? userEmail;
   final List<ComplaintMessage> messages;
 
   Complaint({
     required this.id,
+    required this.userId,
     required this.role,
     required this.category,
     required this.subject,
     required this.status,
     required this.createdAt,
+    this.userName,
+    this.userEmail,
     this.messages = const [],
   });
 
   factory Complaint.fromJson(Map<String, dynamic> json) {
     return Complaint(
       id: json['id'],
+      userId: json['user_id'] ?? 0,
       role: json['role'] ?? '',
       category: json['category'] ?? 'other',
       subject: json['subject'] ?? '',
       status: json['status'] ?? 'open',
       createdAt: json['created_at'] ?? '',
+      userName: json['user'] != null ? json['user']['name'] : null,
+      userEmail: json['user'] != null ? json['user']['email'] : null,
       messages: json['messages'] != null
           ? (json['messages'] as List)
                 .map((m) => ComplaintMessage.fromJson(m))
@@ -71,7 +87,6 @@ class Complaint {
     );
   }
 }
-
 // =========================
 // SERVICE
 // =========================
