@@ -1,3 +1,16 @@
+// Path: lib/screens/admin_screens/dashboard/admin_dashboard_tab.dart
+//
+// FIX: this is the file that actually renders as the admin's dashboard tab
+// (via AdminHomeShell -> AdminDashboardTab). The old notification icon here
+// used Get.toNamed(AppRoutes.adminNotifications), a route that isn't
+// registered in app_pages.dart at all — tapping it would have thrown a
+// "route not found" error. It's now replaced with the same NotificationBell
+// widget used on buyer/seller dashboards, placed immediately next to the
+// "Add Shop" button, and the 'view notifications' permission gate has been
+// removed (that permission isn't assigned to the admin role yet, which was
+// hiding it entirely). Add the permission back in Spatie later if you want
+// it gated again.
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
@@ -5,243 +18,179 @@ import '../../../routes/app_routes.dart';
 import '../../../widgets/admin_drawer.dart';
 import '../../../widgets/notification_bell.dart';
 import '../../../core/services/admin/permission_service.dart';
+import '../../../core/services/admin/admin_service.dart';
 
-class AdminDashboard extends StatelessWidget {
-  const AdminDashboard({super.key});
+class AdminDashboardTab extends StatefulWidget {
+  const AdminDashboardTab({super.key});
+
+  @override
+  State<AdminDashboardTab> createState() => _AdminDashboardTabState();
+}
+
+class _AdminDashboardTabState extends State<AdminDashboardTab> {
+  final AdminService _adminService = AdminService();
+
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  int _totalUsers = 0;
+  int _totalSellers = 0;
+  int _totalCustomers = 0;
+  int _totalShops = 0;
+  int _pendingShops = 0;
+  int _approvedShops = 0;
+  int _rejectedShops = 0;
+  int _totalOrders = 0;
+  num _totalRevenue = 0;
+  int _activeProducts = 0;
+  int _pendingPayments = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (PermissionService.hasPermission('view admin dashboard')) {
+      _loadStats();
+    } else {
+      _isLoading = false;
+    }
+  }
+
+  // Reads an int out of `data[key]` whether the backend sent it as a
+  // real number or (like Laravel's decimal sum()) as a string —
+  // avoids a runtime type crash that was silently triggering the
+  // "Couldn't load dashboard stats" error banner even on a
+  // successful, well-formed response.
+  int _asInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    return int.tryParse(value.toString()) ?? 0;
+  }
+
+  num _asNum(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value;
+    return num.tryParse(value.toString()) ?? 0;
+  }
+
+  Future<void> _loadStats() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+
+    try {
+      final response = await _adminService.getAdminDashboardStats();
+
+      if (response['success'] == true) {
+        final data = response['data'];
+
+        setState(() {
+          _totalUsers = _asInt(data['total_users']);
+          _totalSellers = _asInt(data['total_sellers']);
+          _totalCustomers = _asInt(data['total_customers']);
+          _totalShops = _asInt(data['total_shops']);
+          _pendingShops = _asInt(data['pending_shops']);
+          _approvedShops = _asInt(data['approved_shops']);
+          _rejectedShops = _asInt(data['rejected_shops']);
+          _totalOrders = _asInt(data['total_orders']);
+          // total_revenue comes back as a STRING from the backend
+          // (e.g. "19548.00") — this was the actual bug.
+          _totalRevenue = _asNum(data['total_revenue']);
+          _activeProducts = _asInt(data['active_products']);
+          _pendingPayments = _asInt(data['pending_payments']);
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatMoney(num value) {
+    final str = value.toStringAsFixed(0);
+    final buffer = StringBuffer();
+    for (int i = 0; i < str.length; i++) {
+      final posFromRight = str.length - i;
+      buffer.write(str[i]);
+      if (posFromRight > 1 && (posFromRight - 1) % 3 == 0) {
+        buffer.write(',');
+      }
+    }
+    return "Rs $buffer";
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.gradientBackground,
-
       child: Scaffold(
         backgroundColor: Colors.transparent,
-
         drawer: const AdminDrawer(),
-
         appBar: AppBar(
           title: const Text("Admin Dashboard"),
           centerTitle: true,
-
           actions: [
-            // =========================
-            // ADD SHOP
-            // =========================
             if (PermissionService.hasPermission('create shop'))
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-
-                child: GestureDetector(
-                  onTap: () {
-                    Get.toNamed(AppRoutes.addSeller);
-                  },
-
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.darkGreen,
-                        ),
-
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-
-                      const SizedBox(height: 2),
-
-                      const Text("Add Shops", style: TextStyle(fontSize: 10)),
-                    ],
-                  ),
-                ),
+              _appBarAction(
+                icon: Icons.add,
+                label: "Add Shop",
+                color: AppColors.darkGreen,
+                onTap: () => Get.toNamed(AppRoutes.addSeller),
               ),
 
             // =========================
-            // SETTINGS
-            // =========================
-            if (PermissionService.hasPermission('view settings'))
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-
-                child: GestureDetector(
-                  onTap: () {
-                    Get.toNamed(AppRoutes.adminSettings);
-                  },
-
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.blue,
-                        ),
-
-                        child: const Icon(
-                          Icons.settings,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                      ),
-
-                      const SizedBox(height: 2),
-
-                      const Text("Settings", style: TextStyle(fontSize: 10)),
-                    ],
-                  ),
-                ),
-              ),
-
-            // =========================
-            // NOTIFICATIONS — now backed by the real unread count + list
-            // (was a static icon linking to AppRoutes.adminNotifications;
-            // NotificationBell pushes straight to NotificationsScreen, so
-            // that route is no longer required, but you can keep it too)
+            // NOTIFICATIONS — real bell, placed right next to Add Shop.
+            // Replaces the old dead-end icon (see file header note).
             // =========================
             Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: NotificationBell(
-                iconColor: const Color.fromARGB(255, 179, 60, 60),
-                size: 24,
-              ),
+              child: NotificationBell(iconColor: Colors.white, size: 24),
             ),
+
+            if (PermissionService.hasPermission('view settings'))
+              _appBarAction(
+                icon: Icons.settings,
+                label: "Settings",
+                color: Colors.blue,
+                onTap: () => Get.toNamed(AppRoutes.adminSettings),
+              ),
           ],
         ),
-
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-
-            children: [
-              Text("Admin Controls", style: AppTextStyles.heading2),
-
-              const SizedBox(height: 20),
-
-              // =========================
-              // QUICK STATS
-              // =========================
-              if (PermissionService.hasPermission('view dashboard'))
-                Row(
-                  children: [
-                    Expanded(child: quickStatCard("Users", "1240")),
-
-                    const SizedBox(width: 12),
-
-                    Expanded(child: quickStatCard("Orders", "520")),
-                  ],
+        body: RefreshIndicator(
+          onRefresh: () async {
+            if (PermissionService.hasPermission('view admin dashboard')) {
+              await _loadStats();
+            }
+          },
+          color: AppColors.darkGreen,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Admin Controls", style: AppTextStyles.heading2),
+                const SizedBox(height: 6),
+                Text(
+                  "Overview of the whole platform",
+                  style: AppTextStyles.bodySmall,
                 ),
+                const SizedBox(height: 20),
 
-              const SizedBox(height: 12),
+                if (PermissionService.hasPermission('view admin dashboard'))
+                  if (_hasError) _errorBanner() else _statsSection(),
 
-              quickStatCard("Revenue", "Rs 2.3M"),
-
-              const SizedBox(height: 25),
-
-              // =========================
-              // SEARCH
-              // =========================
-              if (PermissionService.hasPermission('view users') ||
-                  PermissionService.hasPermission('view shops') ||
-                  PermissionService.hasPermission('view orders'))
-                TextField(
-                  onSubmitted: (value) {
-                    Get.toNamed(AppRoutes.adminSearch, arguments: value);
-                  },
-
-                  decoration: InputDecoration(
-                    hintText: "Search users, sellers, shops, orders...",
-
-                    prefixIcon: const Icon(Icons.search),
-
-                    filled: true,
-
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-              const SizedBox(height: 25),
-
-              // =========================
-              // ANALYTICS
-              // =========================
-              if (PermissionService.hasPermission('view analytics'))
-                adminCard(
-                  title: "Analytics",
-                  subtitle: "Platform insights",
-                  icon: Icons.analytics,
-
-                  onTap: () {
-                    Get.toNamed(AppRoutes.analytics);
-                  },
-                ),
-
-              const SizedBox(height: 20),
-
-              // =========================
-              // SELLER APPROVALS
-              // =========================
-              if (PermissionService.hasPermission('approve shops'))
-                adminCard(
-                  title: "Seller Approvals",
-                  subtitle: "Approve shops and verify sellers",
-                  icon: Icons.store_mall_directory,
-
-                  onTap: () {
-                    Get.toNamed(AppRoutes.sellerApprovals);
-                  },
-                ),
-
-              const SizedBox(height: 20),
-
-              // =========================
-              // APPROVED SHOPS
-              // =========================
-              if (PermissionService.hasPermission('view shops'))
-                adminCard(
-                  title: "Approved Shops",
-                  subtitle: "Manage active shops",
-                  icon: Icons.verified,
-
-                  onTap: () {
-                    Get.toNamed(AppRoutes.approvedShops);
-                  },
-                ),
-
-              const SizedBox(height: 20),
-
-              // =========================
-              // REPORTS
-              // =========================
-              if (PermissionService.hasPermission('manage reports'))
-                adminCard(
-                  title: "Reports",
-                  subtitle: "Feedback and complaints",
-                  icon: Icons.report_problem,
-
-                  onTap: () {
-                    Get.toNamed(AppRoutes.reports);
-                  },
-                ),
-
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 10),
+              ],
+            ),
           ),
         ),
       ),
@@ -249,43 +198,205 @@ class AdminDashboard extends StatelessWidget {
   }
 
   // =========================
-  // ADMIN CARD
+  // STATS SECTION
   // =========================
-  Widget adminCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
+  Widget _statsSection() {
+    if (_isLoading) {
+      return Column(
+        children: List.generate(
+          5,
+          (_) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: [
+                Expanded(child: _statSkeleton()),
+                const SizedBox(width: 12),
+                Expanded(child: _statSkeleton()),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
-      child: Container(
-        padding: const EdgeInsets.all(18),
-
-        decoration: AppDecorations.card,
-
-        child: Row(
+    return Column(
+      children: [
+        Row(
           children: [
-            Icon(icon, size: 36, color: AppColors.darkGreen),
-
-            const SizedBox(width: 16),
-
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-
-                children: [
-                  Text(title, style: AppTextStyles.heading4),
-
-                  const SizedBox(height: 4),
-
-                  Text(subtitle, style: AppTextStyles.bodySmall),
-                ],
+              child: quickStatCard(
+                "Users",
+                "$_totalUsers",
+                icon: Icons.people_alt,
+                color: AppColors.darkGreen,
               ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: quickStatCard(
+                "Sellers",
+                "$_totalSellers",
+                icon: Icons.storefront,
+                color: AppColors.golden,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: quickStatCard(
+                "Customers",
+                "$_totalCustomers",
+                icon: Icons.person,
+                color: AppColors.lightGreen,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: quickStatCard(
+                "Total Shops",
+                "$_totalShops",
+                icon: Icons.store,
+                color: AppColors.info,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: quickStatCard(
+                "Pending Shops",
+                "$_pendingShops",
+                icon: Icons.hourglass_top,
+                color: AppColors.warning,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: quickStatCard(
+                "Approved Shops",
+                "$_approvedShops",
+                icon: Icons.verified,
+                color: AppColors.success,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: quickStatCard(
+                "Rejected Shops",
+                "$_rejectedShops",
+                icon: Icons.cancel,
+                color: AppColors.error,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: quickStatCard(
+                "Orders",
+                "$_totalOrders",
+                icon: Icons.shopping_bag,
+                color: AppColors.warning,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: quickStatCard(
+                "Active Products",
+                "$_activeProducts",
+                icon: Icons.inventory_2,
+                color: AppColors.success,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: quickStatCard(
+                "Pending Payments",
+                "$_pendingPayments",
+                icon: Icons.pending_actions,
+                color: AppColors.info,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        quickStatCard(
+          "Total Revenue",
+          _formatMoney(_totalRevenue),
+          icon: Icons.payments,
+          color: AppColors.darkGreen,
+          highlight: true,
+        ),
+      ],
+    );
+  }
 
-            const Icon(Icons.arrow_forward_ios),
+  Widget _statSkeleton() {
+    return Container(
+      height: 80,
+      decoration: AppDecorations.card,
+      child: const Center(
+        child: SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(strokeWidth: 2.4),
+        ),
+      ),
+    );
+  }
+
+  Widget _errorBanner() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: AppDecorations.card,
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.error),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "Couldn't load dashboard stats.",
+              style: AppTextStyles.bodyMedium,
+            ),
+          ),
+          TextButton(onPressed: () => _loadStats(), child: const Text("Retry")),
+        ],
+      ),
+    );
+  }
+
+  Widget _appBarAction({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+              child: Icon(icon, color: Colors.white, size: 22),
+            ),
+            const SizedBox(height: 2),
+            Text(label, style: const TextStyle(fontSize: 10)),
           ],
         ),
       ),
@@ -295,21 +406,49 @@ class AdminDashboard extends StatelessWidget {
   // =========================
   // QUICK STATS CARD
   // =========================
-  Widget quickStatCard(String title, String value) {
+  Widget quickStatCard(
+    String title,
+    String value, {
+    IconData? icon,
+    Color? color,
+    bool highlight = false,
+  }) {
+    final accent = color ?? AppColors.darkGreen;
+
     return Container(
       padding: const EdgeInsets.all(16),
-
-      decoration: AppDecorations.card,
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
+      decoration: highlight
+          ? AppDecorations.card.copyWith(
+              gradient: LinearGradient(
+                colors: [accent.withOpacity(0.18), accent.withOpacity(0.05)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            )
+          : AppDecorations.card,
+      child: Row(
         children: [
-          Text(title, style: AppTextStyles.heading4),
-
-          const SizedBox(height: 8),
-
-          Text(value, style: AppTextStyles.heading3),
+          if (icon != null) ...[
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: accent.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: accent, size: 20),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTextStyles.heading4),
+                const SizedBox(height: 4),
+                Text(value, style: AppTextStyles.heading3),
+              ],
+            ),
+          ),
         ],
       ),
     );

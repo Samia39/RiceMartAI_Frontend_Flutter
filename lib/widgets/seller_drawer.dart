@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/shared/notification_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -45,120 +46,108 @@ class SellerDrawer extends StatelessWidget {
           ),
 
           // =========================
-          // DASHBOARD TAB
+          // SCROLLABLE NAV ITEMS
+          // (was a flat Column + Spacer(), which overflowed on
+          // shorter screens — this scrolls instead)
           // =========================
-          drawerItem(
-            icon: Icons.dashboard,
-            title: "Dashboard",
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // DASHBOARD TAB
+                drawerItem(
+                  icon: Icons.dashboard,
+                  title: "Dashboard",
+                  onTap: () {
+                    Navigator.pop(context);
+                    onTabSelected(0);
+                  },
+                ),
 
-            onTap: () {
-              Navigator.pop(context);
+                // MY SHOP TAB
+                drawerItem(
+                  icon: Icons.store,
+                  title: "My Shop",
+                  onTap: () {
+                    Navigator.pop(context);
+                    onTabSelected(2);
+                  },
+                ),
 
-              // HOME TAB
-              onTabSelected(0);
-            },
+                // MY RICE TAB
+                drawerItem(
+                  icon: Icons.rice_bowl,
+                  title: "My Rice",
+                  onTap: () {
+                    Navigator.pop(context);
+                    onTabSelected(1);
+                  },
+                ),
+
+                // PAYOUT DETAILS
+                drawerItem(
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: "Payout Details",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.to(() => const SellerPayoutDetailsScreen());
+                  },
+                ),
+
+                // PAYOUTS TAB (where the shop sees their payouts from admin)
+                drawerItem(
+                  icon: Icons.receipt_long,
+                  title: "My Payouts",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.to(() => const SellerPayoutsScreen());
+                  },
+                ),
+
+                // ORDERS TAB
+                drawerItem(
+                  icon: Icons.shopping_bag,
+                  title: "Orders",
+                  onTap: () {
+                    Navigator.pop(context);
+                    onTabSelected(4);
+                  },
+                ),
+
+                // PROFILE TAB
+                drawerItem(
+                  icon: Icons.person,
+                  title: "Profile",
+                  onTap: () {
+                    Navigator.pop(context);
+                    onTabSelected(5);
+                  },
+                ),
+
+                // NOTIFICATIONS
+                drawerItem(
+                  icon: Icons.notifications,
+                  title: "Notifications",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.to(() => const NotificationsScreen());
+                  },
+                ),
+              ],
+            ),
           ),
 
-          // =========================
-          // MY RICE TAB
-          // =========================
-          drawerItem(
-            icon: Icons.rice_bowl,
-            title: "My Rice",
-
-            onTap: () {
-              Navigator.pop(context);
-
-              // RICE TAB
-              onTabSelected(1);
-            },
-          ),
+          const Divider(height: 1),
 
           // =========================
-          // MY SHOP TAB
-          // =========================
-          drawerItem(
-            icon: Icons.store,
-            title: "My Shop",
-
-            onTap: () {
-              Navigator.pop(context);
-
-              // SHOP TAB
-              onTabSelected(2);
-            },
-          ),
-
-          // =========================
-          // PAYOUT DETAILS
-          // =========================
-          drawerItem(
-            icon: Icons.account_balance_wallet_outlined,
-            title: "Payout Details",
-
-            onTap: () {
-              Navigator.pop(context);
-
-              Get.to(() => const SellerPayoutDetailsScreen());
-            },
-          ),
-
-          // =========================
-          // PAYOUTS TAB
-          // (where the shop sees their payouts from admin)
-          drawerItem(
-            icon: Icons.receipt_long,
-            title: "My Payouts",
-            onTap: () {
-              Navigator.pop(context);
-              Get.to(() => const SellerPayoutsScreen());
-            },
-          ),
-
-          // =========================
-          // ORDERS TAB
-          // =========================
-          drawerItem(
-            icon: Icons.shopping_bag,
-            title: "Orders",
-
-            onTap: () {
-              Navigator.pop(context);
-
-              // ORDERS TAB
-              onTabSelected(4);
-            },
-          ),
-
-          // =========================
-          // PROFILE TAB
-          // =========================
-          drawerItem(
-            icon: Icons.person,
-            title: "Profile",
-
-            onTap: () {
-              Navigator.pop(context);
-
-              // PROFILE TAB
-              onTabSelected(5);
-            },
-          ),
-
-          const Spacer(),
-
-          // =========================
-          // LOGOUT
+          // LOGOUT — pinned at the bottom, always visible
           // =========================
           drawerItem(
             icon: Icons.logout,
             title: "Logout",
-
             color: Colors.red,
-
             onTap: () {
               box.erase();
-
               Get.offAllNamed(AppRoutes.login);
             },
           ),

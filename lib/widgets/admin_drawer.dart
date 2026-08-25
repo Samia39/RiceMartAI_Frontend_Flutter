@@ -63,7 +63,7 @@ class AdminDrawer extends StatelessWidget {
                   title: "Dashboard",
                   onTap: () {
                     _navigate(context, () {
-                      Get.toNamed(AppRoutes.sellerDashboard);
+                      Get.toNamed(AppRoutes.adminDashboard);
                     });
                   },
                 ),

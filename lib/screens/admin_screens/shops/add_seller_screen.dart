@@ -117,6 +117,14 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
                             const SizedBox(height: 12),
 
                             buildField(
+                              controller.cityController,
+                              "City",
+                              icon: Icons.location_city,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            buildField(
                               controller.addressController,
                               "Address",
                               icon: Icons.location_on,
@@ -139,51 +147,35 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
                               maxLines: 3,
                             ),
 
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
 
                             // =========================
-                            // IMAGE PICKER
+                            // CNIC — FRONT
                             // =========================
-                            Obx(() {
-                              return GestureDetector(
-                                onTap: controller.pickImage,
+                            Text(
+                              "CNIC Document (Front)",
+                              style: AppTextStyles.label,
+                            ),
+                            const SizedBox(height: 8),
+                            imagePicker(
+                              image: controller.cnicFrontImage,
+                              onTap: controller.pickFrontImage,
+                            ),
 
-                                child: Container(
-                                  height: 170,
-                                  width: double.infinity,
+                            const SizedBox(height: 16),
 
-                                  decoration: AppDecorations.inputField,
-
-                                  child: controller.cnicImage.value == null
-                                      ? Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.upload_file,
-                                                color: AppColors.iconMuted,
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                "Upload CNIC Image",
-                                                style: AppTextStyles.bodyMedium,
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      : ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          child: Image.network(
-                                            controller.cnicImage.value!.path,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                          ),
-                                        ),
-                                ),
-                              );
-                            }),
+                            // =========================
+                            // CNIC — BACK
+                            // =========================
+                            Text(
+                              "CNIC Document (Back)",
+                              style: AppTextStyles.label,
+                            ),
+                            const SizedBox(height: 8),
+                            imagePicker(
+                              image: controller.cnicBackImage,
+                              onTap: controller.pickBackImage,
+                            ),
                           ],
                         ),
                       ),
@@ -225,12 +217,46 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
   }
 
   // =========================
+  // IMAGE PICKER TILE
+  // =========================
+  Widget imagePicker({required Rx image, required VoidCallback onTap}) {
+    return Obx(() {
+      return GestureDetector(
+        onTap: onTap,
+
+        child: Container(
+          height: 170,
+          width: double.infinity,
+
+          decoration: AppDecorations.inputField,
+
+          child: image.value == null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.upload_file, color: AppColors.iconMuted),
+                      const SizedBox(height: 6),
+                      Text("Tap to upload", style: AppTextStyles.bodyMedium),
+                    ],
+                  ),
+                )
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    image.value!.path,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+        ),
+      );
+    });
+  }
+
+  // =========================
   // INPUT FIELD
   // =========================
-  // The outer Container supplies background/border via
-  // AppDecorations.inputField, so the TextField itself is told not to
-  // paint its own fill/border — otherwise the global InputDecorationTheme
-  // would stack a second background/border on top of this one.
   Widget buildField(
     TextEditingController controller,
     String hint, {

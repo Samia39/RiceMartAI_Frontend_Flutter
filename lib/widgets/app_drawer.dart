@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/shared/notification_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
+import '../screens/buyer/complaints/customer_complaint_list_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final Function(int) onTabSelected;
@@ -111,6 +113,30 @@ class AppDrawer extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context);
                   Get.toNamed(AppRoutes.myOrders);
+                },
+              ),
+
+              // =========================
+              // COMPLAINTS PAGE
+              // =========================
+              drawerItem(
+                icon: Icons.report_problem,
+                title: "Complaints",
+                onTap: () {
+                  Navigator.pop(context);
+                  Get.to(() => const CustomerComplaintListScreen());
+                },
+              ),
+
+              // =========================
+              // NOTIFICATIONS
+              // =========================
+              drawerItem(
+                icon: Icons.notifications,
+                title: "Notifications",
+                onTap: () {
+                  Navigator.pop(context);
+                  Get.to(() => const NotificationsScreen());
                 },
               ),
 

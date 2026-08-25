@@ -1,13 +1,22 @@
 // Path: lib/screens/admin_screens/dashboard/admin_dashboard_tab.dart
 //
-// Same as the last version, EXCEPT the _loadStats() parsing block —
-// see the note below. This is the only functional change.
+// FIX: this is the file that actually renders as the admin's dashboard tab
+// (via AdminHomeShell -> AdminDashboardTab). The old notification icon here
+// used Get.toNamed(AppRoutes.adminNotifications), a route that isn't
+// registered in app_pages.dart at all — tapping it would have thrown a
+// "route not found" error. It's now replaced with the same NotificationBell
+// widget used on buyer/seller dashboards, placed immediately next to the
+// "Add Shop" button, and the 'view notifications' permission gate has been
+// removed (that permission isn't assigned to the admin role yet, which was
+// hiding it entirely). Add the permission back in Spatie later if you want
+// it gated again.
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 import '../../../widgets/admin_drawer.dart';
+import '../../../widgets/notification_bell.dart';
 import '../../../core/services/admin/permission_service.dart';
 import '../../../core/services/admin/admin_service.dart';
 
@@ -136,19 +145,22 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
                 color: AppColors.darkGreen,
                 onTap: () => Get.toNamed(AppRoutes.addSeller),
               ),
+
+            // =========================
+            // NOTIFICATIONS — real bell, placed right next to Add Shop.
+            // Replaces the old dead-end icon (see file header note).
+            // =========================
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: NotificationBell(iconColor: Colors.white, size: 24),
+            ),
+
             if (PermissionService.hasPermission('view settings'))
               _appBarAction(
                 icon: Icons.settings,
                 label: "Settings",
                 color: Colors.blue,
                 onTap: () => Get.toNamed(AppRoutes.adminSettings),
-              ),
-            if (PermissionService.hasPermission('view notifications'))
-              _appBarAction(
-                icon: Icons.notifications,
-                label: "Alerts",
-                color: Colors.orange,
-                onTap: () => Get.toNamed(AppRoutes.adminNotifications),
               ),
           ],
         ),
