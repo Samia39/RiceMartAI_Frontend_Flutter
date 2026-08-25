@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/seller/complaints/seller_complaint_list_screen.dart';
 import 'package:frontend/screens/shared/notification_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -111,6 +112,15 @@ class SellerDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     onTabSelected(4);
+                  },
+                ),
+                // COMPLAINTS TAB
+                drawerItem(
+                  icon: Icons.report_problem,
+                  title: "Complaints",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.to(() => const SellerComplaintListScreen());
                   },
                 ),
 
