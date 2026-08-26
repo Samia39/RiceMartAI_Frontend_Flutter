@@ -51,14 +51,25 @@ class _CartScreenState extends State<CartScreen> {
 
   // =========================
   // INCREASE QUANTITY
+  // Stops at available stock instead of going over it.
   // =========================
   void increaseQuantity(int index) {
-    cart[index]["quantity"]++;
+    final int stock = int.tryParse(cart[index]["stock"].toString()) ?? 0;
+    final int currentQty = cart[index]["quantity"];
 
-    CartService().updateQuantity(
+    if (currentQty >= stock) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Only $stock KG in stock")));
+      return;
+    }
+
+    final int newQty = CartService().updateQuantity(
       riceId: cart[index]["id"],
-      quantity: cart[index]["quantity"],
+      quantity: currentQty + 1,
     );
+
+    cart[index]["quantity"] = newQty;
 
     loadCart();
     widget.onCartUpdated?.call();
