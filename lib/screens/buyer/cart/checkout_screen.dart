@@ -31,7 +31,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final CityService _cityService = CityService();
   List _cities = []; // [{id, name, code, delivery_charge}]
   int? selectedCityId;
-  double deliveryCharge = 0;
   bool loadingCities = true;
   final addressController = TextEditingController();
   final transactionIdController = TextEditingController();
@@ -60,16 +59,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   int get distinctShopCount {
     final ids = cart
-        .map((item) => item["shop"]?["id"])
+        .map((item) => item["shop"]?["id"] ?? item["shop_id"])
         .where((id) => id != null)
         .toSet();
-    return ids.isEmpty ? 1 : ids.length;
+    return ids.isEmpty ? 0 : ids.length;
   }
 
   // =========================
-  // TOTAL
+  // DELIVERY CHARGE
   // =========================
-  double total = 0;
+  double get perShopCharge {
+    if (selectedCityId == null) return 0;
+    final city = _cities.firstWhere(
+      (c) => c['id'] == selectedCityId,
+      orElse: () => null,
+    );
+    if (city == null) return 0;
+    return double.tryParse(city['delivery_charge'].toString()) ?? 0;
+  }
+
+  double get deliveryCharge => perShopCharge * distinctShopCount;
+
+  // =========================
+  // SUBTOTAL (cart items only, no delivery)
+  // =========================
+  double get subtotal => CartService().totalPrice();
+
+  // =========================
+  // TOTAL (subtotal + delivery)
+  // =========================
+  double get total => subtotal + deliveryCharge;
 
   // =========================
   // LOADING
@@ -81,7 +100,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.initState();
 
     cart = CartService().getCart();
-    total = CartService().totalPrice();
 
     _loadPaymentSettings();
     _loadCities();
@@ -245,7 +263,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       AlertDialog(
         title: const Text("Confirm Order"),
         content: Text(
-          "Are you sure you want to place this order for Rs ${(total + deliveryCharge).toStringAsFixed(0)}?",
+          "Are you sure you want to place this order for Rs ${total.toStringAsFixed(0)}?",
         ),
         actions: [
           TextButton(
@@ -529,21 +547,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 );
                               }).toList(),
                               onChanged: (value) {
-                                final city = _cities.firstWhere(
-                                  (c) => c['id'] == value,
-                                  orElse: () => null,
-                                );
                                 setState(() {
                                   selectedCityId = value;
-                                  final perShopCharge = city != null
-                                      ? double.tryParse(
-                                              city['delivery_charge']
-                                                  .toString(),
-                                            ) ??
-                                            0
-                                      : 0.0;
-                                  deliveryCharge =
-                                      perShopCharge * distinctShopCount;
                                 });
                               },
                             ),
@@ -626,7 +631,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   style: AppTextStyles.bodyMedium,
                                 ),
                                 Text(
-                                  "Rs ${total.toStringAsFixed(0)}",
+                                  "Rs ${subtotal.toStringAsFixed(0)}",
                                   style: AppTextStyles.bodyMedium,
                                 ),
                               ],
@@ -655,7 +660,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               children: [
                                 Text("Total", style: AppTextStyles.heading3),
                                 Text(
-                                  "Rs ${(total + deliveryCharge).toStringAsFixed(0)}",
+                                  "Rs ${total.toStringAsFixed(0)}",
                                   style: AppTextStyles.heading3,
                                 ),
                               ],
@@ -806,7 +811,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         children: [
                           Text("Subtotal", style: AppTextStyles.bodyMedium),
                           Text(
-                            "Rs ${total.toStringAsFixed(0)}",
+                            "Rs ${subtotal.toStringAsFixed(0)}",
                             style: AppTextStyles.bodyMedium,
                           ),
                         ],
@@ -832,7 +837,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         children: [
                           Text("Total", style: AppTextStyles.heading3),
                           Text(
-                            "Rs ${(total + deliveryCharge).toStringAsFixed(0)}",
+                            "Rs ${total.toStringAsFixed(0)}",
                             style: AppTextStyles.heading3,
                           ),
                         ],

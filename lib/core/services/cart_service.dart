@@ -12,23 +12,52 @@ class CartService {
 
   // =========================
   // ADD TO CART
+  // Returns a status so the calling screen can show the right message:
+  //   "added"   -> added normally
+  //   "capped"  -> added, but quantity was reduced to match available stock
+  //   "maxed"   -> already at max stock in cart, nothing added
   // =========================
-  void addToCart({required Map<String, dynamic> rice, required int quantity}) {
+  String addToCart({
+    required Map<String, dynamic> rice,
+    required int quantity,
+  }) {
     List cart = getCart();
+
+    final int stock = int.tryParse(rice["stock"].toString()) ?? 0;
 
     int existingIndex = cart.indexWhere((item) => item["id"] == rice["id"]);
 
     if (existingIndex != -1) {
-      cart[existingIndex]["quantity"] += quantity;
+      final int currentQty = cart[existingIndex]["quantity"];
+
+      if (currentQty >= stock) {
+        // already holding all available stock
+        return "maxed";
+      }
+
+      final int requestedTotal = currentQty + quantity;
+      final int newQty = requestedTotal > stock ? stock : requestedTotal;
+
+      cart[existingIndex]["quantity"] = newQty;
+      box.write("cart", cart);
+
+      return requestedTotal > stock ? "capped" : "added";
     } else {
+      final int newQty = quantity > stock ? stock : quantity;
+
+      if (newQty <= 0) {
+        return "maxed";
+      }
+
       // IMPORTANT: create COPY to avoid mutation bugs
       Map<String, dynamic> newItem = Map<String, dynamic>.from(rice);
-      newItem["quantity"] = quantity;
+      newItem["quantity"] = newQty;
 
       cart.add(newItem);
-    }
+      box.write("cart", cart);
 
-    box.write("cart", cart);
+      return newQty < quantity ? "capped" : "added";
+    }
   }
 
   // =========================
@@ -44,17 +73,28 @@ class CartService {
 
   // =========================
   // UPDATE QUANTITY
+  // Clamped to the item's stock so it can never be pushed above it,
+  // e.g. from the cart screen's +/- buttons.
+  // Returns the quantity that was actually saved.
   // =========================
-  void updateQuantity({required int riceId, required int quantity}) {
+  int updateQuantity({required int riceId, required int quantity}) {
     List cart = getCart();
 
     int index = cart.indexWhere((item) => item["id"] == riceId);
 
     if (index != -1) {
-      cart[index]["quantity"] = quantity;
+      final int stock = int.tryParse(cart[index]["stock"].toString()) ?? 0;
+      final int clamped = quantity > stock
+          ? stock
+          : (quantity < 1 ? 1 : quantity);
+
+      cart[index]["quantity"] = clamped;
+      box.write("cart", cart);
+
+      return clamped;
     }
 
-    box.write("cart", cart);
+    return quantity;
   }
 
   // =========================
