@@ -61,19 +61,19 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       SellerHomeScreen(onTabChange: _switchTab),
 
       // ADD RICE (permission required)
-      PermissionService.hasPermission('create products')
+      PermissionService.hasPermission('view dashboard')
           ? const AddRiceScreen()
           : const _NoAccess(),
 
       // MY SHOP (permission required)
-      PermissionService.hasPermission('view shops')
+      PermissionService.hasPermission('view dashboard')
           ? const MyShopScreen()
           : const _NoAccess(),
 
       ConversationsScreen(),
 
       // ORDERS (permission required)
-      PermissionService.hasPermission('view orders')
+      PermissionService.hasPermission('view dashboard')
           ? const SellerOrdersScreen()
           : const _NoAccess(),
 

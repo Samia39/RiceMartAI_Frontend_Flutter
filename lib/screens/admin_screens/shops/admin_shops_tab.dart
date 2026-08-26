@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:frontend/core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
+import 'approved_shop_detail_screen.dart';
 import 'shop_details_screen.dart';
 
 class AdminShopsTab extends StatefulWidget {
@@ -174,10 +175,12 @@ class _AdminShopsTabState extends State<AdminShopsTab>
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ShopDetailsScreen(
-                            shop: shop,
-                            readOnly: status != "pending",
-                          ),
+                          builder: (_) => status == "approved"
+                              ? ApprovedShopDetailScreen(shop: shop)
+                              : ShopDetailsScreen(
+                                  shop: shop,
+                                  readOnly: status != "pending",
+                                ),
                         ),
                       );
 
