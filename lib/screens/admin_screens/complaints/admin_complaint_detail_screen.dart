@@ -446,7 +446,9 @@ class _AdminComplaintDetailScreenState
                                 if (m.attachmentPath != null) ...[
                                   const SizedBox(height: 8),
                                   _AttachmentThumbnail(
-                                    imageUrl: attachmentUrl(m.attachmentPath!),
+                                    imageUrl: attachmentUrl(
+                                      m.attachmentPath!,
+                                    ), // yahan phir se wrap ho raha hai — broken URL banega
                                   ),
                                 ],
                               ],

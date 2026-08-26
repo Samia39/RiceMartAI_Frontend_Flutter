@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../core/services/admin/payout_service.dart';
-import '../../../core/services/payment_service.dart';
-import '../../../core/utils/themes.dart';
+import 'package:frontend/core/services/admin/payout_service.dart';
+import 'package:frontend/core/services/payment_service.dart';
+import 'package:frontend/core/utils/themes.dart';
 
 class PaySellerDialog extends StatefulWidget {
   final Map payout;

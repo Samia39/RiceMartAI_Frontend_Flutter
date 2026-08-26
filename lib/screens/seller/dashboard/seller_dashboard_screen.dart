@@ -23,7 +23,11 @@ class SellerDashboardScreen extends StatefulWidget {
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   int currentIndex = 0;
 
-  // Called by SellerHomeScreen buttons and SellerDrawer to switch tabs
+  // =========================
+  // TAB SWITCH
+  // =========================
+  // Called by SellerHomeScreen buttons
+  // and SellerDrawer to switch tabs.
   void _switchTab(int index) {
     setState(() {
       currentIndex = index;
@@ -33,6 +37,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final box = GetStorage();
+
     final shopStatus = box.read('shop_status');
 
     // =========================
@@ -55,40 +60,68 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     }
 
     // =========================
-    // SCREENS (PERMISSION BASED)
+    // SCREENS
     // =========================
+    //
+    // IMPORTANT:
+    // These permission names MUST match
+    // the permissions assigned to the seller
+    // role in Laravel/Spatie.
+    //
     final List<Widget> screens = [
-      // HOME — passes _switchTab so dashboard buttons can change tabs
+      // =========================
+      // 0 — HOME / DASHBOARD
+      // =========================
       SellerHomeScreen(onTabChange: _switchTab),
 
-      // ADD RICE (permission required)
+      // =========================
+      // 1 — MY RICE
+      // =========================
       PermissionService.hasPermission('create products')
           ? const AddRiceScreen()
           : const _NoAccess(),
 
-      // MY SHOP (permission required)
-      PermissionService.hasPermission('view shops')
+      // =========================
+      // 2 — MY SHOP
+      // =========================
+      // Correct seller permission:
+      // "view own shop"
+      PermissionService.hasPermission('view own shop')
           ? const MyShopScreen()
           : const _NoAccess(),
 
+      // =========================
+      // 3 — CHAT
+      // =========================
       ConversationsScreen(),
 
-      // ORDERS (permission required)
-      PermissionService.hasPermission('view orders')
+      // =========================
+      // 4 — ORDERS
+      // =========================
+      // Correct seller permission:
+      // "view shop orders"
+      PermissionService.hasPermission('view shop orders')
           ? const SellerOrdersScreen()
           : const _NoAccess(),
 
-      // PROFILE (always allowed)
+      // =========================
+      // 5 — PROFILE
+      // =========================
       const ProfileScreen(),
     ];
 
     return Container(
       decoration: AppDecorations.gradientBackground,
+
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
+        // =========================
+        // APP BAR
+        // =========================
         appBar: AppBar(
           title: const Text("Seller Dashboard"),
+
           actions: const [
             // =========================
             // NOTIFICATIONS
@@ -97,25 +130,50 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           ],
         ),
 
+        // =========================
+        // DRAWER
+        // =========================
         drawer: SellerDrawer(onTabSelected: _switchTab),
 
+        // =========================
+        // CURRENT SCREEN
+        // =========================
         body: screens[currentIndex],
 
+        // =========================
+        // BOTTOM NAVIGATION
+        // =========================
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: currentIndex,
+
           onTap: _switchTab,
+
           selectedItemColor: AppColors.darkGreen,
+
           unselectedItemColor: AppColors.darkGreen.withOpacity(0.5),
+
           type: BottomNavigationBarType.fixed,
+
           items: const [
+            // HOME
             BottomNavigationBarItem(icon: Icon(AppIcons.home), label: "Home"),
+
+            // RICE
             BottomNavigationBarItem(icon: Icon(Icons.rice_bowl), label: "Rice"),
+
+            // MY SHOP
             BottomNavigationBarItem(icon: Icon(Icons.store), label: "My Shop"),
+
+            // CHAT
             BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
+
+            // ORDERS
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_bag),
               label: "Orders",
             ),
+
+            // PROFILE
             BottomNavigationBarItem(
               icon: Icon(AppIcons.profile),
               label: "Profile",

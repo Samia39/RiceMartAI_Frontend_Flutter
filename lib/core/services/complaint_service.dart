@@ -87,6 +87,7 @@ class Complaint {
     );
   }
 }
+
 // =========================
 // SERVICE
 // =========================
@@ -94,6 +95,29 @@ class Complaint {
 class ComplaintService {
   final box = GetStorage();
   final String baseUrl = BaseUrl.url;
+
+  // Every GET/PATCH response goes through this before we touch it, so a
+  // non-200 or non-JSON reply (an HTML error page, an empty body, a
+  // dropped connection) never throws an uncaught exception into a screen
+  // that's awaiting us without a try/catch — that's what was leaving
+  // "My Complaints" stuck on its loading spinner forever.
+  dynamic _safeDecode(http.Response response) {
+    if (response.body.isEmpty) {
+      throw Exception(
+        'Empty response from server (status ${response.statusCode})',
+      );
+    }
+    try {
+      return jsonDecode(response.body);
+    } catch (e) {
+      print(
+        '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
+      );
+      throw Exception(
+        'Server returned an invalid response (status ${response.statusCode})',
+      );
+    }
+  }
 
   // CREATE COMPLAINT (with optional attachment)
   Future<Map<String, dynamic>> createComplaint({
@@ -132,7 +156,9 @@ class ComplaintService {
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
-      final data = jsonDecode(responseBody);
+      final data = _safeDecode(
+        http.Response(responseBody, response.statusCode),
+      );
 
       if (response.statusCode == 201) {
         return {"success": true, "complaint": Complaint.fromJson(data)};
@@ -143,44 +169,63 @@ class ComplaintService {
         };
       }
     } catch (e) {
-      return {"success": false, "message": e.toString()};
+      return {
+        "success": false,
+        "message": e.toString().replaceFirst('Exception: ', ''),
+      };
     }
   }
 
   // MY COMPLAINTS (customer/seller)
   Future<List<Complaint>> getMyComplaints() async {
-    final token = box.read("token");
+    try {
+      final token = box.read("token");
 
-    final response = await http.get(
-      Uri.parse("$baseUrl/complaints/my"),
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
-    );
+      final response = await http.get(
+        Uri.parse("$baseUrl/complaints/my"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((c) => Complaint.fromJson(c)).toList();
+      if (response.statusCode == 200) {
+        final List data = _safeDecode(response);
+        return data.map((c) => Complaint.fromJson(c)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getMyComplaints failed: $e');
+      return [];
     }
-    return [];
   }
 
   // ALL COMPLAINTS (super admin)
   Future<List<Complaint>> getAllComplaints({String? status}) async {
-    final token = box.read("token");
+    try {
+      final token = box.read("token");
 
-    final uri = status != null
-        ? Uri.parse("$baseUrl/complaints?status=$status")
-        : Uri.parse("$baseUrl/complaints");
+      final uri = status != null
+          ? Uri.parse("$baseUrl/complaints?status=$status")
+          : Uri.parse("$baseUrl/complaints");
 
-    final response = await http.get(
-      uri,
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
-    );
+      final response = await http.get(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      return data.map((c) => Complaint.fromJson(c)).toList();
+      if (response.statusCode == 200) {
+        final List data = _safeDecode(response);
+        return data.map((c) => Complaint.fromJson(c)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('⚠️ getAllComplaints failed: $e');
+      return [];
     }
-    return [];
   }
 
   // COMPLAINT DETAIL (thread)
@@ -193,7 +238,7 @@ class ComplaintService {
     );
 
     if (response.statusCode == 200) {
-      return Complaint.fromJson(jsonDecode(response.body));
+      return Complaint.fromJson(_safeDecode(response));
     }
     throw Exception("Complaint not found");
   }
@@ -232,7 +277,9 @@ class ComplaintService {
 
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
-      final data = jsonDecode(responseBody);
+      final data = _safeDecode(
+        http.Response(responseBody, response.statusCode),
+      );
 
       if (response.statusCode == 201) {
         return {
@@ -246,7 +293,10 @@ class ComplaintService {
         };
       }
     } catch (e) {
-      return {"success": false, "message": e.toString()};
+      return {
+        "success": false,
+        "message": e.toString().replaceFirst('Exception: ', ''),
+      };
     }
   }
 
@@ -255,34 +305,49 @@ class ComplaintService {
     required int complaintId,
     required String status,
   }) async {
-    final token = box.read("token");
+    try {
+      final token = box.read("token");
 
-    final response = await http.patch(
-      Uri.parse("$baseUrl/complaints/$complaintId/status"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({"status": status}),
-    );
+      final response = await http.patch(
+        Uri.parse("$baseUrl/complaints/$complaintId/status"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"status": status}),
+      );
 
-    return jsonDecode(response.body);
+      return _safeDecode(response);
+    } catch (e) {
+      return {
+        "success": false,
+        "message": e.toString().replaceFirst('Exception: ', ''),
+      };
+    }
   }
 
   // EMERGENCY CONTACT (settings)
   Future<Map<String, String>> getEmergencyContact() async {
-    final token = box.read("token");
+    try {
+      final token = box.read("token");
 
-    final response = await http.get(
-      Uri.parse("$baseUrl/settings/emergency-contact"),
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
-    );
+      final response = await http.get(
+        Uri.parse("$baseUrl/settings/emergency-contact"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return {"email": data['email'] ?? '', "phone": data['phone'] ?? ''};
+      if (response.statusCode == 200) {
+        final data = _safeDecode(response);
+        return {"email": data['email'] ?? '', "phone": data['phone'] ?? ''};
+      }
+      return {"email": "", "phone": ""};
+    } catch (e) {
+      print('⚠️ getEmergencyContact failed: $e');
+      return {"email": "", "phone": ""};
     }
-    return {"email": "", "phone": ""};
   }
 }

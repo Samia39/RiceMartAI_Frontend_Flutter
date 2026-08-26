@@ -9,10 +9,8 @@ import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';
 import '../screens/access_denied_screen.dart';
 import '../screens/admin_screens/dashboard/admin_home_shell.dart';
-//import '../screens/notifications/admin_notifications_screen.dart';
 import '../screens/admin_screens/orders/admin_orders_screen.dart';
 import '../screens/admin_screens/payments/payment_screen.dart';
-import '../screens/admin_screens/reports/reports_screen.dart';
 import '../screens/admin_screens/settings/admin_settings_screen.dart';
 import '../screens/admin_screens/shops/add_seller_screen.dart';
 import '../screens/admin_screens/shops/approved_shops_screen.dart';
@@ -189,11 +187,6 @@ class AppPages {
     ),
 
     // Admin Reports
-    GetPage(
-      name: AppRoutes.reports,
-      page: () => const ReportsScreen(),
-      middlewares: [AuthMiddleware(), PermissionMiddleware('manage reports')],
-    ),
 
     // Admin Settings
     GetPage(
