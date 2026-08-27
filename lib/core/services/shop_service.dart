@@ -251,23 +251,52 @@ class ShopService {
     }
   }
 
-  // =========================
   // DELETE SHOP
   // =========================
-  Future<Map<String, dynamic>> deleteShop({
+  // SELLER — REQUEST SHOP DELETION (SEND OTP)
+  // =========================
+  Future<Map<String, dynamic>> requestShopDeletion({
     required String token,
     required int shopId,
   }) async {
-    final response = await http.delete(
-      Uri.parse("$baseUrl/shops/$shopId/delete"),
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/shops/$shopId/delete/request"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      );
 
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
-    );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
 
-    print(response.statusCode);
-    print(response.body);
+  // =========================
+  // SELLER — CONFIRM SHOP DELETION (VERIFY OTP)
+  // =========================
+  Future<Map<String, dynamic>> confirmShopDeletion({
+    required String token,
+    required int shopId,
+    required String otp,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/shops/$shopId/delete/confirm"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"otp": otp}),
+      );
 
-    return jsonDecode(response.body);
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 
   // get my shop details

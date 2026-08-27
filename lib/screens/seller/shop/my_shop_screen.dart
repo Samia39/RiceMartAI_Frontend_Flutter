@@ -66,35 +66,175 @@ class _MyShopScreenState extends State<MyShopScreen> {
   // =========================
   // DELETE SHOP
   // =========================
-  Future<void> deleteShop() async {
+  // =========================
+  // STEP 1: REQUEST OTP
+  // =========================
+  Future<void> _requestDeleteOtp() async {
     final box = GetStorage();
-
     String token = box.read("token") ?? "";
-
     int? shopId = box.read("shop_id");
 
     if (shopId == null) return;
 
-    final result = await ShopService().deleteShop(token: token, shopId: shopId);
+    final result = await ShopService().requestShopDeletion(
+      token: token,
+      shopId: shopId,
+    );
 
     if (result["success"] == true) {
-      // CLEAR STORAGE
-      box.remove("has_shop");
-      box.remove("shop_approved");
-      box.remove("shop_id");
-
-      box.remove("shop_name");
-      box.remove("owner_name");
-      box.remove("phone");
-      box.remove("address");
-      box.remove("description");
-
-      Get.snackbar("Success", "Shop deleted");
-
-      Get.offAllNamed('/seller-dashboard');
+      Get.snackbar("OTP Sent", "Check your email for the verification code");
+      _showOtpDialog(shopId, token);
     } else {
-      Get.snackbar("Error", "Failed to delete shop");
+      Get.snackbar("Error", result["message"] ?? "Failed to send OTP");
     }
+  }
+
+  // =========================
+  // STEP 2: ENTER OTP + CONFIRM DELETE
+  // =========================
+  void _showOtpDialog(int shopId, String token) {
+    final otpController = TextEditingController();
+    bool isSending = false;
+    bool isResending = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppColors.cream,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              title: Text("Verify Deletion", style: AppTextStyles.heading3),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Enter the 6-digit code sent to your email to permanently delete this shop.",
+                    style: AppTextStyles.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: AppDecorations.inputField,
+                    child: TextField(
+                      controller: otpController,
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Enter OTP",
+                        counterText: '',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: isResending
+                          ? null
+                          : () async {
+                              setDialogState(() => isResending = true);
+                              final result = await ShopService()
+                                  .requestShopDeletion(
+                                    token: token,
+                                    shopId: shopId,
+                                  );
+                              setDialogState(() => isResending = false);
+                              if (!dialogContext.mounted) return;
+                              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result["message"] ?? "OTP resent",
+                                  ),
+                                ),
+                              );
+                            },
+                      child: Text(isResending ? "Resending..." : "Resend OTP"),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSending
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: isSending
+                      ? null
+                      : () async {
+                          final otp = otpController.text.trim();
+                          if (otp.length != 6) {
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              const SnackBar(
+                                content: Text("Enter the 6-digit OTP"),
+                              ),
+                            );
+                            return;
+                          }
+
+                          setDialogState(() => isSending = true);
+
+                          final result = await ShopService()
+                              .confirmShopDeletion(
+                                token: token,
+                                shopId: shopId,
+                                otp: otp,
+                              );
+
+                          if (!dialogContext.mounted) return;
+                          Navigator.pop(dialogContext);
+
+                          if (result["success"] == true) {
+                            final box = GetStorage();
+                            box.remove("has_shop");
+                            box.remove("shop_approved");
+                            box.remove("shop_id");
+                            box.remove("shop_name");
+                            box.remove("owner_name");
+                            box.remove("phone");
+                            box.remove("city");
+                            box.remove("address");
+                            box.remove("description");
+                            box.remove("cnic");
+                            box.remove("cnic_image");
+                            box.remove("cnic_back_image");
+                            box.write("shop_status", "none");
+                            box.write("roles", ["customer"]);
+
+                            Get.snackbar("Success", "Shop deleted");
+                            Get.offAllNamed(AppRoutes.dashboard);
+                          } else {
+                            Get.snackbar(
+                              "Error",
+                              result["message"] ?? "Failed to delete shop",
+                            );
+                          }
+                        },
+                  child: isSending
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text("Confirm Delete"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget infoTile({
@@ -201,21 +341,17 @@ class _MyShopScreenState extends State<MyShopScreen> {
                   onPressed: () {
                     Get.defaultDialog(
                       title: "Delete Shop",
-                      middleText: "Are you sure?",
-
-                      textConfirm: "Delete",
+                      middleText:
+                          "Are you sure? You'll need to verify with an OTP sent to your email.",
+                      textConfirm: "Continue",
                       textCancel: "Cancel",
-
                       confirmTextColor: Colors.white,
-
                       onConfirm: () async {
                         Get.back();
-
-                        await deleteShop();
+                        await _requestDeleteOtp();
                       },
                     );
                   },
-
                   icon: const Icon(Icons.delete),
 
                   label: const Text("Delete Shop"),
