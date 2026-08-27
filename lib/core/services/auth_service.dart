@@ -106,3 +106,74 @@ class AuthService {
     return jsonDecode(user);
   }
 }
+// ── REGISTER (OTP bhejega) ────────────────────────────────
+static Future<String?> register({
+  required String fullName,
+  required String username,
+  required String email,
+  required String password,
+  required String confirmPassword,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/register'),
+      headers: _headers,
+      body: jsonEncode({
+        'name':                  fullName,
+        'username':              username,
+        'email':                 email,
+        'password':              password,
+        'password_confirmation': confirmPassword,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) return null;
+
+    if (response.statusCode == 422) {
+      final errors = data['errors'] as Map<String, dynamic>?;
+      if (errors != null && errors.isNotEmpty) {
+        final firstError = errors.values.first;
+        return firstError is List ? firstError.first : firstError.toString();
+      }
+    }
+    return data['message'] ?? 'Registration failed.';
+  } catch (e) {
+    return 'Network error. Please check your connection.';
+  }
+}
+
+// ── VERIFY OTP ────────────────────────────────────────────
+static Future<String?> verifyOtp({
+  required String email,
+  required String otp,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/verify-otp'),
+      headers: _headers,
+      body: jsonEncode({'email': email, 'otp': otp}),
+    );
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 201) return null;
+    return data['message'] ?? 'Verification failed.';
+  } catch (e) {
+    return 'Network error. Please check your connection.';
+  }
+}
+
+// ── RESEND OTP ────────────────────────────────────────────
+static Future<String?> resendOtp({required String email}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/resend-otp'),
+      headers: _headers,
+      body: jsonEncode({'email': email}),
+    );
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200) return null;
+    return data['message'] ?? 'Failed to resend OTP.';
+  } catch (e) {
+    return 'Network error. Please check your connection.';
+  }
+}
