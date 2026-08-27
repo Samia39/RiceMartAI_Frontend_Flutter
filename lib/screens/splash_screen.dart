@@ -41,19 +41,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
       await authController.loadUser();
 
-      final roles = authController.roles;
-
-      if (roles.contains('admin') || roles.contains('super_admin')) {
-        Get.offNamed(AppRoutes.adminDashboard);
-        return;
-      }
-
-      if (roles.contains('seller')) {
-        Get.offNamed(AppRoutes.sellerDashboard);
-        return;
-      }
-
-      Get.offNamed(AppRoutes.dashboard);
+      // Navigation now happens inside loadUser() -> redirectUser(),
+      // which knows about shop_status as well as roles.
     });
   }
 

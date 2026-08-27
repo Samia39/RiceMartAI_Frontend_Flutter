@@ -48,6 +48,9 @@ class ShopDetailsScreen extends StatelessWidget {
     final correctionReason = shop["correction_reason"]?.toString();
     final hasCorrectionReason =
         correctionReason != null && correctionReason.isNotEmpty;
+    final rejectionReason = shop["rejection_reason"]?.toString();
+    final hasRejectionReason =
+        rejectionReason != null && rejectionReason.isNotEmpty;
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -276,25 +279,7 @@ class ShopDetailsScreen extends StatelessWidget {
                                 color: AppColors.error.withOpacity(0.7),
                               ),
                             ),
-                            onPressed: () async {
-                              String token = GetStorage().read("token") ?? "";
-
-                              final result = await ShopService().rejectShop(
-                                token: token,
-                                shopId: int.parse(shop["id"].toString()),
-                              );
-
-                              if (result["success"] == true &&
-                                  context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Shop Rejected"),
-                                  ),
-                                );
-
-                                Navigator.pop(context, true);
-                              }
-                            },
+                            onPressed: () => _rejectDialog(context, shop),
                             child: const Text("Reject"),
                           ),
                         ),
@@ -522,6 +507,110 @@ class ShopDetailsScreen extends StatelessWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Text("Send"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _rejectDialog(BuildContext context, Map<String, dynamic> shop) {
+    TextEditingController reason = TextEditingController();
+    bool isSending = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppColors.cream,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              title: Text("Reject Shop", style: AppTextStyles.heading3),
+              content: Container(
+                decoration: AppDecorations.inputField,
+                child: TextField(
+                  controller: reason,
+                  maxLines: 3,
+                  style: AppTextStyles.bodyLarge,
+                  decoration: InputDecoration(
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    hintText: "Write rejection reason...",
+                    hintStyle: AppTextStyles.hint,
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSending
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                  ),
+                  onPressed: isSending
+                      ? null
+                      : () async {
+                          final reasonText = reason.text.trim();
+
+                          if (reasonText.isEmpty) {
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Please enter a rejection reason",
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+
+                          setDialogState(() => isSending = true);
+
+                          String token = GetStorage().read("token") ?? "";
+
+                          final result = await ShopService().rejectShop(
+                            token: token,
+                            shopId: int.parse(shop["id"].toString()),
+                            reason: reasonText,
+                          );
+
+                          if (!dialogContext.mounted) return;
+                          Navigator.pop(dialogContext);
+
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result["message"] ??
+                                    (result["success"] == true
+                                        ? "Shop rejected"
+                                        : "Failed to reject shop"),
+                              ),
+                            ),
+                          );
+
+                          if (result["success"] == true) {
+                            Navigator.pop(context, true);
+                          }
+                        },
+                  child: isSending
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text("Reject"),
                 ),
               ],
             );

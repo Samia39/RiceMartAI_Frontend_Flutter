@@ -28,6 +28,7 @@ import '../screens/buyer/cart/cart_screen.dart';
 import '../screens/buyer/rice/rice_detail_screen.dart';
 import '../screens/seller/shop/create_shop_screen.dart';
 import '../screens/seller/shop/edit_shop_screen.dart';
+import '../screens/seller/shop/shop_status_screen.dart';
 import '../screens/splash_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
@@ -140,6 +141,12 @@ class AppPages {
       name: AppRoutes.myShop,
       page: () => const MyShopScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('view shop')],
+    ),
+
+    GetPage(
+      name: AppRoutes.shopStatus,
+      page: () => ShopStatusScreen(shop: Get.arguments),
+      middlewares: [AuthMiddleware()],
     ),
 
     GetPage(

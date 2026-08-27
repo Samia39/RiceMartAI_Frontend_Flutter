@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
+import 'shop_status_screen.dart';
 
 class CreateShopScreen extends StatefulWidget {
   const CreateShopScreen({super.key});
@@ -33,9 +35,9 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   bool isLoading = false;
 
-  // -----------------------
-  // Pick CNIC (front or back)
-  // -----------------------
+  // ---------------------------------------------------------
+  // Pick CNIC (Front or Back)
+  // ---------------------------------------------------------
   Future<void> pickCnic(bool isFront) async {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
 
@@ -52,16 +54,19 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     }
   }
 
-  // -----------------------
+  // ---------------------------------------------------------
   // Create Shop
-  // -----------------------
+  // ---------------------------------------------------------
   Future<void> createShop() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
+    // Both CNIC images are required
     if (cnicFrontImage == null || cnicBackImage == null) {
       Get.snackbar(
-        "Error",
-        "Upload both sides of your CNIC",
+        "Required",
+        "Please upload both front and back sides of your CNIC.",
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -76,13 +81,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
       final result = await ShopService().createShop(
         token: token ?? "",
-        cnic: _cnicController.text,
-        shopName: _shopController.text,
-        ownerName: _ownerController.text,
-        phone: _phoneController.text,
-        city: _cityController.text,
-        address: _addressController.text,
-        description: _descController.text,
+        cnic: _cnicController.text.trim(),
+        shopName: _shopController.text.trim(),
+        ownerName: _ownerController.text.trim(),
+        phone: _phoneController.text.trim(),
+        city: _cityController.text.trim(),
+        address: _addressController.text.trim(),
+        description: _descController.text.trim(),
         cnicFrontImage: cnicFrontImage!,
         cnicBackImage: cnicBackImage!,
       );
@@ -95,39 +100,40 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         final box = GetStorage();
 
         box.write("has_shop", true);
-
         box.write("shop_approved", false);
-
         box.write("shop_id", result["shop"]["id"]);
-        // SAVE SHOP DATA
-        box.write("shop_name", _shopController.text);
-        box.write("owner_name", _ownerController.text);
-        box.write("phone", _phoneController.text);
-        box.write("city", _cityController.text);
-        box.write("address", _addressController.text);
-        box.write("description", _descController.text);
 
-        Get.snackbar("Success", "Shop sent for approval");
+        box.write("shop_name", _shopController.text.trim());
+        box.write("owner_name", _ownerController.text.trim());
+        box.write("phone", _phoneController.text.trim());
+        box.write("city", _cityController.text.trim());
+        box.write("address", _addressController.text.trim());
+        box.write("description", _descController.text.trim());
+
+        Get.offAll(() => ShopStatusScreen(shop: result["shop"]));
       } else {
-        Get.snackbar("Error", result["message"] ?? "Failed");
+        Get.snackbar(
+          "Error",
+          result["message"] ?? "Failed to create shop",
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
       setState(() {
         isLoading = false;
       });
 
-      Get.snackbar("Error", "Server error");
+      Get.snackbar(
+        "Error",
+        "Server error. Please try again.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
-  // -----------------------
-  // Reusable field
-  // -----------------------
-  // NOTE: the outer Container already supplies the background/border via
-  // AppDecorations.inputField, so the TextFormField itself is told not to
-  // paint its own fill/border (filled: false, border: InputBorder.none) —
-  // otherwise the global InputDecorationTheme would draw a second
-  // background/border on top of this one.
+  // ---------------------------------------------------------
+  // Reusable Input Field
+  // ---------------------------------------------------------
   Widget inputField({
     required TextEditingController controller,
     required String hint,
@@ -135,50 +141,90 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     int lines = 1,
     TextInputType keyboard = TextInputType.text,
     List<TextInputFormatter>? formatters,
+    bool isRequired = true,
   }) {
-    return Container(
-      decoration: AppDecorations.inputField,
-
-      child: TextFormField(
-        controller: controller,
-        maxLines: lines,
-        keyboardType: keyboard,
-        inputFormatters: formatters,
-
-        validator: (v) {
-          if (v == null || v.isEmpty) {
-            return "Required";
-          }
-          return null;
-        },
-
-        style: AppTextStyles.bodyLarge,
-        cursorColor: AppColors.darkGreen,
-
-        decoration: InputDecoration(
-          filled: false,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          errorBorder: InputBorder.none,
-          focusedErrorBorder: InputBorder.none,
-
-          prefixIcon: icon != null
-              ? Icon(icon, color: AppColors.darkGreen)
-              : null,
-
-          hintText: hint,
-          hintStyle: AppTextStyles.hint,
-
-          errorStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Field label
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          child: RichText(
+            text: TextSpan(
+              text: hint,
+              style: AppTextStyles.label,
+              children: [
+                if (isRequired)
+                  const TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                else
+                  TextSpan(
+                    text: ' (Optional)',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.iconMuted,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
-      ),
+
+        // Input box
+        Container(
+          decoration: AppDecorations.inputField,
+          child: TextFormField(
+            controller: controller,
+            maxLines: lines,
+            keyboardType: keyboard,
+            inputFormatters: formatters,
+
+            // Only validate required fields
+            validator: isRequired
+                ? (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return "Required";
+                    }
+
+                    return null;
+                  }
+                : null,
+
+            style: AppTextStyles.bodyLarge,
+            cursorColor: AppColors.darkGreen,
+
+            decoration: InputDecoration(
+              filled: false,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              focusedErrorBorder: InputBorder.none,
+
+              prefixIcon: icon != null
+                  ? Icon(icon, color: AppColors.darkGreen)
+                  : null,
+
+              hintText: hint,
+              hintStyle: AppTextStyles.hint,
+
+              errorStyle: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.error,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  // -----------------------
-  // CNIC image tile (front or back)
-  // -----------------------
+  // ---------------------------------------------------------
+  // CNIC Image Tile
+  // ---------------------------------------------------------
   Widget cnicImageTile({
     required String label,
     required Uint8List? image,
@@ -187,8 +233,25 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.label),
+        // CNIC label with required *
+        RichText(
+          text: TextSpan(
+            text: label,
+            style: AppTextStyles.label,
+            children: const [
+              TextSpan(
+                text: ' *',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 8),
+
         GestureDetector(
           onTap: onTap,
           child: Container(
@@ -208,9 +271,20 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.upload_file, color: AppColors.iconMuted),
+                        Icon(
+                          Icons.upload_file,
+                          color: AppColors.iconMuted,
+                          size: 30,
+                        ),
                         const SizedBox(height: 6),
                         Text("Upload $label", style: AppTextStyles.bodyMedium),
+                        const SizedBox(height: 3),
+                        Text(
+                          "Required",
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.error,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -220,22 +294,20 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
+  // ---------------------------------------------------------
+  // Section Card
+  // ---------------------------------------------------------
   Widget sectionCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
       decoration: AppDecorations.card,
-
       child: Padding(
         padding: const EdgeInsets.all(16),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
             Text(title, style: AppTextStyles.heading3),
-
             const SizedBox(height: 16),
-
             child,
           ],
         ),
@@ -243,11 +315,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
+  // ---------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: AppDecorations.gradientBackground,
-
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
@@ -255,7 +329,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
         body: Form(
           key: _formKey,
-
           child: LayoutBuilder(
             builder: (context, constraints) {
               final isWide = constraints.maxWidth > 700;
@@ -265,28 +338,24 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                   horizontal: isWide ? 40 : 16,
                   vertical: 16,
                 ),
-
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 600),
-
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-
                       children: [
-                        // -----------------------
-                        // CNIC Information
-                        // -----------------------
+                        // ==================================================
+                        // CNIC INFORMATION
+                        // ==================================================
                         sectionCard(
                           title: "CNIC Information",
-
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-
                             children: [
+                              // CNIC Number
                               inputField(
                                 controller: _cnicController,
-                                hint: "12345-1234567-1",
+                                hint: "CNIC",
                                 icon: Icons.badge,
                                 keyboard: TextInputType.number,
                                 formatters: [
@@ -298,6 +367,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 15),
 
+                              // CNIC Front
                               cnicImageTile(
                                 label: "CNIC Front",
                                 image: cnicFrontImage,
@@ -306,6 +376,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 15),
 
+                              // CNIC Back
                               cnicImageTile(
                                 label: "CNIC Back",
                                 image: cnicBackImage,
@@ -317,16 +388,15 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                         const SizedBox(height: 18),
 
-                        // -----------------------
-                        // Shop Information
-                        // -----------------------
+                        // ==================================================
+                        // SHOP INFORMATION
+                        // ==================================================
                         sectionCard(
                           title: "Shop Information",
-
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-
                             children: [
+                              // Shop Name
                               inputField(
                                 controller: _shopController,
                                 hint: "Shop Name",
@@ -335,6 +405,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
+                              // Owner Name
                               inputField(
                                 controller: _ownerController,
                                 hint: "Owner Name",
@@ -343,6 +414,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
+                              // Phone
                               inputField(
                                 controller: _phoneController,
                                 hint: "Phone",
@@ -352,6 +424,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
+                              // City
                               inputField(
                                 controller: _cityController,
                                 hint: "City",
@@ -360,6 +433,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
+                              // Address
                               inputField(
                                 controller: _addressController,
                                 hint: "Address",
@@ -368,11 +442,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
+                              // Description - OPTIONAL
                               inputField(
                                 controller: _descController,
                                 hint: "Description",
                                 icon: Icons.info,
                                 lines: 4,
+                                isRequired: false,
                               ),
                             ],
                           ),
@@ -380,12 +456,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                         const SizedBox(height: 24),
 
+                        // ==================================================
+                        // CREATE SHOP BUTTON
+                        // ==================================================
                         SizedBox(
                           height: 55,
-
                           child: ElevatedButton(
                             onPressed: isLoading ? null : createShop,
-
                             child: isLoading
                                 ? const CircularProgressIndicator()
                                 : const Text("Create Shop"),
@@ -405,6 +482,9 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
+  // ---------------------------------------------------------
+  // Dispose
+  // ---------------------------------------------------------
   @override
   void dispose() {
     _cnicController.dispose();

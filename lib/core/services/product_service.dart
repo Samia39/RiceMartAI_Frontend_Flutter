@@ -34,8 +34,8 @@ class ProductService {
     required String name,
     required String price,
     required String stock,
-    Uint8List? imageBytes,
-    String? imageName,
+    required Uint8List imageBytes,
+    String imageName = 'product.jpg',
   }) async {
     final uri = Uri.parse("$baseUrl/products");
     final request = http.MultipartRequest("POST", uri);
@@ -51,19 +51,16 @@ class ProductService {
     request.fields['price'] = price;
     request.fields['stock'] = stock;
 
-    if (imageBytes != null) {
-      final fileName = imageName ?? 'product.jpg';
-      final ext = fileName.split('.').last.toLowerCase();
+    final ext = imageName.split('.').last.toLowerCase();
 
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'image',
-          imageBytes,
-          filename: fileName,
-          contentType: MediaType('image', ext == 'jpg' ? 'jpeg' : ext),
-        ),
-      );
-    }
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'image',
+        imageBytes,
+        filename: imageName,
+        contentType: MediaType('image', ext == 'jpg' ? 'jpeg' : ext),
+      ),
+    );
 
     final streamed = await request.send();
     final response = await http.Response.fromStream(streamed);
