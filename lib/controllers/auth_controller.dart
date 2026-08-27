@@ -36,6 +36,7 @@ class AuthController extends GetxController {
         box.write('roles', res['roles']);
         box.write('permissions', res['permissions']);
         box.write('has_shop', res['has_shop']);
+        box.write('shop_status', res['shop_status']);
         box.write('name', res['user']?['name'] ?? ''); // ✅ safe null check
         box.write('email', res['user']?['email'] ?? ''); // ✅ save email too
 
@@ -124,6 +125,7 @@ class AuthController extends GetxController {
       box.write('roles', res['roles']);
       box.write('permissions', res['permissions']);
       box.write('has_shop', res['has_shop']);
+      box.write('shop_status', res['shop_status']);
       box.write(
         'name',
         res['user']?['name'] ?? '',
@@ -132,6 +134,8 @@ class AuthController extends GetxController {
         'email',
         res['user']?['email'] ?? '',
       ); // ✅ refresh email on app restart
+
+      redirectUser(res);
     } catch (e) {
       await logout();
     }
@@ -167,10 +171,26 @@ class AuthController extends GetxController {
   // ======================
   void redirectUser(Map data) {
     final roles = List<String>.from(data['roles'] ?? []);
+    final hasShop = data['has_shop'] == true;
+    final shopStatus = (data['shop_status'] ?? 'none').toString();
 
+    // Admins are never gated by shop status.
     if (roles.contains('admin') || roles.contains('super_admin')) {
       Get.offAllNamed(AppRoutes.adminDashboard);
-    } else if (roles.contains('seller')) {
+      return;
+    }
+
+    // Anyone with a shop that's still pending or was rejected gets
+    // routed to the status screen instead of their normal dashboard.
+    // (A correction request doesn't change the DB status — the shop
+    // stays "pending" — so this same branch covers that case too;
+    // ShopStatusScreen itself checks correction_reason to pick the card.)
+    if (hasShop && shopStatus == 'pending') {
+      Get.offAllNamed(AppRoutes.shopStatus, arguments: data['shop']);
+      return;
+    }
+
+    if (roles.contains('seller') && shopStatus == 'approved') {
       Get.offAllNamed(AppRoutes.sellerDashboard);
     } else {
       Get.offAllNamed(AppRoutes.dashboard);

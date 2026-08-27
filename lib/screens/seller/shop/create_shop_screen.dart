@@ -7,6 +7,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
+import 'shop_status_screen.dart';
 
 class CreateShopScreen extends StatefulWidget {
   const CreateShopScreen({super.key});
@@ -93,13 +94,9 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
       if (result["shop"] != null) {
         final box = GetStorage();
-
         box.write("has_shop", true);
-
         box.write("shop_approved", false);
-
         box.write("shop_id", result["shop"]["id"]);
-        // SAVE SHOP DATA
         box.write("shop_name", _shopController.text);
         box.write("owner_name", _ownerController.text);
         box.write("phone", _phoneController.text);
@@ -107,7 +104,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
         box.write("address", _addressController.text);
         box.write("description", _descController.text);
 
-        Get.snackbar("Success", "Shop sent for approval");
+        Get.offAll(() => ShopStatusScreen(shop: result["shop"])); // <-- CHANGED
       } else {
         Get.snackbar("Error", result["message"] ?? "Failed");
       }

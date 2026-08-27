@@ -54,6 +54,10 @@ class _MyShopScreenState extends State<MyShopScreen> {
       box.write("address", shop["address"]);
       box.write("description", shop["description"]);
       box.write("shop_approved", shop["is_approved"]);
+      box.write("cnic", shop["cnic"]);
+      box.write("cnic_image", shop["cnic_image"]);
+      box.write("cnic_back_image", shop["cnic_back_image"]);
+      box.write("city", shop["city"]);
     } else {
       Get.snackbar("Error", result["message"]);
     }

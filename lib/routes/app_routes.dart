@@ -31,6 +31,7 @@ class AppRoutes {
   // Seller Edit Shop
   static const editShop = "/edit-shop";
   static const myShop = "/my-shop";
+  static const shopStatus = "/shop-status";
   static const addProduct = "/add-product";
 
   // =========================

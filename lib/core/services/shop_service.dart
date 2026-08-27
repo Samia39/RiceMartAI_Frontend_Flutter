@@ -134,10 +134,20 @@ class ShopService {
     return [];
   }
 
-  Future rejectShop({required String token, required int shopId}) async {
+  // reject shop
+  Future rejectShop({
+    required String token,
+    required int shopId,
+    required String reason,
+  }) async {
     final response = await http.delete(
       Uri.parse("$baseUrl/shops/$shopId"),
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"reason": reason}),
     );
 
     return jsonDecode(response.body);
@@ -182,6 +192,7 @@ class ShopService {
     required String city,
     required String address,
     required String description,
+    required String cnic,
     Uint8List? cnicFrontImage,
     Uint8List? cnicBackImage,
     String? cnicFrontFileName,
@@ -209,6 +220,7 @@ class ShopService {
       request.fields['city'] = city;
       request.fields['address'] = address;
       request.fields['description'] = description;
+      request.fields['cnic'] = cnic;
 
       if (cnicFrontImage != null) {
         request.files.add(
