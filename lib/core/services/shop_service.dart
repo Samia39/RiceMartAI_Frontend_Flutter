@@ -311,4 +311,48 @@ class ShopService {
       return {"success": false, "message": e.toString()};
     }
   }
+
+  // =========================
+  // ADMIN — PERMANENTLY REMOVE SELLER
+  // =========================
+  Future<Map<String, dynamic>> removeSeller({
+    required String token,
+    required int shopId,
+    required String reason,
+    required bool permanentlyBan,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/admin/shops/$shopId/remove-seller"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"reason": reason, "permanently_ban": permanentlyBan}),
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  // =========================
+  // ADMIN — FETCH REMOVED SHOPS (record)
+  // =========================
+  Future<List<Map<String, dynamic>>> fetchRemovedShops({
+    required String token,
+  }) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/removed-shops"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    }
+
+    return [];
+  }
 }
