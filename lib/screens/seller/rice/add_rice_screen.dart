@@ -236,41 +236,41 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
         product["rice_category"]?["name"]?.toString() ?? "Uncategorized";
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
       decoration: AppDecorations.card,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // =========================
-          // THUMBNAIL
+          // TOP: ICON / IMAGE
           // =========================
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              height: 72,
-              width: 72,
-              color: AppColors.cream,
-              child: imageUrl != null
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (c, e, s) => Icon(
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            color: AppColors.cream.withOpacity(0.5),
+            child: Center(
+              child: CircleAvatar(
+                radius: 30,
+                backgroundColor: AppColors.darkGreen.withOpacity(0.12),
+                backgroundImage: imageUrl != null
+                    ? NetworkImage(imageUrl)
+                    : null,
+                child: imageUrl == null
+                    ? Icon(
                         Icons.rice_bowl,
                         color: AppColors.darkGreen,
                         size: 28,
-                      ),
-                    )
-                  : Icon(Icons.rice_bowl, color: AppColors.darkGreen, size: 28),
+                      )
+                    : null,
+              ),
             ),
           ),
-
-          const SizedBox(width: 14),
 
           // =========================
           // DETAILS
           // =========================
-          Expanded(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -280,79 +280,89 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
-
-                // category pill
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
+                const SizedBox(height: 3),
+                Text(
+                  categoryName,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.iconMuted,
                   ),
-                  decoration: AppDecorations.pill,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.category_outlined,
-                        size: 12,
-                        color: AppColors.darkGreen,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(categoryName, style: AppTextStyles.labelMuted),
-                    ],
-                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-
                 const SizedBox(height: 8),
-
-                // price + stock
-                Row(
-                  children: [
-                    Icon(
-                      Icons.currency_rupee,
-                      size: 14,
-                      color: AppColors.golden,
-                    ),
-                    const SizedBox(width: 2),
-                    Text(
-                      "${product["price"]}",
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Icon(
-                      Icons.inventory_2_outlined,
-                      size: 14,
-                      color: AppColors.lightGreen,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      "${product["stock"]} KG",
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                  ],
+                Text(
+                  "Rs ${product["price"]}/KG",
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
           ),
 
+          const Divider(height: 1),
+
           // =========================
-          // ACTIONS
+          // FOOTER: EDIT | DELETE
           // =========================
-          Column(
-            children: [
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                onPressed: () => editRiceDialog(product),
-                icon: const Icon(Icons.edit_outlined, color: AppColors.info),
-              ),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                onPressed: () => deleteProduct(product["id"]),
-                icon: const Icon(Icons.delete_outline, color: AppColors.error),
-              ),
-            ],
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => editRiceDialog(product),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 16,
+                            color: AppColors.success,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            "Edit",
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const VerticalDivider(width: 1),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => deleteProduct(product["id"]),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            size: 16,
+                            color: AppColors.error,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            "Delete",
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -425,13 +435,20 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
                             ),
                           ),
                         )
-                      : ListView.builder(
+                      : GridView.builder(
                           padding: EdgeInsets.fromLTRB(
                             isWide ? 24 : 14,
                             14,
                             isWide ? 24 : 14,
                             90,
                           ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: isWide ? 4 : 2,
+                                mainAxisSpacing: 14,
+                                crossAxisSpacing: 14,
+                                mainAxisExtent: isWide ? 250 : 255,
+                              ),
                           itemCount: productList.length,
                           itemBuilder: (context, index) =>
                               productCard(productList[index]),
