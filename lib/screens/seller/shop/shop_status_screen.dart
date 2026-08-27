@@ -65,6 +65,11 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       _correctionReason != null && _correctionReason!.isNotEmpty;
   String? get _rejectionReason => shop?["rejection_reason"]?.toString();
 
+  bool get _isExistingSeller {
+    final roles = List<String>.from(GetStorage().read('roles') ?? []);
+    return roles.contains('seller');
+  }
+
   void _goToBuyerDashboard() {
     final box = GetStorage();
     box.remove("has_shop");
@@ -72,6 +77,13 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
     box.remove("shop_approved");
     box.write("shop_status", "none");
     Get.offAllNamed(AppRoutes.dashboard);
+  }
+
+  void _continueToSellerDashboard() {
+    // Role hasn't changed (still 'seller') — this shop update is just
+    // awaiting re-approval, so the seller keeps full dashboard access
+    // while it's reviewed. No storage to clear, no reload needed.
+    Get.offAllNamed(AppRoutes.sellerDashboard);
   }
 
   // Refreshes cached roles/permissions (customer -> seller) via the
@@ -139,9 +151,12 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       icon: Icons.hourglass_top,
       iconColor: AppColors.warning,
       title: "Application Under Review",
-      message:
-          "Your shop \"${shop!["shop_name"] ?? ''}\" has been submitted and is "
-          "waiting for admin approval. We'll notify you once it's reviewed.",
+      message: _isExistingSeller
+          ? "Your shop \"${shop!["shop_name"] ?? ''}\" was updated and is "
+                "waiting for admin re-approval. You can keep using your seller "
+                "dashboard in the meantime — we'll notify you once it's reviewed."
+          : "Your shop \"${shop!["shop_name"] ?? ''}\" has been submitted and is "
+                "waiting for admin approval. We'll notify you once it's reviewed.",
       children: [
         OutlinedButton.icon(
           onPressed: _refresh,
@@ -150,8 +165,14 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
         ),
         const SizedBox(height: 10),
         TextButton(
-          onPressed: _goToBuyerDashboard,
-          child: const Text("Continue Browsing as Customer"),
+          onPressed: _isExistingSeller
+              ? _continueToSellerDashboard
+              : _goToBuyerDashboard,
+          child: Text(
+            _isExistingSeller
+                ? "Continue to Seller Dashboard"
+                : "Continue Browsing as Customer",
+          ),
         ),
       ],
     );
