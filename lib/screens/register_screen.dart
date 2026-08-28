@@ -45,6 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _snack('Please fill in all fields.');
       return;
     }
+
     if (password != confirm) {
       _snack('Passwords do not match.');
       return;
@@ -61,8 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (mounted) setState(() => _isLoading = false);
 
     if (error == null) {
-      _snack('Account created! Please sign in.');
-      Get.offNamed('/login');
+      Get.offNamed('/otp', arguments: {'email': email});
     } else {
       _snack(error);
     }
@@ -107,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 14),
                 _inputField(
                     ctrl: _emailCtrl,
-                    hint: 'Email or Phone Number',
+                    hint: 'Email',
                     icon: Icons.mail_outline,
                     keyboard: TextInputType.emailAddress),
                 const SizedBox(height: 14),

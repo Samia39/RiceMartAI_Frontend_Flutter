@@ -10,11 +10,11 @@ class AuthService {
   static const String _baseUrl = 'http://127.0.0.1:8000/api';
   static final _box = GetStorage();
 
-  static String? getToken()        => _box.read('token');
-  static String? getRole()         => _box.read('role');
-  static bool   isLoggedIn()       => getToken() != null;
-  static bool   isAdmin()          => getRole() == 'admin';
-  static Future<void> clearAuth()  async {
+  static String? getToken()       => _box.read('token');
+  static String? getRole()        => _box.read('role');
+  static bool   isLoggedIn()      => getToken() != null;
+  static bool   isAdmin()         => getRole() == 'admin';
+  static Future<void> clearAuth() async {
     await _box.remove('token');
     await _box.remove('role');
     await _box.remove('user');
@@ -26,6 +26,7 @@ class AuthService {
     if (getToken() != null) 'Authorization': 'Bearer ${getToken()}',
   };
 
+  // ── LOGIN ─────────────────────────────────────────────────
   static Future<String?> login({
     required String username,
     required String email,
@@ -56,6 +57,7 @@ class AuthService {
     }
   }
 
+  // ── REGISTER ─────────────────────────────────────────────
   static Future<String?> register({
     required String fullName,
     required String username,
@@ -78,7 +80,7 @@ class AuthService {
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 201) return null;
+      if (response.statusCode == 200) return null;
 
       if (response.statusCode == 422) {
         final errors = data['errors'] as Map<String, dynamic>?;
@@ -93,6 +95,42 @@ class AuthService {
     }
   }
 
+  // ── VERIFY OTP ────────────────────────────────────────────
+  static Future<String?> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/verify-otp'),
+        headers: _headers,
+        body: jsonEncode({'email': email, 'otp': otp}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 201) return null;
+      return data['message'] ?? 'Verification failed.';
+    } catch (e) {
+      return 'Network error. Please check your connection.';
+    }
+  }
+
+  // ── RESEND OTP ────────────────────────────────────────────
+  static Future<String?> resendOtp({required String email}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/resend-otp'),
+        headers: _headers,
+        body: jsonEncode({'email': email}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) return null;
+      return data['message'] ?? 'Failed to resend OTP.';
+    } catch (e) {
+      return 'Network error. Please check your connection.';
+    }
+  }
+
+  // ── LOGOUT ────────────────────────────────────────────────
   static Future<void> logout() async {
     try {
       await http.post(Uri.parse('$_baseUrl/logout'), headers: _headers);
@@ -100,80 +138,10 @@ class AuthService {
     await clearAuth();
   }
 
+  // ── GET CURRENT USER ──────────────────────────────────────
   static Map<String, dynamic> getCurrentUser() {
     final user = _box.read('user');
     if (user == null) return {};
     return jsonDecode(user);
-  }
-}
-// ── REGISTER (OTP bhejega) ────────────────────────────────
-static Future<String?> register({
-  required String fullName,
-  required String username,
-  required String email,
-  required String password,
-  required String confirmPassword,
-}) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/register'),
-      headers: _headers,
-      body: jsonEncode({
-        'name':                  fullName,
-        'username':              username,
-        'email':                 email,
-        'password':              password,
-        'password_confirmation': confirmPassword,
-      }),
-    );
-
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 200) return null;
-
-    if (response.statusCode == 422) {
-      final errors = data['errors'] as Map<String, dynamic>?;
-      if (errors != null && errors.isNotEmpty) {
-        final firstError = errors.values.first;
-        return firstError is List ? firstError.first : firstError.toString();
-      }
-    }
-    return data['message'] ?? 'Registration failed.';
-  } catch (e) {
-    return 'Network error. Please check your connection.';
-  }
-}
-
-// ── VERIFY OTP ────────────────────────────────────────────
-static Future<String?> verifyOtp({
-  required String email,
-  required String otp,
-}) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/verify-otp'),
-      headers: _headers,
-      body: jsonEncode({'email': email, 'otp': otp}),
-    );
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 201) return null;
-    return data['message'] ?? 'Verification failed.';
-  } catch (e) {
-    return 'Network error. Please check your connection.';
-  }
-}
-
-// ── RESEND OTP ────────────────────────────────────────────
-static Future<String?> resendOtp({required String email}) async {
-  try {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/resend-otp'),
-      headers: _headers,
-      body: jsonEncode({'email': email}),
-    );
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 200) return null;
-    return data['message'] ?? 'Failed to resend OTP.';
-  } catch (e) {
-    return 'Network error. Please check your connection.';
   }
 }
