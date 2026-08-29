@@ -40,7 +40,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
 
   String _imageUrl(dynamic path) {
     if (path == null || path.toString().isEmpty) return "";
-    return "http://127.0.0.1:8000/storage/$path";
+    return "http://ricemart.sandbox.pk/storage/$path";
   }
 
   // =========================

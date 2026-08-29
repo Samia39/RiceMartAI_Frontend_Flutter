@@ -180,7 +180,7 @@ class ProductService {
     }
 
     // ✅ Strip trailing "/api" (or any trailing path) from baseUrl
-    // so we get just the host, e.g. "http://127.0.0.1:8000"
+    // so we get just the host, e.g. "http://ricemart.sandbox.pk"
     final host = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
 
     return "$host/storage/$str";

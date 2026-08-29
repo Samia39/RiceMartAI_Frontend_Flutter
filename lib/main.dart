@@ -20,7 +20,11 @@ void main() async {
     Stripe.publishableKey =
         "pk_test_51U7HrHQ8RiNpzmf2FmvcBjKae5hJ4CF5fM7tBUVSHp4djWo5Nk2WcVwJhc1XyNgZVJq95f0elTmYlPEDINfmW1Qo001oGGzNee";
 
-    await Stripe.instance.applySettings();
+    try {
+      await Stripe.instance.applySettings();
+    } catch (e) {
+      debugPrint("Stripe initialization error: $e");
+    }
   }
 
   runApp(const MyApp());

@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 class CityService {
   final box = GetStorage();
 
-  final String baseUrl = "http://127.0.0.1:8000/api";
+  final String baseUrl = "http://ricemart.sandbox.pk/api";
 
   // =========================
   // GET ALL CITIES
