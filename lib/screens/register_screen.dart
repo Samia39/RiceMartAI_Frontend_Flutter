@@ -83,13 +83,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (error == null) {
       Get.offNamed('/otp', arguments: {'email': email});
     } else {
+      // Email account not found ya koi aur error
       _snack(error);
     }
   }
 
   void _snack(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: msg.contains('not found')
+            ? AppColors.error
+            : null,
+      ),
+    );
   }
 
   @override
