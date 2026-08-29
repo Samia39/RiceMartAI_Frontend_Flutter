@@ -1,9 +1,9 @@
-import 'package:frontend/screens/admin_screens/payments/admin_payment_settings_screen.dart';
-import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
-import 'package:frontend/screens/chats/chat.dart';
-import 'package:frontend/screens/chats/conversation.dart';
-import 'package:frontend/screens/seller/rice/add_rice_screen.dart';
-import 'package:frontend/screens/seller/shop/my_shop_screen.dart';
+import 'package:ricemart_ai/screens/admin_screens/payments/admin_payment_settings_screen.dart';
+import 'package:ricemart_ai/screens/buyer/dashboard/buyer_dashboard_screen.dart';
+import 'package:ricemart_ai/screens/chats/chat.dart';
+import 'package:ricemart_ai/screens/chats/conversation.dart';
+import 'package:ricemart_ai/screens/seller/rice/add_rice_screen.dart';
+import 'package:ricemart_ai/screens/seller/shop/my_shop_screen.dart';
 import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';

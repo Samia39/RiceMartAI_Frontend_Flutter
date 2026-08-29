@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/admin_screens/complaints/admin_complaint_list_screen.dart';
-import 'package:frontend/screens/admin_screens/courier_management/courier_charge_screen.dart';
-import 'package:frontend/screens/admin_screens/payout/admin_payouts_screen.dart';
+import 'package:ricemart_ai/screens/admin_screens/complaints/admin_complaint_list_screen.dart';
+import 'package:ricemart_ai/screens/admin_screens/courier_management/courier_charge_screen.dart';
+import 'package:ricemart_ai/screens/admin_screens/payout/admin_payouts_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/chat_service.dart';
+import 'package:ricemart_ai/core/services/chat_service.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';

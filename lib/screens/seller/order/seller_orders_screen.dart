@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/seller/order/seller_order_details_screen.dart';
+import 'package:ricemart_ai/screens/seller/order/seller_order_details_screen.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/order_service.dart';

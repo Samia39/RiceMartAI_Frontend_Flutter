@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/seller/payout/SellerPayoutsScreen.dart';
+import 'package:ricemart_ai/screens/seller/payout/SellerPayoutsScreen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -8,19 +8,14 @@ import '../../core/services/order_service.dart';
 import '../../core/utils/themes.dart';
 import '../../routes/app_routes.dart';
 
-// Role-specific order detail screens — each expects a different shape,
-// so we can't just push one generic screen with an order_id.
 import '../buyer/orders/order_details_screen.dart';
 import '../seller/order/seller_order_details_screen.dart';
 import '../admin_screens/orders/admin_order_details_screen.dart';
 
-// Role-specific complaint detail screens — same reasoning as orders above.
 import '../admin_screens/complaints/admin_complaint_detail_screen.dart';
 import '../buyer/complaints/customer_complaint_detail_screen.dart';
 import '../seller/complaints/seller_complaint_detail_screen.dart';
 
-// Role-specific payout screens — admin sees every shop's payouts,
-// seller only sees their own.
 import '..//admin_screens/payout/admin_payouts_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -37,7 +32,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   List<Map<String, dynamic>> notifications = [];
   bool isLoading = true;
-  bool isNavigating = false; // prevents double-taps while we fetch
+  bool isNavigating = false;
 
   @override
   void initState() {
@@ -70,20 +65,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   // =========================
   // ROLE HELPER
-  // (matches the "role" key already stored at login — same source
-  // PermissionService/dashboards read from)
+  // FIX: login/loadUser save the key as 'roles' (plural, a LIST —
+  // e.g. ["admin"] or ["seller"]), never a singular 'role' string.
+  // Reading 'role' below always returned null, so _isAdmin/_isSeller
+  // were silently broken for everyone except a literal "full access"
+  // permission match. Read the actual 'roles' list instead.
   //
   // Normalized to ignore spacing/casing/underscore differences
   // ("Super Admin", "super-admin", "SuperAdmin" all match), plus a
   // fallback check against cached permissions (mirrors the backend's
-  // `$user->can('full access')` check for super admin) in case the
-  // role string itself isn't reliably set for admin accounts.
+  // `$user->can('full access')` check for super admin).
   // =========================
 
-  String get _rawRole =>
-      (_box.read('role') ?? '').toString().toLowerCase().trim();
+  List<String> get _rawRoles {
+    final stored = _box.read('roles');
+    if (stored is List) {
+      return stored.map((r) => r.toString().toLowerCase().trim()).toList();
+    }
+    return [];
+  }
 
-  String get _normalizedRole => _rawRole.replaceAll(RegExp(r'[\s_-]'), '');
+  List<String> get _normalizedRoles =>
+      _rawRoles.map((r) => r.replaceAll(RegExp(r'[\s_-]'), '')).toList();
 
   bool get _hasFullAccessPermission {
     final permissions = _box.read('permissions');
@@ -98,11 +101,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   bool get _isAdmin =>
-      _normalizedRole == 'admin' ||
-      _normalizedRole == 'superadmin' ||
+      _normalizedRoles.contains('admin') ||
+      _normalizedRoles.contains('superadmin') ||
       _hasFullAccessPermission;
 
-  bool get _isSeller => _normalizedRole == 'seller';
+  bool get _isSeller => _normalizedRoles.contains('seller');
 
   // =========================
   // MAIN TAP HANDLER
@@ -131,22 +134,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         await _openOrder(data);
         break;
 
-      // Sent to admins when a payout becomes ready to release
-      // (customer confirmed receipt, or the whole order was delivered)
-      // and to sellers once admin has paid them out. Neither of these
-      // is an "order" screen concern — both belong on the Payouts screen.
       case 'payment_release':
       case 'payout_paid':
         _openPayouts();
         break;
 
       case 'shop_pending':
-        // Only admins get this type — send them to the approvals queue
         Get.toNamed(AppRoutes.sellerApprovals);
         break;
 
       case 'shop_status':
-        // Only sellers get this type — send them to their own shop
         Get.toNamed(AppRoutes.myShop);
         break;
 
@@ -155,15 +152,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         break;
 
       default:
-        // Unknown/future type — do nothing beyond marking as read
         break;
     }
   }
-
-  // =========================
-  // CHAT — conversation_id is enough, ChatScreen falls back to
-  // "Chat" as the title if other_name isn't supplied.
-  // =========================
 
   void _openChat(Map<String, dynamic> data) {
     final conversationId = data['conversation_id'];
@@ -173,30 +164,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     Get.toNamed(AppRoutes.chat, arguments: {"conversation_id": conversationId});
   }
 
-  // =========================
-  // COMPLAINT
-  //
-  // The backend now sends recipient_role with the notification.
-  // This is preferred over guessing the role from local storage.
-  //
-  // Admin       -> AdminComplaintDetailScreen
-  // Seller      -> SellerComplaintDetailScreen
-  // Customer    -> CustomerComplaintDetailScreen
-  //
-  // If recipient_role is missing (old notifications), fall back
-  // to the locally detected role.
-  // =========================
-
   void _openComplaint(Map<String, dynamic> data) {
     final complaintId = data['complaint_id'];
 
     if (complaintId == null) return;
 
-    // Prefer the backend's own answer for who this notification is for.
-    //
-    // It is set at send-time from the same source of truth as the
-    // permission check, so it cannot disagree with the server like
-    // a client-side role guess can.
     final recipientRole = data['recipient_role']
         ?.toString()
         .toLowerCase()
@@ -213,27 +185,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         () => CustomerComplaintDetailScreen(complaintId: complaintId as int),
       );
     } else if (_isAdmin) {
-      // Fallback for notifications sent before recipient_role existed.
       Get.to(() => AdminComplaintDetailScreen(complaintId: complaintId as int));
     } else if (_isSeller) {
       Get.to(
         () => SellerComplaintDetailScreen(complaintId: complaintId as int),
       );
     } else {
-      // Customer fallback
       Get.to(
         () => CustomerComplaintDetailScreen(complaintId: complaintId as int),
       );
     }
   }
-
-  // =========================
-  // ORDER — fetch the right list for the current role, find the
-  // matching record, then push the role-specific detail screen.
-  //
-  // NOTE: firstWhereOrNull below is provided by package:get (GetX),
-  // already imported at the top of this file.
-  // =========================
 
   Future<void> _openOrder(Map<String, dynamic> data) async {
     final orderId = data['order_id'];
@@ -264,8 +226,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       } else if (_isSeller) {
         final items = await _orderService.fetchSellerOrders();
 
-        // Notification stores order_id, but the seller screen needs an
-        // order ITEM — pick the first item belonging to that order.
         final found = items.firstWhereOrNull(
           (i) => i['order']?['id'] == orderId,
         );
@@ -276,7 +236,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Get.snackbar("Not found", "This order could not be loaded.");
         }
       } else {
-        // Buyer
         final active = await _orderService.getActiveOrders();
         final history = await _orderService.getOrderHistory();
 
@@ -296,13 +255,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       }
     }
   }
-
-  // =========================
-  // PAYOUT — 'payment_release' goes to admins ("ready to send"),
-  // 'payout_paid' goes to sellers ("you've been paid"). Both just
-  // need to land on the right role's Payouts tab; the tab/filter
-  // inside each screen already separates pending/ready/paid.
-  // =========================
 
   void _openPayouts() {
     if (_isAdmin) {

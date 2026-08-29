@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:frontend/core/utils/themes.dart';
+import 'package:ricemart_ai/core/utils/themes.dart';
 import '../../../core/services/complaint_service.dart';
 
 class CustomerNewComplaintScreen extends StatefulWidget {

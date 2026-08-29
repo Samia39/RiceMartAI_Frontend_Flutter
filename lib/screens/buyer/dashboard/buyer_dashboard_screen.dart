@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/chats/conversation.dart';
-import 'package:frontend/routes/app_routes.dart';
+import 'package:ricemart_ai/screens/chats/conversation.dart';
+import 'package:ricemart_ai/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:frontend/screens/buyer/profile/profile_screen.dart';
-import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
-import 'package:frontend/screens/buyer/shops/shops_screen.dart';
+import 'package:ricemart_ai/screens/buyer/profile/profile_screen.dart';
+import 'package:ricemart_ai/screens/buyer/rice/all_rice_screen.dart';
+import 'package:ricemart_ai/screens/buyer/shops/shops_screen.dart';
 
 import '../../../core/constants/app_icons.dart';
 import '../../../core/services/cart_service.dart';

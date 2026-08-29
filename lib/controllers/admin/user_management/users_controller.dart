@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/admin/admin_service.dart';
+import 'package:ricemart_ai/core/services/admin/admin_service.dart';
 import 'package:get/get.dart';
 
 class UsersController extends GetxController {

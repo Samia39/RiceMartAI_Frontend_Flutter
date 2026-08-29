@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:frontend/routes/app_routes.dart';
+import 'package:ricemart_ai/routes/app_routes.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../core/services/cart_service.dart';

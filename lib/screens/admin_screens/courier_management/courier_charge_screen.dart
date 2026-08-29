@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/admin/courier_charge_service.dart';
-import 'package:frontend/core/utils/themes.dart';
+import 'package:ricemart_ai/core/services/admin/courier_charge_service.dart';
+// ignore: depend_on_referenced_packages
+import 'package:ricemart_ai/core/utils/themes.dart';
 
 class CourierChargeScreen extends StatefulWidget {
   const CourierChargeScreen({super.key});

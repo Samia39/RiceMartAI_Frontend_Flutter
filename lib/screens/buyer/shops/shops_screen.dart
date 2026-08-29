@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/routes/app_routes.dart';
+import 'package:ricemart_ai/routes/app_routes.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/shop_service.dart';

@@ -1,6 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
+import 'package:ricemart_ai/screens/buyer/rice/all_rice_screen.dart';
 import '../../../core/utils/themes.dart';
 
 class AIResultScreen extends StatelessWidget {
