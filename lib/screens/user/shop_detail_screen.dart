@@ -38,7 +38,7 @@ class _ShopDetailScreenState extends State<ShopDetailScreen> {
     final conv = await ChatService.startConversation(shop!.id);
     setState(() => isChatLoading = false);
     if (conv != null) {
-      Get.toNamed('/chat-screen', arguments: conv);
+      Get.toNamed('/chat', arguments: conv);
     } else {
       Get.snackbar('Error', 'Chat start nahi ho saka!',
           backgroundColor: const Color(0xFFD4C9A8));
