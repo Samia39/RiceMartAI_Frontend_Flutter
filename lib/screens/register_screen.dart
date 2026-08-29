@@ -46,6 +46,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    // Email format check
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(email)) {
+      _snack('Please enter a valid email address.');
+      return;
+    }
+
+    // Valid email domains check
+    final validDomains = [
+      'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com',
+      'icloud.com', 'live.com', 'msn.com', 'protonmail.com',
+      'mail.com', 'ymail.com', 'yahoo.co.uk', 'googlemail.com',
+    ];
+    final emailDomain = email.split('@').last.toLowerCase();
+    if (!validDomains.contains(emailDomain)) {
+      _snack('Your email domain does not exist. Please use Gmail, Yahoo, or Outlook.');
+      return;
+    }
+
     if (password != confirm) {
       _snack('Passwords do not match.');
       return;

@@ -6,6 +6,8 @@ import '../screens/otp_screen.dart';
 import '../screens/user_dashboard.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/seller_dashboard.dart';
+import '../screens/admin/admin_shops_screen.dart';
+import '../screens/admin/admin_shop_detail_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -17,6 +19,8 @@ class AppRoutes {
   static const String userDashboard   = '/user-dashboard';
   static const String adminDashboard  = '/admin-dashboard';
   static const String sellerDashboard = '/seller-dashboard';
+  static const String adminShops      = '/admin-shops';
+  static const String adminShopDetail = '/admin-shop-detail';
 
   static final List<GetPage> pages = [
     GetPage(name: splash,          page: () => const SplashScreen()),
@@ -26,5 +30,7 @@ class AppRoutes {
     GetPage(name: userDashboard,   page: () => const UserDashboard()),
     GetPage(name: adminDashboard,  page: () => const AdminDashboard()),
     GetPage(name: sellerDashboard, page: () => const SellerDashboard()),
+    GetPage(name: adminShops,      page: () => const AdminShopsScreen()),
+    GetPage(name: adminShopDetail, page: () => const AdminShopDetailScreen()),
   ];
 }
