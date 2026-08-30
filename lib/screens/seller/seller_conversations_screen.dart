@@ -73,7 +73,7 @@ class _SellerConversationsScreenState
                           final conv = conversations[i];
                           return GestureDetector(
                             onTap: () => Get.toNamed(
-                              '/chat-screen',
+                              '/chat',
                               arguments: conv,
                             ),
                             child: Container(
@@ -83,8 +83,8 @@ class _SellerConversationsScreenState
                                 color: AppColors.cream.withOpacity(0.22),
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
-                                    color:
-                                        AppColors.borderGold.withOpacity(0.45)),
+                                    color: AppColors.borderGold
+                                        .withOpacity(0.45)),
                               ),
                               child: Row(
                                 children: [
@@ -97,7 +97,8 @@ class _SellerConversationsScreenState
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(Icons.person,
-                                        color: AppColors.darkGreen, size: 26),
+                                        color: AppColors.darkGreen,
+                                        size: 26),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -125,8 +126,7 @@ class _SellerConversationsScreenState
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          conv.lastMessage ??
-                                              'No messages yet',
+                                          conv.lastMessage ?? 'No messages yet',
                                           style: TextStyle(
                                             fontFamily: 'Poppins',
                                             fontSize: 12,
@@ -141,8 +141,8 @@ class _SellerConversationsScreenState
                                   ),
                                   Icon(Icons.arrow_forward_ios,
                                       size: 14,
-                                      color:
-                                          AppColors.darkGreen.withOpacity(0.45)),
+                                      color: AppColors.darkGreen
+                                          .withOpacity(0.45)),
                                 ],
                               ),
                             ),

@@ -31,7 +31,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // ── Title ────────────────────────────────────────
         const SizedBox(height: 8),
         const Text('Conversations',
             style: TextStyle(
@@ -41,8 +40,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
               color: AppColors.darkGreen,
             )),
         const SizedBox(height: 16),
-
-        // ── List ─────────────────────────────────────────
         Expanded(
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -74,7 +71,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                           final conv = conversations[i];
                           return GestureDetector(
                             onTap: () => Get.toNamed(
-                              '/chat-screen',
+                              '/chat',
                               arguments: conv,
                             ),
                             child: Container(
@@ -89,7 +86,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  // Shop Icon
                                   Container(
                                     width: 50,
                                     height: 50,
@@ -118,8 +114,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          conv.lastMessage ??
-                                              'No messages yet',
+                                          conv.lastMessage ?? 'No messages yet',
                                           style: TextStyle(
                                             fontFamily: 'Poppins',
                                             fontSize: 12,
@@ -134,8 +129,8 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                                   ),
                                   Icon(Icons.arrow_forward_ios,
                                       size: 14,
-                                      color:
-                                          AppColors.darkGreen.withOpacity(0.45)),
+                                      color: AppColors.darkGreen
+                                          .withOpacity(0.45)),
                                 ],
                               ),
                             ),
