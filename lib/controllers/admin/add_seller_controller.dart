@@ -103,7 +103,11 @@ class AddSellerController extends GetxController {
           "Seller account created — approved and ready to log in",
           snackPosition: SnackPosition.TOP,
         );
-        Get.back(result: true);
+
+        // FIX: pehle Get.back() poori screen band kar deta tha. Ab isi
+        // screen pe rehte hain aur form clear kar dete hain taake agla
+        // seller foran add kiya ja sake.
+        clearFields();
       } else {
         Get.snackbar(
           "Error",
@@ -115,6 +119,26 @@ class AddSellerController extends GetxController {
       isLoading.value = false;
       Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.TOP);
     }
+  }
+
+  // =========================
+  // CLEAR FORM (after successful create)
+  // =========================
+  void clearFields() {
+    nameController.clear();
+    emailController.clear();
+    passwordController.clear();
+
+    shopNameController.clear();
+    ownerNameController.clear();
+    phoneController.clear();
+    cityController.clear();
+    addressController.clear();
+    cnicController.clear();
+    descriptionController.clear();
+
+    cnicFrontImage.value = null;
+    cnicBackImage.value = null;
   }
 
   @override
