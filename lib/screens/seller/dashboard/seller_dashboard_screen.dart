@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ricemart_ai/screens/seller/dashboard/seller_home.dart';
-import 'package:ricemart_ai/screens/chats/conversation.dart';
+import 'seller_home.dart';
+import '../../chats/conversation.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../rice/add_rice_screen.dart';

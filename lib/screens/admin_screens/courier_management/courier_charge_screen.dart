@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ricemart_ai/core/services/admin/courier_charge_service.dart';
+import '../../../core/services/admin/courier_charge_service.dart';
 // ignore: depend_on_referenced_packages
 import 'package:ricemart_ai/core/utils/themes.dart';
 

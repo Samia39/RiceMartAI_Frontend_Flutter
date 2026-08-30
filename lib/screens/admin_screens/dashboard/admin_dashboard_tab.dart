@@ -1,16 +1,3 @@
-// Path: lib/screens/admin_screens/dashboard/admin_dashboard_tab.dart
-//
-// FIX: this is the file that actually renders as the admin's dashboard tab
-// (via AdminHomeShell -> AdminDashboardTab). The old notification icon here
-// used Get.toNamed(AppRoutes.adminNotifications), a route that isn't
-// registered in app_pages.dart at all — tapping it would have thrown a
-// "route not found" error. It's now replaced with the same NotificationBell
-// widget used on buyer/seller dashboards, placed immediately next to the
-// "Add Shop" button, and the 'view notifications' permission gate has been
-// removed (that permission isn't assigned to the admin role yet, which was
-// hiding it entirely). Add the permission back in Spatie later if you want
-// it gated again.
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';

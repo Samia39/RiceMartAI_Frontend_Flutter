@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:ricemart_ai/core/services/shop_service.dart';
+import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
 
 class ShopDetailsScreen extends StatelessWidget {

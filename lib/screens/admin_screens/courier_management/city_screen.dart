@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ricemart_ai/core/services/admin/city_service.dart';
-import 'package:ricemart_ai/core/utils/themes.dart';
+import '../../../core/services/admin/city_service.dart';
+import '../../../core/utils/themes.dart';
 
 class CityScreen extends StatefulWidget {
   const CityScreen({super.key});

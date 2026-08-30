@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:ricemart_ai/screens/seller/payout/SellerPayoutsScreen.dart';
+import '../seller/payout/SellerPayoutsScreen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../../core/services/notification_service.dart';
 import '../../core/services/order_service.dart';
+import '../../core/services/shop_service.dart';
 import '../../core/utils/themes.dart';
 import '../../routes/app_routes.dart';
 
@@ -17,6 +18,7 @@ import '../buyer/complaints/customer_complaint_detail_screen.dart';
 import '../seller/complaints/seller_complaint_detail_screen.dart';
 
 import '..//admin_screens/payout/admin_payouts_screen.dart';
+import '../admin_screens/shops/approved_shop_detail_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -151,6 +153,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         _openComplaint(data);
         break;
 
+      case 'review':
+        await _openReview(data);
+        break;
+
       default:
         break;
     }
@@ -261,6 +267,45 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       Get.to(() => const AdminPayoutsScreen());
     } else if (_isSeller) {
       Get.to(() => const SellerPayoutsScreen());
+    }
+  }
+
+  // =========================
+  // REVIEW — seller goes to their own shop (which now shows its
+  // reviews section); admin/super_admin goes to that specific shop's
+  // detail screen, matched by shop_id from the notification payload.
+  // =========================
+  Future<void> _openReview(Map<String, dynamic> data) async {
+    final shopId = data['shop_id'];
+
+    if (shopId == null) return;
+
+    if (_isSeller) {
+      Get.toNamed(AppRoutes.myShop);
+      return;
+    }
+
+    if (_isAdmin) {
+      if (isNavigating) return;
+      setState(() => isNavigating = true);
+
+      try {
+        final shops = await ShopService().fetchApprovedShops();
+
+        final found = shops.firstWhereOrNull(
+          (s) => s['id'].toString() == shopId.toString(),
+        );
+
+        if (found != null) {
+          await Get.to(() => ApprovedShopDetailScreen(shop: found));
+        } else {
+          Get.snackbar("Not found", "This shop could not be loaded.");
+        }
+      } finally {
+        if (mounted) {
+          setState(() => isNavigating = false);
+        }
+      }
     }
   }
 

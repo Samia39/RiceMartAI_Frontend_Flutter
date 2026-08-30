@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:ricemart_ai/core/services/shop_service.dart';
-import 'package:ricemart_ai/controllers/auth_controller.dart';
+import '../../../core/services/shop_service.dart';
+import '../../../controllers/auth_controller.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 import 'edit_shop_screen.dart';

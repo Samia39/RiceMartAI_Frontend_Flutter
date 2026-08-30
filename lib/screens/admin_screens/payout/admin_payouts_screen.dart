@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:ricemart_ai/core/services/admin/payout_service.dart';
-import 'package:ricemart_ai/core/utils/themes.dart';
+import '../../../core/services/admin/payout_service.dart';
+import '../../../core/utils/themes.dart';
 import 'pay_seller_dialog.dart';
 
 class AdminPayoutsScreen extends StatefulWidget {

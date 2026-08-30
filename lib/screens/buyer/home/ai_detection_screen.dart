@@ -4,15 +4,14 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:ricemart_ai/screens/buyer/home/ai_result.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../routes/app_routes.dart';
 
 import 'package:permission_handler/permission_handler.dart'
     if (dart.library.html) 'package:ricemart_ai/core/utils/permission_stubs.dart';
 
 import '../../../core/services/test_service.dart';
-import '../../../core/utils/permission_stubs.dart'
-    hide Permission, openAppSettings;
 import '../../../core/utils/themes.dart';
 
 class AIDetectionScreen extends StatefulWidget {
@@ -36,7 +35,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
   final ImagePicker picker = ImagePicker();
 
   // ── Desktop check ──
-  // Desktop = Windows / macOS / Linux (not web, not mobile)
   bool get _isDesktop =>
       !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 
@@ -48,17 +46,10 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     super.dispose();
   }
 
-  // ════════════════════════════════════════
-  //  CAMERA BUTTON PRESSED
-  //  → Desktop/Web: image_picker file dialog
-  //  → Mobile: live camera preview
-  // ════════════════════════════════════════
   Future<void> handleCameraButton() async {
     if (_isDesktop || kIsWeb) {
-      // Desktop & Web: image_picker handles it natively
       await _takePhotoImagePicker();
     } else if (_isMobile) {
-      // Mobile: toggle live camera preview
       if (_cameraOpen) {
         await _closeCamera();
       } else {
@@ -67,9 +58,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ════════════════════════════════════════
-  //  OPEN LIVE CAMERA (mobile only)
-  // ════════════════════════════════════════
   Future<void> _openCamera() async {
     final status = await Permission.camera.request();
     if (!status.isGranted) {
@@ -95,7 +83,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
         return;
       }
 
-      // Prefer rear camera
       final rear = _cameras!.firstWhere(
         (c) => c.lensDirection == CameraLensDirection.back,
         orElse: () => _cameras!.first,
@@ -126,9 +113,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ════════════════════════════════════════
-  //  CAPTURE PHOTO (mobile live preview)
-  // ════════════════════════════════════════
   Future<void> _capturePhoto() async {
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
@@ -154,20 +138,12 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ════════════════════════════════════════
-  //  CLOSE CAMERA (mobile)
-  // ════════════════════════════════════════
   Future<void> _closeCamera() async {
     await _cameraController?.dispose();
     _cameraController = null;
     setState(() => _cameraOpen = false);
   }
 
-  // ════════════════════════════════════════
-  //  IMAGE PICKER CAMERA (desktop + web fallback)
-  //  Desktop pe: system camera app ya file dialog
-  //  Web pe: browser camera popup
-  // ════════════════════════════════════════
   Future<void> _takePhotoImagePicker() async {
     try {
       final XFile? image = await picker.pickImage(
@@ -181,7 +157,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
         });
       }
     } catch (e) {
-      // Desktop mein camera nahi hoga toh gallery suggest karo
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -194,9 +169,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ════════════════════════════════════════
-  //  GALLERY
-  // ════════════════════════════════════════
   Future<void> pickGalleryImage() async {
     if (_cameraOpen) await _closeCamera();
 
@@ -222,9 +194,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ════════════════════════════════════════
-  //  PERMISSION DIALOG
-  // ════════════════════════════════════════
   void _showPermissionSettingsDialog() {
     showDialog(
       context: context,
@@ -250,9 +219,9 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     );
   }
 
-  // ════════════════════════════════════════
-  //  SEND TO SERVER & NAVIGATE
-  // ════════════════════════════════════════
+  // NOTE (flagged, not fixed yet per your request): TestService.uploadImage
+  // posts to the backend's /test-image endpoint, which currently has no
+  // auth or permission middleware at all. Revisit when you're ready.
   Future<void> sendImage() async {
     if (selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -270,12 +239,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     if (!mounted) return;
 
     if (response['success'] == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AIResultScreen(result: response['data']),
-        ),
-      );
+      Get.toNamed(AppRoutes.airesult, arguments: response['data']);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -286,14 +250,10 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     }
   }
 
-  // ════════════════════════════════════════
-  //  CAMERA BUTTON LABEL & ICON
-  //  changes based on platform + state
-  // ════════════════════════════════════════
   String get _cameraButtonLabel {
-    if (_isDesktop) return "Take Photo"; // desktop: file dialog
-    if (kIsWeb) return "Take Photo"; // web: browser camera
-    if (_cameraOpen) return "Close Camera"; // mobile: toggle
+    if (_isDesktop) return "Take Photo";
+    if (kIsWeb) return "Take Photo";
+    if (_cameraOpen) return "Close Camera";
     return "Open Camera";
   }
 
@@ -302,9 +262,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     return Icons.camera_alt_outlined;
   }
 
-  // ════════════════════════════════════════
-  //  IMAGE PREVIEW WIDGET
-  // ════════════════════════════════════════
   Widget _buildImagePreview() {
     if (selectedImage == null) {
       return Column(
@@ -349,9 +306,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     );
   }
 
-  // ════════════════════════════════════════
-  //  MAIN BUILD
-  // ════════════════════════════════════════
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -366,7 +320,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Title ────────────────────────────────
                 Text(
                   "Rice Category Detection",
                   style: AppTextStyles.heading2.copyWith(
@@ -383,7 +336,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
                 const SizedBox(height: 20),
 
-                // ── Image / Camera Preview ────────────────
                 Stack(
                   children: [
                     Container(
@@ -414,7 +366,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                           : _buildImagePreview(),
                     ),
 
-                    // ── Shutter overlay (mobile live preview) ──
                     if (_cameraOpen)
                       Positioned(
                         bottom: 12,
@@ -459,7 +410,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                         ),
                       ),
 
-                    // ── Source badge (after image selected) ──
                     if (imageSourceLabel != null && !_cameraOpen)
                       Positioned(
                         top: 10,
@@ -500,10 +450,8 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
                 const SizedBox(height: 20),
 
-                // ── Gallery + Camera buttons ────────────────
                 Row(
                   children: [
-                    // Gallery
                     Expanded(
                       child: SizedBox(
                         height: 52,
@@ -520,7 +468,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
                     const SizedBox(width: 12),
 
-                    // Camera — label & behavior changes by platform
                     Expanded(
                       child: SizedBox(
                         height: 52,
@@ -536,7 +483,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
                 const SizedBox(height: 14),
 
-                // ── Analyze Button ──────────────────────────
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -569,7 +515,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
                   ),
                 ),
 
-                // ── Loading hint ────────────────────────────
                 if (isLoading) ...[
                   const SizedBox(height: 14),
                   Center(

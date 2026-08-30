@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:ricemart_ai/core/services/shop_service.dart';
-import 'package:ricemart_ai/core/services/product_service.dart';
+import '../../../core/services/shop_service.dart';
+import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../widgets/shop_reviews_section.dart';
 
