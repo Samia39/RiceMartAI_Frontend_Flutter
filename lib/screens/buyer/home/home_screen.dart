@@ -5,9 +5,6 @@ import '../../../core/utils/themes.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/services/cart_service.dart';
 import '../../../routes/app_routes.dart';
-import 'ai_detection_screen.dart';
-import 'ai_recommendation_screen.dart';
-import '../rice/all_rice_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -100,12 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // ================= AI DETECTION =================
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AIDetectionScreen(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.aiDetection);
                     },
                     child: featureCard(
                       icon: Icons.camera_alt_rounded,
@@ -119,12 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // ================= RECOMMENDATION =================
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AiRecommendationScreen(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.airecommendation);
                     },
                     child: featureCard(
                       icon: Icons.recommend_rounded,
@@ -148,12 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       // SEE ALL BUTTON
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AllRiceScreen(),
-                            ),
-                          );
+                          Get.toNamed(AppRoutes.allRice);
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(

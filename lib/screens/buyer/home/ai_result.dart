@@ -1,12 +1,20 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:frontend/screens/buyer/rice/all_rice_screen.dart';
+import 'package:frontend/routes/app_routes.dart';
 import '../../../core/utils/themes.dart';
 
 class AIResultScreen extends StatelessWidget {
-  final Map<String, dynamic> result;
+  // Kept as an optional constructor param for backward compatibility with
+  // any direct instantiation; when reached via Get.toNamed(AppRoutes.airesult)
+  // it's left null and we read Get.arguments instead.
+  final Map<String, dynamic>? resultOverride;
 
-  const AIResultScreen({super.key, required this.result});
+  const AIResultScreen({super.key, this.resultOverride});
+
+  Map<String, dynamic> get result =>
+      resultOverride ?? (Get.arguments as Map<String, dynamic>?) ?? {};
 
   Color _qualityColor(String quality) {
     switch (quality.toLowerCase()) {
@@ -192,20 +200,18 @@ class AIResultScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
 
-                          // ✅ The main button
+                          // ✅ The main button — now a named route so it
+                          // gets AuthMiddleware like the rest of the app.
                           SizedBox(
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AllRiceScreen(
-                                      // ✅ Pass rice type as filter
-                                      initialSearchQuery: searchQuery,
-                                    ),
-                                  ),
+                                Get.toNamed(
+                                  AppRoutes.allRice,
+                                  arguments: {
+                                    'initialSearchQuery': searchQuery,
+                                  },
                                 );
                               },
                               style: ElevatedButton.styleFrom(
@@ -339,7 +345,7 @@ class AIResultScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Get.back(),
                     icon: const Icon(Icons.arrow_back),
                     label: const Text('Scan Another Image'),
                   ),

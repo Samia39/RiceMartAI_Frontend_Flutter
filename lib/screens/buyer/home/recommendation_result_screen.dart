@@ -5,14 +5,25 @@ import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 
 class AiRecommendationResultScreen extends StatelessWidget {
-  final String query;
-  final Map<String, dynamic> result;
+  // Kept as optional overrides for backward compatibility with direct
+  // instantiation; when reached via Get.toNamed(AppRoutes.airecommendationresult)
+  // these are left null and we read Get.arguments instead.
+  final String? queryOverride;
+  final Map<String, dynamic>? resultOverride;
 
   const AiRecommendationResultScreen({
     super.key,
-    required this.query,
-    required this.result,
+    this.queryOverride,
+    this.resultOverride,
   });
+
+  Map<String, dynamic> get _args =>
+      (Get.arguments as Map<String, dynamic>?) ?? {};
+
+  String get query => queryOverride ?? (_args['query']?.toString() ?? '');
+
+  Map<String, dynamic> get result =>
+      resultOverride ?? (_args['result'] as Map<String, dynamic>?) ?? {};
 
   @override
   Widget build(BuildContext context) {

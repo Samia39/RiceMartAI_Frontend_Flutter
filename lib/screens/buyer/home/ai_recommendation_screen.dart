@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/buyer/home/recommendation_result_screen.dart';
 import 'package:get/get.dart';
 
 import '../../../core/utils/themes.dart';
 import '../../../core/services/ai_recommendation_service.dart';
+import '../../../routes/app_routes.dart';
 
 class AiRecommendationScreen extends StatefulWidget {
   const AiRecommendationScreen({super.key});
@@ -52,9 +52,9 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
       return;
     }
 
-    Get.to(
-      () => AiRecommendationResultScreen(query: query.trim(), result: result),
-      transition: Transition.rightToLeft,
+    Get.toNamed(
+      AppRoutes.airecommendationresult,
+      arguments: {"query": query.trim(), "result": result},
     );
   }
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../core/services/complaint_service.dart';
 import '../../../core/utils/themes.dart';
-import 'customer_new_complaint_screen.dart';
-import 'customer_complaint_detail_screen.dart';
+import '../../../routes/app_routes.dart';
 
 class CustomerComplaintListScreen extends StatefulWidget {
   const CustomerComplaintListScreen({super.key});
@@ -178,14 +178,12 @@ class _CustomerComplaintListScreenState
                               ),
                             ),
                           ),
+                          // Converted from Navigator.push(MaterialPageRoute(...))
+                          // to a named route so AuthMiddleware runs for it.
                           onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CustomerComplaintDetailScreen(
-                                  complaintId: c.id,
-                                ),
-                              ),
+                            await Get.toNamed(
+                              AppRoutes.customerComplaintDetail,
+                              arguments: c.id,
                             );
                             _loadData();
                           },
@@ -197,13 +195,10 @@ class _CustomerComplaintListScreenState
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // Converted from Navigator.push(MaterialPageRoute(...)) to a named
+        // route so AuthMiddleware runs for it.
         onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const CustomerNewComplaintScreen(),
-            ),
-          );
+          await Get.toNamed(AppRoutes.customerNewComplaint);
           _loadData();
         },
         icon: const Icon(Icons.add),

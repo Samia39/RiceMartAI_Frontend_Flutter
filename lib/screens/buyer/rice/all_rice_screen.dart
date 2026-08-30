@@ -21,6 +21,22 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   bool isLoading = true;
   final searchController = TextEditingController();
 
+  // Prefer an explicit constructor param (bottom-nav tab usage); fall back
+  // to Get.arguments when reached via Get.toNamed(AppRoutes.allRice) with
+  // no constructor param supplied (e.g. from AIResultScreen's "Show in
+  // Marketplace" button).
+  String? get _effectiveInitialQuery {
+    if (widget.initialSearchQuery != null &&
+        widget.initialSearchQuery!.isNotEmpty) {
+      return widget.initialSearchQuery;
+    }
+    final args = Get.arguments;
+    if (args is Map && args['initialSearchQuery'] is String) {
+      return args['initialSearchQuery'] as String;
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -38,10 +54,11 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
       isLoading = false;
     });
 
-    if (widget.initialSearchQuery != null &&
-        widget.initialSearchQuery!.isNotEmpty) {
-      searchController.text = widget.initialSearchQuery!;
-      searchProducts(widget.initialSearchQuery!);
+    final initialQuery = _effectiveInitialQuery;
+
+    if (initialQuery != null && initialQuery.isNotEmpty) {
+      searchController.text = initialQuery;
+      searchProducts(initialQuery);
     } else {
       setState(() {
         filteredProducts = data;
@@ -229,6 +246,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final initialQuery = _effectiveInitialQuery;
 
     // Bound the card's own width instead of a fixed column count —
     // this keeps cards small and consistent on both mobile and wide
@@ -251,8 +269,8 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
         appBar: AppBar(
           title: const Text("Rice Marketplace"),
           bottom:
-              widget.initialSearchQuery != null &&
-                  widget.initialSearchQuery!.isNotEmpty &&
+              initialQuery != null &&
+                  initialQuery.isNotEmpty &&
                   searchController.text.isNotEmpty
               ? PreferredSize(
                   preferredSize: const Size.fromHeight(36),
@@ -283,7 +301,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                "AI Filter: ${widget.initialSearchQuery}",
+                                "AI Filter: $initialQuery",
                                 style: AppTextStyles.bodySmall.copyWith(
                                   color: AppColors.darkGreen,
                                   fontWeight: FontWeight.w600,
@@ -352,7 +370,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                           "No products found",
                           style: AppTextStyles.bodyLarge,
                         ),
-                        if (widget.initialSearchQuery != null)
+                        if (initialQuery != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: TextButton(

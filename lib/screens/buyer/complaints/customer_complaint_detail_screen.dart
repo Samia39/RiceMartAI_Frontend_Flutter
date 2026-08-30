@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:frontend/core/services/complaint_service.dart';
 import 'package:frontend/core/utils/themes.dart';
 
 class CustomerComplaintDetailScreen extends StatefulWidget {
-  final int complaintId;
-  const CustomerComplaintDetailScreen({super.key, required this.complaintId});
+  // Kept optional for backward compatibility with direct instantiation
+  // (e.g. notifications_screen.dart's Get.to(() => CustomerComplaintDetailScreen(
+  // complaintId: ...)) — not yet converted, pending the seller/admin pass
+  // since that file also branches to admin/seller complaint screens we
+  // haven't reviewed). When reached via
+  // Get.toNamed(AppRoutes.customerComplaintDetail, arguments: id) this is
+  // left null and we read Get.arguments instead.
+  final int? complaintId;
+
+  const CustomerComplaintDetailScreen({super.key, this.complaintId});
+
+  int get _resolvedId => complaintId ?? (Get.arguments as int? ?? 0);
 
   @override
   State<CustomerComplaintDetailScreen> createState() =>
@@ -19,6 +30,8 @@ class _CustomerComplaintDetailScreenState
   bool _loading = true;
   bool _sending = false;
 
+  int get _id => widget._resolvedId;
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +40,7 @@ class _CustomerComplaintDetailScreenState
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final complaint = await _service.getComplaintDetail(widget.complaintId);
+    final complaint = await _service.getComplaintDetail(_id);
     setState(() {
       _complaint = complaint;
       _loading = false;
@@ -40,7 +53,7 @@ class _CustomerComplaintDetailScreenState
     setState(() => _sending = true);
 
     final result = await _service.addMessage(
-      complaintId: widget.complaintId,
+      complaintId: _id,
       message: _replyController.text.trim(),
     );
 

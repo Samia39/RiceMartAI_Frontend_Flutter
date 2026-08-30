@@ -23,6 +23,16 @@ class AppRoutes {
   static const airecommendation = "/ai-recommendation";
   static const airecommendationresult = "/ai-recommendation-result";
   static const profile = "/profile";
+
+  // Newly converted from Navigator.push/Get.to to named routes so
+  // middleware (AuthMiddleware etc.) actually runs for them.
+  static const aiDetection = "/ai-detection";
+  static const allRice = "/all-rice";
+  static const notifications = "/notifications";
+  static const customerComplaints = "/customer-complaints";
+  static const customerNewComplaint = "/customer-complaints/new";
+  static const customerComplaintDetail = "/customer-complaints/detail";
+
   // =========================
   // Seller Dashboard
   // =========================
