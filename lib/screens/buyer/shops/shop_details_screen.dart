@@ -5,6 +5,7 @@ import '../../../core/services/chat_service.dart';
 import '../../../core/services/cart_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
+import '../../../widgets/shop_reviews_section.dart'; // ✅ adjust path to match your project structure
 
 class ShopDetailsScreen extends StatefulWidget {
   const ShopDetailsScreen({super.key});
@@ -286,6 +287,17 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                     );
                   },
                 ),
+
+              const SizedBox(height: 24),
+
+              // =========================
+              // SHOP REVIEWS
+              // Visible to any customer viewing this shop, so they
+              // can see what past buyers said before purchasing.
+              // =========================
+              Text("Customer Reviews", style: AppTextStyles.heading3),
+              const SizedBox(height: 14),
+              ShopReviewsSection(shopId: shop["id"] as int),
             ],
           ),
         ),

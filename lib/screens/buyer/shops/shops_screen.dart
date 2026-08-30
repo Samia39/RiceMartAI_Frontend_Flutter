@@ -16,7 +16,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
   bool isLoading = true;
 
   List<Map<String, dynamic>> shops = [];
-
   List<Map<String, dynamic>> filteredShops = [];
 
   TextEditingController searchController = TextEditingController();

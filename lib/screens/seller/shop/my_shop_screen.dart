@@ -5,6 +5,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
+import '../../../widgets/shop_reviews_section.dart';
 
 class MyShopScreen extends StatefulWidget {
   const MyShopScreen({super.key});
@@ -19,6 +20,7 @@ class _MyShopScreenState extends State<MyShopScreen> {
   String phone = "";
   String address = "";
   String description = "";
+  int? shopId;
 
   @override
   void initState() {
@@ -44,6 +46,9 @@ class _MyShopScreenState extends State<MyShopScreen> {
         phone = shop["phone"] ?? "";
         address = shop["address"] ?? "";
         description = shop["description"] ?? "";
+        shopId = shop["id"] is int
+            ? shop["id"]
+            : int.tryParse(shop["id"].toString());
       });
 
       // SAVE ALSO IN STORAGE
@@ -357,6 +362,14 @@ class _MyShopScreenState extends State<MyShopScreen> {
                   label: const Text("Delete Shop"),
                 ),
               ),
+
+              // =========================
+              // SHOP REVIEWS
+              // =========================
+              if (shopId != null) ...[
+                const SizedBox(height: 30),
+                ShopReviewsSection(shopId: shopId!),
+              ],
             ],
           ),
         ),

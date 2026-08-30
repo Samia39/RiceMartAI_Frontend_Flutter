@@ -3,6 +3,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:ricemart_ai/core/services/shop_service.dart';
 import 'package:ricemart_ai/core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
+import '../../../widgets/shop_reviews_section.dart';
 
 class ApprovedShopDetailScreen extends StatefulWidget {
   final Map<String, dynamic> shop;
@@ -304,6 +305,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
     final shop = widget.shop;
     final frontImage = _imageUrl(shop["cnic_image"]);
     final backImage = _imageUrl(shop["cnic_back_image"]);
+    final shopId = int.parse(shop["id"].toString());
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -430,6 +432,10 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                           : Column(
                               children: products.map(_productTile).toList(),
                             ),
+
+                      // ===== REVIEWS =====
+                      const SizedBox(height: 24),
+                      ShopReviewsSection(shopId: shopId),
 
                       const SizedBox(height: 24),
 
