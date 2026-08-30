@@ -37,7 +37,7 @@ class ChatService {
   static Future<List<ConversationModel>> getConversations() async {
     try {
       final res = await http.get(
-        Uri.parse('$baseUrl/chat/conversations'),
+        Uri.parse('$baseUrl/conversations'),
         headers: _headers,
       );
       if (res.statusCode == 200) {
@@ -56,7 +56,7 @@ class ChatService {
   static Future<List<MessageModel>> getMessages(int conversationId) async {
     try {
       final res = await http.get(
-        Uri.parse('$baseUrl/chat/messages/$conversationId'),
+        Uri.parse('$baseUrl/chat/$conversationId'),
         headers: _headers,
       );
       if (res.statusCode == 200) {
