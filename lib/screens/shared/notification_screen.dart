@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/seller/payout/SellerPayoutsScreen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -8,20 +7,11 @@ import '../../core/services/order_service.dart';
 import '../../core/utils/themes.dart';
 import '../../routes/app_routes.dart';
 
-// Role-specific order detail screens — each expects a different shape,
-// so we can't just push one generic screen with an order_id.
-import '../buyer/orders/order_details_screen.dart';
-import '../seller/order/seller_order_details_screen.dart';
+// Admin-only detail screens — still reached directly since we haven't
+// reviewed the admin screens yet. Left exactly as before.
 import '../admin_screens/orders/admin_order_details_screen.dart';
-
-// Role-specific complaint detail screens — same reasoning as orders above.
 import '../admin_screens/complaints/admin_complaint_detail_screen.dart';
-import '../buyer/complaints/customer_complaint_detail_screen.dart';
-import '../seller/complaints/seller_complaint_detail_screen.dart';
-
-// Role-specific payout screens — admin sees every shop's payouts,
-// seller only sees their own.
-import '..//admin_screens/payout/admin_payouts_screen.dart';
+import '../admin_screens/payout/admin_payouts_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -176,12 +166,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   // =========================
   // COMPLAINT
   //
-  // The backend now sends recipient_role with the notification.
-  // This is preferred over guessing the role from local storage.
+  // The backend sends recipient_role with the notification — preferred
+  // over guessing the role from local storage, since it can't disagree
+  // with the server like a client-side role guess can.
   //
-  // Admin       -> AdminComplaintDetailScreen
-  // Seller      -> SellerComplaintDetailScreen
-  // Customer    -> CustomerComplaintDetailScreen
+  // Admin       -> AdminComplaintDetailScreen (direct construction —
+  //                admin screens not yet reviewed/named-routed)
+  // Seller      -> named route AppRoutes.sellerComplaintDetail
+  // Customer    -> named route AppRoutes.customerComplaintDetail
   //
   // If recipient_role is missing (old notifications), fall back
   // to the locally detected role.
@@ -192,11 +184,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     if (complaintId == null) return;
 
-    // Prefer the backend's own answer for who this notification is for.
-    //
-    // It is set at send-time from the same source of truth as the
-    // permission check, so it cannot disagree with the server like
-    // a client-side role guess can.
     final recipientRole = data['recipient_role']
         ?.toString()
         .toLowerCase()
@@ -205,31 +192,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (recipientRole == 'admin') {
       Get.to(() => AdminComplaintDetailScreen(complaintId: complaintId as int));
     } else if (recipientRole == 'seller') {
-      Get.to(
-        () => SellerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
     } else if (recipientRole == 'customer') {
-      Get.to(
-        () => CustomerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      Get.toNamed(AppRoutes.customerComplaintDetail, arguments: complaintId);
     } else if (_isAdmin) {
       // Fallback for notifications sent before recipient_role existed.
       Get.to(() => AdminComplaintDetailScreen(complaintId: complaintId as int));
     } else if (_isSeller) {
-      Get.to(
-        () => SellerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
     } else {
       // Customer fallback
-      Get.to(
-        () => CustomerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      Get.toNamed(AppRoutes.customerComplaintDetail, arguments: complaintId);
     }
   }
 
   // =========================
   // ORDER — fetch the right list for the current role, find the
   // matching record, then push the role-specific detail screen.
+  //
+  // Admin still uses direct construction (not yet reviewed). Seller and
+  // buyer now go through named routes.
   //
   // NOTE: firstWhereOrNull below is provided by package:get (GetX),
   // already imported at the top of this file.
@@ -271,7 +253,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         );
 
         if (found != null) {
-          await Get.to(() => SellerOrderDetailScreen(item: found));
+          await Get.toNamed(AppRoutes.sellerOrderDetail, arguments: found);
         } else {
           Get.snackbar("Not found", "This order could not be loaded.");
         }
@@ -308,7 +290,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (_isAdmin) {
       Get.to(() => const AdminPayoutsScreen());
     } else if (_isSeller) {
-      Get.to(() => const SellerPayoutsScreen());
+      Get.toNamed(AppRoutes.sellerPayouts);
     }
   }
 

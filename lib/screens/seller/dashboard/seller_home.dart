@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/utils/themes.dart';
-import '../../buyer/home/ai_recommendation_screen.dart';
-import '../../buyer/home/ai_detection_screen.dart';
+import '../../../routes/app_routes.dart';
 
 class SellerHomeScreen extends StatelessWidget {
   /// Callback to switch tabs in the parent SellerDashboardScreen.
@@ -76,12 +76,7 @@ class SellerHomeScreen extends StatelessWidget {
                   // ================= AI DETECTION =================
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AIDetectionScreen(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.aiDetection);
                     },
                     child: featureCard(
                       icon: Icons.camera_alt_rounded,
@@ -95,12 +90,7 @@ class SellerHomeScreen extends StatelessWidget {
                   // ================= RECOMMENDATION =================
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AiRecommendationScreen(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.airecommendation);
                     },
                     child: featureCard(
                       icon: Icons.recommend_rounded,

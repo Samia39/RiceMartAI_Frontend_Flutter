@@ -5,7 +5,6 @@ import 'package:frontend/core/services/shop_service.dart';
 import 'package:frontend/controllers/auth_controller.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
-import 'edit_shop_screen.dart';
 
 class ShopStatusScreen extends StatefulWidget {
   final Map<String, dynamic>? shop;
@@ -87,20 +86,21 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
   }
 
   // Refreshes cached roles/permissions (customer -> seller) via the
-  // same AuthController.loadUser() used at app startup, then moves on.
+  // same AuthController.loadUser() used at app startup, then navigates
+  // to the seller dashboard now that the fresh role is in storage.
   Future<void> _goToSellerDashboard() async {
     final authController = Get.find<AuthController>();
     await authController.loadUser();
 
-    // if (!mounted) return;
-    // Get.offAllNamed(AppRoutes.sellerDashboard);
+    if (!mounted) return;
+    Get.offAllNamed(AppRoutes.sellerDashboard);
   }
 
+  // Converted from Navigator.push(MaterialPageRoute(...)) to a named
+  // route so AuthMiddleware/PermissionMiddleware('update own shop')
+  // actually run for it.
   Future<void> _editAndResubmit() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const EditShopScreen()),
-    );
+    await Get.toNamed(AppRoutes.editShop);
     if (mounted) _refresh();
   }
 

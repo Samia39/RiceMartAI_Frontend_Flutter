@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/seller/order/seller_order_details_screen.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
+import '../../../routes/app_routes.dart';
 
 class SellerOrdersScreen extends StatefulWidget {
   const SellerOrdersScreen({super.key});
@@ -104,7 +104,10 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
     return GestureDetector(
       onTap: () async {
-        await Get.to(() => SellerOrderDetailScreen(item: item));
+        // Converted from Get.to(() => SellerOrderDetailScreen(item: item))
+        // to a named route so AuthMiddleware/PermissionMiddleware
+        // actually run for it.
+        await Get.toNamed(AppRoutes.sellerOrderDetail, arguments: item);
         fetchOrders();
       },
       child: Container(

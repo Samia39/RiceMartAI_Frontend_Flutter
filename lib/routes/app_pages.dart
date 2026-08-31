@@ -3,7 +3,14 @@ import 'package:frontend/screens/buyer/dashboard/buyer_dashboard_screen.dart';
 import 'package:frontend/screens/chats/chat.dart';
 import 'package:frontend/screens/chats/conversation.dart';
 import 'package:frontend/screens/seller/rice/add_rice_screen.dart';
+import 'package:frontend/screens/seller/rice/add_product_form_screen.dart';
 import 'package:frontend/screens/seller/shop/my_shop_screen.dart';
+import 'package:frontend/screens/seller/payout/SellerPayoutDetailsScreen.dart';
+import 'package:frontend/screens/seller/payout/SellerPayoutsScreen.dart';
+import 'package:frontend/screens/seller/complaints/seller_complaint_list_screen.dart';
+import 'package:frontend/screens/seller/complaints/seller_new_complaint_screen.dart';
+import 'package:frontend/screens/seller/complaints/seller_complaint_detail_screen.dart';
+import 'package:frontend/screens/seller/order/seller_order_details_screen.dart';
 import 'package:get/get.dart';
 import '../middleware/auth_middleware.dart';
 import '../middleware/role_middleware.dart';
@@ -132,7 +139,6 @@ class AppPages {
       middlewares: [AuthMiddleware(), PermissionMiddleware('create shop')],
     ),
 
-    // Newly named (previously reached only via Navigator.push/Get.to)
     GetPage(
       name: AppRoutes.aiDetection,
       page: () => const AIDetectionScreen(),
@@ -170,13 +176,7 @@ class AppPages {
     ),
 
     // =========================================================
-    // SELLER ROUTES — pending dedicated review pass.
-    // editShop / myShop / addProduct permission strings are known to be
-    // wrong ('manage shop', 'view shop', 'add product' don't exist on
-    // the backend) but left untouched here until we review
-    // EditShopScreen / CreateShopScreen / ShopStatusScreen — editShop
-    // likely also needs to serve the customer shop-correction flow
-    // (backend now grants customers 'update own shop' for exactly that).
+    // SELLER ROUTES
     // =========================================================
     GetPage(
       name: AppRoutes.sellerDashboard,
@@ -187,16 +187,22 @@ class AppPages {
       ],
     ),
 
+    // Shared by seller's normal edit AND the customer shop-correction
+    // flow (ShopStatusScreen "Edit & Resubmit") — both roles now hold
+    // 'update own shop' on the backend for exactly this reason.
     GetPage(
       name: AppRoutes.editShop,
       page: () => const EditShopScreen(),
-      middlewares: [AuthMiddleware(), PermissionMiddleware('manage shop')],
+      middlewares: [AuthMiddleware(), PermissionMiddleware('update own shop')],
     ),
 
+    // Backend route has no permission check beyond auth:sanctum —
+    // matched here (previously had a 'view shop' permission that
+    // doesn't exist on the backend).
     GetPage(
       name: AppRoutes.myShop,
       page: () => const MyShopScreen(),
-      middlewares: [AuthMiddleware(), PermissionMiddleware('view shop')],
+      middlewares: [AuthMiddleware()],
     ),
 
     GetPage(
@@ -205,10 +211,80 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
 
+    // This route was dead (nothing called Get.toNamed(AppRoutes.addProduct))
+    // and AddRiceScreen is really the product list/manage screen (view +
+    // inline edit/delete), not a create-only form — so 'add product'
+    // never fit. Corrected to 'view own products', which is what actually
+    // gates entry to this screen; the finer-grained edit/delete actions
+    // are still separately enforced by the backend regardless of what
+    // this route's middleware says.
     GetPage(
       name: AppRoutes.addProduct,
       page: () => const AddRiceScreen(),
-      middlewares: [AuthMiddleware(), PermissionMiddleware('add product')],
+      middlewares: [
+        AuthMiddleware(),
+        PermissionMiddleware('view own products'),
+      ],
+    ),
+
+    // Newly named (previously reached only via Navigator.push from
+    // inside AddRiceScreen). Needs shopId — passed as Get.arguments.
+    GetPage(
+      name: AppRoutes.sellerAddProductForm,
+      page: () => const AddProductFormScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('create products')],
+    ),
+
+    // Newly named (previously reached only via Get.to from SellerDrawer).
+    // Maps to backend's PUT /my-shop/payout-details, guarded by
+    // 'update own shop'.
+    GetPage(
+      name: AppRoutes.sellerPayoutDetails,
+      page: () => const SellerPayoutDetailsScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('update own shop')],
+    ),
+
+    // Newly named (previously reached only via Get.to from SellerDrawer
+    // and NotificationsScreen). Maps to backend's GET /seller/payouts,
+    // guarded by 'view own payouts'.
+    GetPage(
+      name: AppRoutes.sellerPayouts,
+      page: () => const SellerPayoutsScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view own payouts')],
+    ),
+
+    // Newly named (previously reached only via Get.to from SellerDrawer).
+    GetPage(
+      name: AppRoutes.sellerComplaints,
+      page: () => const SellerComplaintListScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    // Newly named (previously reached only via Navigator.push from
+    // SellerComplaintListScreen).
+    GetPage(
+      name: AppRoutes.sellerNewComplaint,
+      page: () => const SellerNewComplaintScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('file complaints')],
+    ),
+
+    // Newly named (previously reached only via Navigator.push from
+    // SellerComplaintListScreen and Get.to from NotificationsScreen).
+    // complaintId passed via Get.arguments.
+    GetPage(
+      name: AppRoutes.sellerComplaintDetail,
+      page: () => const SellerComplaintDetailScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    // Newly named (previously reached only via Get.to from
+    // SellerOrdersScreen and NotificationsScreen). item map passed via
+    // Get.arguments. Gated on the same permission as the orders list
+    // itself, since viewing one item's detail is part of that scope.
+    GetPage(
+      name: AppRoutes.sellerOrderDetail,
+      page: () => SellerOrderDetailScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view shop orders')],
     ),
 
     // =========================================================
@@ -295,8 +371,7 @@ class AppPages {
     ),
 
     // =========================================================
-    // AI FEATURES — now read real arguments via Get.arguments instead
-    // of hardcoded empty placeholders.
+    // AI FEATURES
     // =========================================================
     GetPage(
       name: AppRoutes.airesult,

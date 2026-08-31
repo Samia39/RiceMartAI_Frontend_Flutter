@@ -9,9 +9,10 @@ import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 
 class AddProductFormScreen extends StatefulWidget {
-  final int shopId;
+  const AddProductFormScreen({super.key});
 
-  const AddProductFormScreen({super.key, required this.shopId});
+  // Reached via Get.toNamed(AppRoutes.sellerAddProductForm, arguments: shopId)
+  int get shopId => Get.arguments as int;
 
   @override
   State<AddProductFormScreen> createState() => _AddProductFormScreenState();

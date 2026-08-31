@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
-import 'add_product_form_screen.dart';
+import '../../../routes/app_routes.dart';
 
 class AddRiceScreen extends StatefulWidget {
   const AddRiceScreen({super.key});
@@ -210,6 +210,9 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
   // =========================
   // GO TO ADD PRODUCT FORM
+  // Converted from Navigator.push(MaterialPageRoute(...)) to a named
+  // route so AuthMiddleware/PermissionMiddleware actually run for it.
+  // shopId is passed via Get.arguments.
   // =========================
   Future<void> openAddProductForm() async {
     if (shopId == null) {
@@ -217,9 +220,9 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
       return;
     }
 
-    final added = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => AddProductFormScreen(shopId: shopId!)),
+    final added = await Get.toNamed(
+      AppRoutes.sellerAddProductForm,
+      arguments: shopId,
     );
 
     if (added == true) {

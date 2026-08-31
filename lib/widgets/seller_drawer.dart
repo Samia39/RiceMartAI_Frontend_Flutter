@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/seller/complaints/seller_complaint_list_screen.dart';
-import 'package:frontend/screens/shared/notification_screen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
-import '../screens/seller/payout/SellerPayoutDetailsScreen.dart';
-import '../screens/seller/payout/SellerPayoutsScreen.dart';
 
 class SellerDrawer extends StatelessWidget {
   // =========================
@@ -86,22 +82,26 @@ class SellerDrawer extends StatelessWidget {
                 ),
 
                 // PAYOUT DETAILS
+                // Converted from Get.to(() => ...) to a named route so
+                // AuthMiddleware/PermissionMiddleware actually run for it.
                 drawerItem(
                   icon: Icons.account_balance_wallet_outlined,
                   title: "Payout Details",
                   onTap: () {
                     Navigator.pop(context);
-                    Get.to(() => const SellerPayoutDetailsScreen());
+                    Get.toNamed(AppRoutes.sellerPayoutDetails);
                   },
                 ),
 
                 // PAYOUTS TAB (where the shop sees their payouts from admin)
+                // Converted from Get.to(() => ...) to a named route so
+                // AuthMiddleware/PermissionMiddleware actually run for it.
                 drawerItem(
                   icon: Icons.receipt_long,
                   title: "My Payouts",
                   onTap: () {
                     Navigator.pop(context);
-                    Get.to(() => const SellerPayoutsScreen());
+                    Get.toNamed(AppRoutes.sellerPayouts);
                   },
                 ),
 
@@ -115,12 +115,14 @@ class SellerDrawer extends StatelessWidget {
                   },
                 ),
                 // COMPLAINTS TAB
+                // Converted from Get.to(() => ...) to a named route so
+                // AuthMiddleware actually runs for it.
                 drawerItem(
                   icon: Icons.report_problem,
                   title: "Complaints",
                   onTap: () {
                     Navigator.pop(context);
-                    Get.to(() => const SellerComplaintListScreen());
+                    Get.toNamed(AppRoutes.sellerComplaints);
                   },
                 ),
 
@@ -135,12 +137,14 @@ class SellerDrawer extends StatelessWidget {
                 ),
 
                 // NOTIFICATIONS
+                // Converted from Get.to(() => ...) to a named route so
+                // AuthMiddleware actually runs for it.
                 drawerItem(
                   icon: Icons.notifications,
                   title: "Notifications",
                   onTap: () {
                     Navigator.pop(context);
-                    Get.to(() => const NotificationsScreen());
+                    Get.toNamed(AppRoutes.notifications);
                   },
                 ),
               ],

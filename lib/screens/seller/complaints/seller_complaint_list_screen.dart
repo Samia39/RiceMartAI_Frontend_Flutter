@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../core/services/complaint_service.dart';
 import '../../../core/utils/themes.dart';
-import 'seller_new_complaint_screen.dart';
-import 'seller_complaint_detail_screen.dart';
+import '../../../routes/app_routes.dart';
 
 IconData _categoryIcon(String category) {
   switch (category) {
@@ -243,14 +243,12 @@ class _SellerComplaintListScreenState extends State<SellerComplaintListScreen> {
                           borderRadius: BorderRadius.circular(16),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
+                            // Converted from Navigator.push(MaterialPageRoute(...))
+                            // to a named route so AuthMiddleware runs for it.
                             onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => SellerComplaintDetailScreen(
-                                    complaintId: c.id,
-                                  ),
-                                ),
+                              await Get.toNamed(
+                                AppRoutes.sellerComplaintDetail,
+                                arguments: c.id,
                               );
                               _loadData();
                             },
@@ -341,11 +339,10 @@ class _SellerComplaintListScreenState extends State<SellerComplaintListScreen> {
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // Converted from Navigator.push(MaterialPageRoute(...)) to a
+        // named route so AuthMiddleware/PermissionMiddleware run for it.
         onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SellerNewComplaintScreen()),
-          );
+          await Get.toNamed(AppRoutes.sellerNewComplaint);
           _loadData();
         },
         icon: const Icon(Icons.add),
