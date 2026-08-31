@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../core/services/complaint_service.dart';
 import '../../../core/utils/themes.dart';
 
 class SellerComplaintDetailScreen extends StatefulWidget {
-  final int complaintId;
-  const SellerComplaintDetailScreen({super.key, required this.complaintId});
+  const SellerComplaintDetailScreen({super.key});
+
+  int get complaintId => Get.arguments as int;
 
   @override
   State<SellerComplaintDetailScreen> createState() =>
@@ -19,6 +21,8 @@ class _SellerComplaintDetailScreenState
   bool _loading = true;
   bool _sending = false;
 
+  int get _id => widget.complaintId;
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +31,7 @@ class _SellerComplaintDetailScreenState
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final complaint = await _service.getComplaintDetail(widget.complaintId);
+    final complaint = await _service.getComplaintDetail(_id);
     setState(() {
       _complaint = complaint;
       _loading = false;
@@ -38,7 +42,7 @@ class _SellerComplaintDetailScreenState
     if (_replyController.text.trim().isEmpty) return;
     setState(() => _sending = true);
     final result = await _service.addMessage(
-      complaintId: widget.complaintId,
+      complaintId: _id,
       message: _replyController.text.trim(),
     );
     setState(() => _sending = false);

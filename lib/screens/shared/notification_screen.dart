@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../seller/payout/SellerPayoutsScreen.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -9,15 +8,11 @@ import '../../core/services/shop_service.dart';
 import '../../core/utils/themes.dart';
 import '../../routes/app_routes.dart';
 
-import '../buyer/orders/order_details_screen.dart';
-import '../seller/order/seller_order_details_screen.dart';
+// Admin-only detail screens — still reached directly since we haven't
+// reviewed the admin screens yet. Left exactly as before.
 import '../admin_screens/orders/admin_order_details_screen.dart';
-
 import '../admin_screens/complaints/admin_complaint_detail_screen.dart';
-import '../buyer/complaints/customer_complaint_detail_screen.dart';
-import '../seller/complaints/seller_complaint_detail_screen.dart';
-
-import '..//admin_screens/payout/admin_payouts_screen.dart';
+import '../admin_screens/payout/admin_payouts_screen.dart';
 import '../admin_screens/shops/approved_shop_detail_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -34,7 +29,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   List<Map<String, dynamic>> notifications = [];
   bool isLoading = true;
-  bool isNavigating = false;
+  bool isNavigating = false; // prevents double-taps while we fetch
 
   @override
   void initState() {
@@ -136,16 +131,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         await _openOrder(data);
         break;
 
+      // Sent to admins when a payout becomes ready to release
+      // (customer confirmed receipt, or the whole order was delivered)
+      // and to sellers once admin has paid them out. Neither of these
+      // is an "order" screen concern — both belong on the Payouts screen.
       case 'payment_release':
       case 'payout_paid':
         _openPayouts();
         break;
 
       case 'shop_pending':
+        // Only admins get this type — send them to the approvals queue
         Get.toNamed(AppRoutes.sellerApprovals);
         break;
 
       case 'shop_status':
+        // Only sellers get this type — send them to their own shop
         Get.toNamed(AppRoutes.myShop);
         break;
 
@@ -158,9 +159,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         break;
 
       default:
+        // Unknown/future type — do nothing beyond marking as read
         break;
     }
   }
+
+  // =========================
+  // CHAT — conversation_id is enough, ChatScreen falls back to
+  // "Chat" as the title if other_name isn't supplied.
+  // =========================
 
   void _openChat(Map<String, dynamic> data) {
     final conversationId = data['conversation_id'];
@@ -169,6 +176,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     Get.toNamed(AppRoutes.chat, arguments: {"conversation_id": conversationId});
   }
+
+  // =========================
+  // COMPLAINT
+  //
+  // The backend sends recipient_role with the notification — preferred
+  // over guessing the role from local storage, since it can't disagree
+  // with the server like a client-side role guess can.
+  //
+  // Admin       -> AdminComplaintDetailScreen (direct construction —
+  //                admin screens not yet reviewed/named-routed)
+  // Seller      -> named route AppRoutes.sellerComplaintDetail
+  // Customer    -> named route AppRoutes.customerComplaintDetail
+  //
+  // If recipient_role is missing (old notifications), fall back
+  // to the locally detected role.
+  // =========================
 
   void _openComplaint(Map<String, dynamic> data) {
     final complaintId = data['complaint_id'];
@@ -183,25 +206,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (recipientRole == 'admin') {
       Get.to(() => AdminComplaintDetailScreen(complaintId: complaintId as int));
     } else if (recipientRole == 'seller') {
-      Get.to(
-        () => SellerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
     } else if (recipientRole == 'customer') {
-      Get.to(
-        () => CustomerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      Get.toNamed(AppRoutes.customerComplaintDetail, arguments: complaintId);
     } else if (_isAdmin) {
+      // Fallback for notifications sent before recipient_role existed.
       Get.to(() => AdminComplaintDetailScreen(complaintId: complaintId as int));
     } else if (_isSeller) {
-      Get.to(
-        () => SellerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
     } else {
-      Get.to(
-        () => CustomerComplaintDetailScreen(complaintId: complaintId as int),
-      );
+      // Customer fallback
+      Get.toNamed(AppRoutes.customerComplaintDetail, arguments: complaintId);
     }
   }
+
+  // =========================
+  // ORDER — fetch the right list for the current role, find the
+  // matching record, then push the role-specific detail screen.
+  //
+  // Admin still uses direct construction (not yet reviewed). Seller and
+  // buyer now go through named routes.
+  //
+  // NOTE: firstWhereOrNull below is provided by package:get (GetX),
+  // already imported at the top of this file.
+  // =========================
 
   Future<void> _openOrder(Map<String, dynamic> data) async {
     final orderId = data['order_id'];
@@ -232,16 +260,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       } else if (_isSeller) {
         final items = await _orderService.fetchSellerOrders();
 
+        // Notification stores order_id, but the seller screen needs an
+        // order ITEM — pick the first item belonging to that order.
         final found = items.firstWhereOrNull(
           (i) => i['order']?['id'] == orderId,
         );
 
         if (found != null) {
-          await Get.to(() => SellerOrderDetailScreen(item: found));
+          await Get.toNamed(AppRoutes.sellerOrderDetail, arguments: found);
         } else {
           Get.snackbar("Not found", "This order could not be loaded.");
         }
       } else {
+        // Buyer
         final active = await _orderService.getActiveOrders();
         final history = await _orderService.getOrderHistory();
 
@@ -262,19 +293,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
+  // =========================
+  // PAYOUT — 'payment_release' goes to admins ("ready to send"),
+  // 'payout_paid' goes to sellers ("you've been paid"). Both just
+  // need to land on the right role's Payouts tab; the tab/filter
+  // inside each screen already separates pending/ready/paid.
+  // =========================
+
   void _openPayouts() {
     if (_isAdmin) {
       Get.to(() => const AdminPayoutsScreen());
     } else if (_isSeller) {
-      Get.to(() => const SellerPayoutsScreen());
+      Get.toNamed(AppRoutes.sellerPayouts);
     }
   }
 
   // =========================
-  // REVIEW — seller goes to their own shop (which now shows its
-  // reviews section); admin/super_admin goes to that specific shop's
-  // detail screen, matched by shop_id from the notification payload.
+  // REVIEW — seller goes to their own shop (which shows its reviews
+  // section); admin/super_admin goes to that specific shop's detail
+  // screen, matched by shop_id from the notification payload.
+  // Admin path uses direct construction, consistent with the rest of
+  // this file's "admin screens not yet reviewed" convention.
   // =========================
+
   Future<void> _openReview(Map<String, dynamic> data) async {
     final shopId = data['shop_id'];
 

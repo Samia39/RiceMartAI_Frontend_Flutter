@@ -86,6 +86,9 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   // =========================
   // PRODUCT CARD
   // =========================
+  // ✅ Design updated to match the Seller Dashboard ("My Products") card
+  // look instead of a plain white card — same AppDecorations.card style,
+  // and the image fills the whole top area (no white background feel).
   Widget productCard(Map<String, dynamic> product, double imageHeight) {
     final imageUrl = ProductService.getImageUrl(product);
 
@@ -101,66 +104,52 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
         }
       },
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        clipBehavior: Clip.antiAlias,
+        decoration: AppDecorations.card,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ IMAGE
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
-              child: Container(
-                height: imageHeight,
-                width: double.infinity,
-                color: AppColors.cream,
-                child: imageUrl != null
-                    ? Image.network(
-                        imageUrl,
-                        height: imageHeight,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, progress) {
-                          if (progress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: progress.expectedTotalBytes != null
-                                  ? progress.cumulativeBytesLoaded /
-                                        progress.expectedTotalBytes!
-                                  : null,
-                              strokeWidth: 2,
-                              color: AppColors.darkGreen,
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Center(
-                            child: Icon(
-                              Icons.rice_bowl,
-                              size: 50,
-                              color: AppColors.darkGreen,
-                            ),
-                          );
-                        },
-                      )
-                    : const Center(
-                        child: Icon(
-                          Icons.rice_bowl,
-                          size: 50,
-                          color: AppColors.darkGreen,
-                        ),
+            // ✅ IMAGE — fills the full top area (no circle, no white bg)
+            Container(
+              height: imageHeight,
+              width: double.infinity,
+              color: AppColors.cream.withOpacity(0.5),
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      height: imageHeight,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: progress.expectedTotalBytes != null
+                                ? progress.cumulativeBytesLoaded /
+                                      progress.expectedTotalBytes!
+                                : null,
+                            strokeWidth: 2,
+                            color: AppColors.darkGreen,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.rice_bowl,
+                            size: 50,
+                            color: AppColors.darkGreen,
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.rice_bowl,
+                        size: 50,
+                        color: AppColors.darkGreen,
                       ),
-              ),
+                    ),
             ),
 
             // CONTENT

@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '/core/services/notification_service.dart';
-import '/screens/shared/notification_screen.dart';
+import '/routes/app_routes.dart';
 
 /// Drop this anywhere (an AppBar's actions, a title Row, etc.).
 /// It polls the unread count every 30s while mounted, shows a red badge,
@@ -11,7 +12,7 @@ class NotificationBell extends StatefulWidget {
   final double size;
 
   /// Optional override if you want custom navigation instead of the
-  /// default push to NotificationsScreen (e.g. a named route).
+  /// default named-route push to NotificationsScreen.
   final VoidCallback? onTap;
 
   const NotificationBell({
@@ -60,10 +61,9 @@ class _NotificationBellState extends State<NotificationBell> {
       return;
     }
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-    );
+    // Converted from Navigator.push(MaterialPageRoute(...)) to the named
+    // route so AuthMiddleware actually runs for it.
+    await Get.toNamed(AppRoutes.notifications);
 
     // Refresh badge in case items were read/marked-all on that screen.
     _loadUnreadCount();

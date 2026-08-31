@@ -5,9 +5,10 @@ import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 
 class SellerOrderDetailScreen extends StatelessWidget {
-  final dynamic item;
+  SellerOrderDetailScreen({super.key});
 
-  SellerOrderDetailScreen({super.key, required this.item});
+  // Reached via Get.toNamed(AppRoutes.sellerOrderDetail, arguments: item)
+  dynamic get item => Get.arguments;
 
   final service = OrderService();
 

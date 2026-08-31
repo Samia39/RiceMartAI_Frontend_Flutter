@@ -132,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: AppColors.cream,
                         ),
                       ),
+
                       // SEE ALL BUTTON
                       GestureDetector(
                         onTap: () {
@@ -197,22 +198,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 },
                                 child: Container(
                                   width: 155,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.cream,
-                                    borderRadius: BorderRadius.circular(18),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.08),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
+
+                                  // ================= EXACT ALL PRODUCTS CARD COLOR =================
+                                  decoration: AppDecorations.card,
+
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // ✅ PRODUCT IMAGE
+                                      // ================= PRODUCT IMAGE =================
                                       ClipRRect(
                                         borderRadius:
                                             const BorderRadius.vertical(
@@ -221,54 +215,61 @@ class _HomeScreenState extends State<HomeScreen> {
                                         child: Container(
                                           height: 100,
                                           width: double.infinity,
-                                          color: AppColors.darkGreen
-                                              .withOpacity(0.1),
+
+                                          // SAME AS ALL PRODUCTS
+                                          color: AppColors.cream.withOpacity(
+                                            0.5,
+                                          ),
+
                                           child: imageUrl != null
                                               ? Image.network(
                                                   imageUrl,
                                                   height: 100,
                                                   width: double.infinity,
                                                   fit: BoxFit.cover,
-                                                  loadingBuilder:
-                                                      (
-                                                        context,
-                                                        child,
-                                                        progress,
-                                                      ) {
-                                                        if (progress == null) {
-                                                          return child;
-                                                        }
+                                                  loadingBuilder: (context, child, progress) {
+                                                    if (progress == null) {
+                                                      return child;
+                                                    }
+
+                                                    return Center(
+                                                      child: CircularProgressIndicator(
+                                                        value:
+                                                            progress.expectedTotalBytes !=
+                                                                null
+                                                            ? progress.cumulativeBytesLoaded /
+                                                                  progress
+                                                                      .expectedTotalBytes!
+                                                            : null,
+                                                        strokeWidth: 2,
+                                                        color:
+                                                            AppColors.darkGreen,
+                                                      ),
+                                                    );
+                                                  },
+                                                  errorBuilder:
+                                                      (context, error, stack) {
                                                         return const Center(
-                                                          child: SizedBox(
-                                                            height: 20,
-                                                            width: 20,
-                                                            child:
-                                                                CircularProgressIndicator(
-                                                                  strokeWidth:
-                                                                      2,
-                                                                ),
+                                                          child: Icon(
+                                                            Icons.rice_bowl,
+                                                            size: 40,
+                                                            color: AppColors
+                                                                .darkGreen,
                                                           ),
                                                         );
                                                       },
-                                                  errorBuilder:
-                                                      (context, error, stack) {
-                                                        return const Icon(
-                                                          Icons.rice_bowl,
-                                                          size: 40,
-                                                          color: AppColors
-                                                              .darkGreen,
-                                                        );
-                                                      },
                                                 )
-                                              : const Icon(
-                                                  Icons.rice_bowl,
-                                                  size: 48,
-                                                  color: AppColors.darkGreen,
+                                              : const Center(
+                                                  child: Icon(
+                                                    Icons.rice_bowl,
+                                                    size: 48,
+                                                    color: AppColors.darkGreen,
+                                                  ),
                                                 ),
                                         ),
                                       ),
 
-                                      // PRODUCT INFO
+                                      // ================= PRODUCT INFO =================
                                       Padding(
                                         padding: const EdgeInsets.all(10),
                                         child: Column(
@@ -282,7 +283,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                               style: AppTextStyles.heading4
                                                   .copyWith(fontSize: 14),
                                             ),
+
                                             const SizedBox(height: 4),
+
                                             Text(
                                               product["rice_category"]?["name"] ??
                                                   "",
@@ -294,9 +297,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     fontSize: 11,
                                                   ),
                                             ),
+
                                             const SizedBox(height: 8),
 
-                                            // ✅ PRICE + ADD TO CART
+                                            // ================= PRICE + ADD TO CART =================
                                             Row(
                                               children: [
                                                 Expanded(
@@ -314,12 +318,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         ),
                                                   ),
                                                 ),
+
                                                 GestureDetector(
                                                   onTap: () {
                                                     CartService().addToCart(
                                                       rice: product,
                                                       quantity: 1,
                                                     );
+
                                                     ScaffoldMessenger.of(
                                                       context,
                                                     ).showSnackBar(
