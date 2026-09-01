@@ -78,4 +78,15 @@ class AppRoutes {
   static const chat = "/chat";
   static const conversation = "/conversation";
   static const airesult = "/airesult";
+
+  // Newly converted from Navigator.push/Get.to to named routes so
+  // middleware actually runs for them.
+  static const adminOrderDetail = "/admin/order-detail";
+  static const adminShopVerification = "/admin/shop-verification";
+  static const adminApprovedShopDetail = "/admin/approved-shop-detail";
+  static const adminCities = "/admin/cities";
+  static const adminCourierCharges = "/admin/courier-charges";
+  static const adminComplaints = "/admin/complaints";
+  static const adminComplaintDetail = "/admin/complaints/detail";
+  static const adminPayouts = "/admin/payouts";
 }

@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:frontend/core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
 
 class ShopDetailsScreen extends StatelessWidget {
-  final Map<String, dynamic> shop;
+  const ShopDetailsScreen({super.key});
 
-  /// When true (e.g. opened from the Approved Shops list), the
-  /// Approve / Correction / Reject action row is hidden and a simple
-  /// "Approved" indicator is shown instead — this screen becomes
-  /// view-only.
-  final bool readOnly;
-
-  const ShopDetailsScreen({
-    super.key,
-    required this.shop,
-    this.readOnly = false,
-  });
+  // Reached via Get.toNamed(AppRoutes.adminShopVerification,
+  // arguments: {'shop': shop, 'readOnly': bool}).
+  Map get _args => Get.arguments as Map;
+  Map<String, dynamic> get shop => Map<String, dynamic>.from(_args['shop']);
+  bool get readOnly => _args['readOnly'] == true;
 
   // =========================
   // STATUS COLOR (pending / approved / rejected)
@@ -49,8 +44,6 @@ class ShopDetailsScreen extends StatelessWidget {
     final hasCorrectionReason =
         correctionReason != null && correctionReason.isNotEmpty;
     final rejectionReason = shop["rejection_reason"]?.toString();
-    final hasRejectionReason =
-        rejectionReason != null && rejectionReason.isNotEmpty;
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -248,7 +241,7 @@ class ShopDetailsScreen extends StatelessWidget {
                                       ),
                                     );
 
-                                    Navigator.pop(context, true);
+                                    Get.back(result: true);
                                   }
                                 },
                                 child: const Text("Approve"),
@@ -497,7 +490,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                           if (result["success"] == true) {
                             // Refresh the list this screen was opened from.
-                            Navigator.pop(context, true);
+                            Get.back(result: true);
                           }
                         },
                   child: isSending
@@ -601,7 +594,7 @@ class ShopDetailsScreen extends StatelessWidget {
                           );
 
                           if (result["success"] == true) {
-                            Navigator.pop(context, true);
+                            Get.back(result: true);
                           }
                         },
                   child: isSending
@@ -623,8 +616,6 @@ class ShopDetailsScreen extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  FULL-SCREEN CNIC VIEWER
-//  Dark backdrop, pinch-to-zoom, close button, Hero transition from
-//  whichever thumbnail (front/back) was tapped.
 // ─────────────────────────────────────────────────────────────────────────────
 class _CnicFullScreenViewer extends StatelessWidget {
   final String imageUrl;

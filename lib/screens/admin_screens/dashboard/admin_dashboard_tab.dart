@@ -1,15 +1,10 @@
 // Path: lib/screens/admin_screens/dashboard/admin_dashboard_tab.dart
 //
-// FIX: this is the file that actually renders as the admin's dashboard tab
-// (via AdminHomeShell -> AdminDashboardTab). The old notification icon here
-// used Get.toNamed(AppRoutes.adminNotifications), a route that isn't
-// registered in app_pages.dart at all — tapping it would have thrown a
-// "route not found" error. It's now replaced with the same NotificationBell
-// widget used on buyer/seller dashboards, placed immediately next to the
-// "Add Shop" button, and the 'view notifications' permission gate has been
-// removed (that permission isn't assigned to the admin role yet, which was
-// hiding it entirely). Add the permission back in Spatie later if you want
-// it gated again.
+// FIX (this pass): the Settings shortcut was gated on
+// PermissionService.hasPermission('view settings') — that permission
+// does not exist anywhere in the backend seeder, so this button was
+// permanently invisible to every role, including admin. Corrected to
+// 'manage settings', which is real and already assigned to admin.
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -138,7 +133,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           title: const Text("Admin Dashboard"),
           centerTitle: true,
           actions: [
-            if (PermissionService.hasPermission('create shop'))
+            if (PermissionService.hasPermission('create sellers'))
               _appBarAction(
                 icon: Icons.add,
                 label: "Add Shop",
@@ -155,7 +150,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
               child: NotificationBell(iconColor: Colors.white, size: 24),
             ),
 
-            if (PermissionService.hasPermission('view settings'))
+            if (PermissionService.hasPermission('manage settings'))
               _appBarAction(
                 icon: Icons.settings,
                 label: "Settings",

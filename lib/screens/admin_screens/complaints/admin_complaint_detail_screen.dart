@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../core/services/complaint_service.dart';
 import '../../../core/utils/themes.dart';
 
@@ -27,6 +28,14 @@ String _categoryLabel(String category) {
       return 'Other';
   }
 }
+
+// FIX: this was previously an undefined `attachmentUrl(...)` call — the
+// file wouldn't compile as given. Using the same base-URL pattern already
+// used elsewhere in the admin screens (ApprovedShopDetailScreen,
+// PaymentScreen) for consistency.
+const String _imageBaseUrl = "http://ricemart.sandbox.pk";
+
+String _attachmentUrl(String path) => "$_imageBaseUrl/storage/$path";
 
 // ─────────────────────────────────────────────────────────
 // ZOOM VIEWER — opens full-screen pinch-to-zoom image
@@ -177,8 +186,14 @@ class _AttachmentThumbnail extends StatelessWidget {
 // MAIN SCREEN
 // ─────────────────────────────────────────────────────────
 class AdminComplaintDetailScreen extends StatefulWidget {
-  final int complaintId;
-  const AdminComplaintDetailScreen({super.key, required this.complaintId});
+  // Kept optional for backward compatibility with direct instantiation
+  // (notifications_screen.dart's admin branch is being converted to the
+  // named route in this same pass, but kept nullable here defensively).
+  final int? complaintId;
+
+  const AdminComplaintDetailScreen({super.key, this.complaintId});
+
+  int get _resolvedId => complaintId ?? (Get.arguments as int? ?? 0);
 
   @override
   State<AdminComplaintDetailScreen> createState() =>
@@ -194,6 +209,8 @@ class _AdminComplaintDetailScreenState
   bool _sending = false;
   bool _updatingStatus = false;
 
+  int get _id => widget._resolvedId;
+
   @override
   void initState() {
     super.initState();
@@ -202,7 +219,7 @@ class _AdminComplaintDetailScreenState
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final complaint = await _service.getComplaintDetail(widget.complaintId);
+    final complaint = await _service.getComplaintDetail(_id);
     setState(() {
       _complaint = complaint;
       _loading = false;
@@ -213,7 +230,7 @@ class _AdminComplaintDetailScreenState
     if (_replyController.text.trim().isEmpty) return;
     setState(() => _sending = true);
     final result = await _service.addMessage(
-      complaintId: widget.complaintId,
+      complaintId: _id,
       message: _replyController.text.trim(),
     );
     setState(() => _sending = false);
@@ -229,10 +246,7 @@ class _AdminComplaintDetailScreenState
 
   Future<void> _changeStatus(String status) async {
     setState(() => _updatingStatus = true);
-    await _service.updateStatus(
-      complaintId: widget.complaintId,
-      status: status,
-    );
+    await _service.updateStatus(complaintId: _id, status: status);
     setState(() => _updatingStatus = false);
     _load();
   }
@@ -446,9 +460,7 @@ class _AdminComplaintDetailScreenState
                                 if (m.attachmentPath != null) ...[
                                   const SizedBox(height: 8),
                                   _AttachmentThumbnail(
-                                    imageUrl: attachmentUrl(
-                                      m.attachmentPath!,
-                                    ), // yahan phir se wrap ho raha hai — broken URL banega
+                                    imageUrl: _attachmentUrl(m.attachmentPath!),
                                   ),
                                 ],
                               ],

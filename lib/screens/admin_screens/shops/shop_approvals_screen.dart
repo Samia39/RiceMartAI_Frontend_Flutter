@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:frontend/core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
-import 'shop_details_screen.dart';
+import '../../../routes/app_routes.dart';
 
 class ShopApprovalsScreen extends StatefulWidget {
   const ShopApprovalsScreen({super.key});
@@ -87,11 +88,12 @@ class _ShopApprovalsScreenState extends State<ShopApprovalsScreen> {
 
                           ElevatedButton(
                             onPressed: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ShopDetailsScreen(shop: shop),
-                                ),
+                              // Converted from Navigator.push(MaterialPageRoute(...))
+                              // to the same named route AdminShopsTab now uses,
+                              // so AuthMiddleware/PermissionMiddleware run here too.
+                              final result = await Get.toNamed(
+                                AppRoutes.adminShopVerification,
+                                arguments: {"shop": shop, "readOnly": false},
                               );
 
                               if (result == true) {

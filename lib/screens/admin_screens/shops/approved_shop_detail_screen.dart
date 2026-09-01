@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:get/get.dart';
 import 'package:frontend/core/services/shop_service.dart';
 import 'package:frontend/core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 
 class ApprovedShopDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> shop;
+  const ApprovedShopDetailScreen({super.key});
 
-  const ApprovedShopDetailScreen({super.key, required this.shop});
+  // Reached via Get.toNamed(AppRoutes.adminApprovedShopDetail,
+  // arguments: shop)
+  Map<String, dynamic> get shop => Get.arguments as Map<String, dynamic>;
 
   @override
   State<ApprovedShopDetailScreen> createState() =>

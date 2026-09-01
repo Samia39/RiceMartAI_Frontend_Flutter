@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../core/services/complaint_service.dart';
 import '../../../core/utils/themes.dart';
-import 'admin_complaint_detail_screen.dart';
+import '../../../routes/app_routes.dart';
 
 IconData _categoryIcon(String category) {
   switch (category) {
@@ -192,14 +193,13 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(16),
                                       onTap: () async {
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                AdminComplaintDetailScreen(
-                                                  complaintId: c.id,
-                                                ),
-                                          ),
+                                        // Converted from Navigator.push(MaterialPageRoute(...))
+                                        // to the named route so
+                                        // AuthMiddleware/PermissionMiddleware
+                                        // ('view complaints') run for it.
+                                        await Get.toNamed(
+                                          AppRoutes.adminComplaintDetail,
+                                          arguments: c.id,
                                         );
                                         _load();
                                       },
@@ -268,16 +268,8 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
                                                           style: AppTextStyles
                                                               .bodySmall
                                                               .copyWith(
-                                                                color:
-                                                                    _roleColor(
-                                                                          c.role,
-                                                                        ) ==
-                                                                        AppColors
-                                                                            .golden
-                                                                    ? AppColors
-                                                                          .darkGreen
-                                                                    : AppColors
-                                                                          .darkGreen,
+                                                                color: AppColors
+                                                                    .darkGreen,
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w700,
