@@ -8,12 +8,9 @@ import '../../core/services/shop_service.dart';
 import '../../core/utils/themes.dart';
 import '../../routes/app_routes.dart';
 
-// Admin-only detail screens — still reached directly since we haven't
-// reviewed the admin screens yet. Left exactly as before.
-import '../admin_screens/orders/admin_order_details_screen.dart';
-import '../admin_screens/complaints/admin_complaint_detail_screen.dart';
-import '../admin_screens/payout/admin_payouts_screen.dart';
-import '../admin_screens/shops/approved_shop_detail_screen.dart';
+// Every detail screen (admin, seller, customer, order, complaint, payout,
+// shop) is now reached via named routes, so no admin-screen widget
+// imports are needed directly in this file anymore.
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -184,10 +181,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   // over guessing the role from local storage, since it can't disagree
   // with the server like a client-side role guess can.
   //
-  // Admin       -> AdminComplaintDetailScreen (direct construction —
-  //                admin screens not yet reviewed/named-routed)
-  // Seller      -> named route AppRoutes.sellerComplaintDetail
-  // Customer    -> named route AppRoutes.customerComplaintDetail
+  // Admin/Super Admin -> named route AppRoutes.adminComplaintDetail
+  // Seller             -> named route AppRoutes.sellerComplaintDetail
+  // Customer           -> named route AppRoutes.customerComplaintDetail
   //
   // If recipient_role is missing (old notifications), fall back
   // to the locally detected role.
@@ -204,14 +200,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         .trim();
 
     if (recipientRole == 'admin') {
-      Get.to(() => AdminComplaintDetailScreen(complaintId: complaintId as int));
+      Get.toNamed(AppRoutes.adminComplaintDetail, arguments: complaintId);
     } else if (recipientRole == 'seller') {
       Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
     } else if (recipientRole == 'customer') {
       Get.toNamed(AppRoutes.customerComplaintDetail, arguments: complaintId);
     } else if (_isAdmin) {
       // Fallback for notifications sent before recipient_role existed.
-      Get.to(() => AdminComplaintDetailScreen(complaintId: complaintId as int));
+      Get.toNamed(AppRoutes.adminComplaintDetail, arguments: complaintId);
     } else if (_isSeller) {
       Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
     } else {
@@ -222,10 +218,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   // =========================
   // ORDER — fetch the right list for the current role, find the
-  // matching record, then push the role-specific detail screen.
-  //
-  // Admin still uses direct construction (not yet reviewed). Seller and
-  // buyer now go through named routes.
+  // matching record, then push the role-specific detail screen via a
+  // named route.
   //
   // NOTE: firstWhereOrNull below is provided by package:get (GetX),
   // already imported at the top of this file.
@@ -248,11 +242,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         final found = all.firstWhereOrNull((o) => o['id'] == orderId);
 
         if (found != null) {
-          await Get.to(
-            () => AdminOrderDetailsScreen(
-              order: found,
-              isHistory: history.any((o) => o['id'] == orderId),
-            ),
+          await Get.toNamed(
+            AppRoutes.adminOrderDetail,
+            arguments: {
+              'order': found,
+              'isHistory': history.any((o) => o['id'] == orderId),
+            },
           );
         } else {
           Get.snackbar("Not found", "This order could not be loaded.");
@@ -302,7 +297,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   void _openPayouts() {
     if (_isAdmin) {
-      Get.to(() => const AdminPayoutsScreen());
+      Get.toNamed(AppRoutes.adminPayouts);
     } else if (_isSeller) {
       Get.toNamed(AppRoutes.sellerPayouts);
     }
@@ -312,8 +307,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   // REVIEW — seller goes to their own shop (which shows its reviews
   // section); admin/super_admin goes to that specific shop's detail
   // screen, matched by shop_id from the notification payload.
-  // Admin path uses direct construction, consistent with the rest of
-  // this file's "admin screens not yet reviewed" convention.
+  //
+  // Routed via the named route (AppRoutes.adminApprovedShopDetail) so
+  // AuthMiddleware/PermissionMiddleware('view all shops') actually run,
+  // same as every other detail screen in this file.
   // =========================
 
   Future<void> _openReview(Map<String, dynamic> data) async {
@@ -338,7 +335,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         );
 
         if (found != null) {
-          await Get.to(() => ApprovedShopDetailScreen(shop: found));
+          await Get.toNamed(
+            AppRoutes.adminApprovedShopDetail,
+            arguments: found,
+          );
         } else {
           Get.snackbar("Not found", "This shop could not be loaded.");
         }

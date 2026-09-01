@@ -4,14 +4,13 @@ import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 
 class AdminOrderDetailsScreen extends StatefulWidget {
-  final Map order;
-  final bool isHistory;
+  const AdminOrderDetailsScreen({super.key});
 
-  const AdminOrderDetailsScreen({
-    super.key,
-    required this.order,
-    this.isHistory = false,
-  });
+  // Reached via Get.toNamed(AppRoutes.adminOrderDetail,
+  // arguments: {"order": o, "isHistory": isHistory})
+  Map get _args => Get.arguments as Map;
+  Map get order => _args["order"] as Map;
+  bool get isHistory => _args["isHistory"] as bool? ?? false;
 
   @override
   State<AdminOrderDetailsScreen> createState() =>

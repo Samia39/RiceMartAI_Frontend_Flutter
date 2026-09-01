@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '../../../core/services/shop_service.dart';
+
 import '../../../core/services/product_service.dart';
+import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../widgets/shop_reviews_section.dart';
 
 class ApprovedShopDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> shop;
+  const ApprovedShopDetailScreen({super.key});
 
-  const ApprovedShopDetailScreen({super.key, required this.shop});
+  // Reached via:
+  // Get.toNamed(
+  //   AppRoutes.adminApprovedShopDetail,
+  //   arguments: shop,
+  // )
+  Map<String, dynamic> get shop => Get.arguments as Map<String, dynamic>;
 
   @override
   State<ApprovedShopDetailScreen> createState() =>
@@ -29,24 +36,38 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
   }
 
   Future<void> _loadProducts() async {
-    final shopId = int.parse(widget.shop["id"].toString());
-    final data = await ProductService().fetchShopProducts(shopId: shopId);
-    if (mounted) {
+    try {
+      final shopId = int.parse(widget.shop["id"].toString());
+
+      final data = await ProductService().fetchShopProducts(shopId: shopId);
+
+      if (!mounted) return;
+
       setState(() {
         products = data;
+        loadingProducts = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
         loadingProducts = false;
       });
     }
   }
 
   String _imageUrl(dynamic path) {
-    if (path == null || path.toString().isEmpty) return "";
+    if (path == null || path.toString().isEmpty) {
+      return "";
+    }
+
     return "http://ricemart.sandbox.pk/storage/$path";
   }
 
   // =========================
-  // COMPACT INFO ROW (label + value side by side, small text)
+  // COMPACT INFO ROW
   // =========================
+
   Widget _compactRow(IconData icon, String label, dynamic value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -72,6 +93,10 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
       ),
     );
   }
+
+  // =========================
+  // CNIC THUMBNAIL
+  // =========================
 
   Widget _cnicThumb(String label, String url) {
     return Expanded(
@@ -101,7 +126,17 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                 width: double.infinity,
                 color: AppColors.cream,
                 child: url.isNotEmpty
-                    ? Image.network(url, fit: BoxFit.cover)
+                    ? Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.image_not_supported,
+                            size: 20,
+                            color: AppColors.iconMuted,
+                          );
+                        },
+                      )
                     : Icon(
                         Icons.image_not_supported,
                         size: 20,
@@ -115,8 +150,13 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
     );
   }
 
+  // =========================
+  // PRODUCT TILE
+  // =========================
+
   Widget _productTile(Map<String, dynamic> product) {
     final imageUrl = ProductService.getImageUrl(product);
+
     final categoryName =
         product["rice_category"]?["name"]?.toString() ?? "Uncategorized";
 
@@ -132,12 +172,16 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
               height: 52,
               width: 52,
               color: AppColors.cream,
-              child: imageUrl != null
+              child: imageUrl != null && imageUrl.isNotEmpty
                   ? Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (c, e, s) =>
-                          Icon(Icons.rice_bowl, color: AppColors.darkGreen),
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.rice_bowl,
+                          color: AppColors.darkGreen,
+                        );
+                      },
                     )
                   : Icon(Icons.rice_bowl, color: AppColors.darkGreen),
             ),
@@ -148,7 +192,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product["name"] ?? "",
+                  product["name"]?.toString() ?? "",
                   style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -163,8 +207,14 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text("Rs. ${product["price"]}", style: AppTextStyles.bodyMedium),
-              Text("${product["stock"]} KG", style: AppTextStyles.bodySmall),
+              Text(
+                "Rs. ${product["price"] ?? "-"}",
+                style: AppTextStyles.bodyMedium,
+              ),
+              Text(
+                "${product["stock"] ?? 0} KG",
+                style: AppTextStyles.bodySmall,
+              ),
             ],
           ),
         ],
@@ -175,8 +225,10 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
   // =========================
   // REMOVE SELLER DIALOG
   // =========================
+
   void _showRemoveDialog() {
     final reasonController = TextEditingController();
+
     bool permanentBan = false;
     bool sending = false;
 
@@ -197,8 +249,9 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "This will permanently deactivate the shop and seller account. "
-                      "Order history is kept. This cannot be undone from the app.",
+                      "This will permanently deactivate the shop "
+                      "and seller account. Order history is kept. "
+                      "This cannot be undone from the app.",
                       style: AppTextStyles.bodySmall,
                     ),
                     const SizedBox(height: 12),
@@ -218,10 +271,14 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                       contentPadding: EdgeInsets.zero,
                       controlAffinity: ListTileControlAffinity.leading,
                       value: permanentBan,
-                      onChanged: (v) =>
-                          setDialogState(() => permanentBan = v ?? false),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          permanentBan = value ?? false;
+                        });
+                      },
                       title: Text(
-                        "Permanently ban this person from registering again",
+                        "Permanently ban this person from "
+                        "registering again",
                         style: AppTextStyles.bodySmall,
                       ),
                     ),
@@ -232,7 +289,9 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                 TextButton(
                   onPressed: sending
                       ? null
-                      : () => Navigator.pop(dialogContext),
+                      : () {
+                          Navigator.pop(dialogContext);
+                        },
                   child: const Text("Cancel"),
                 ),
                 ElevatedButton(
@@ -241,6 +300,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                       ? null
                       : () async {
                           final reason = reasonController.text.trim();
+
                           if (reason.isEmpty) {
                             ScaffoldMessenger.of(dialogContext).showSnackBar(
                               const SnackBar(
@@ -250,35 +310,54 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                             return;
                           }
 
-                          setDialogState(() => sending = true);
+                          setDialogState(() {
+                            sending = true;
+                          });
 
-                          final result = await ShopService().removeSeller(
-                            token: _token,
-                            shopId: int.parse(widget.shop["id"].toString()),
-                            reason: reason,
-                            permanentlyBan: permanentBan,
-                          );
+                          try {
+                            final result = await ShopService().removeSeller(
+                              token: _token,
+                              shopId: int.parse(widget.shop["id"].toString()),
+                              reason: reason,
+                              permanentlyBan: permanentBan,
+                            );
 
-                          if (!dialogContext.mounted) return;
-                          Navigator.pop(dialogContext);
+                            if (!dialogContext.mounted) {
+                              return;
+                            }
 
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                result["message"] ??
-                                    (result["success"] == true
-                                        ? "Seller removed"
-                                        : "Failed to remove seller"),
+                            Navigator.pop(dialogContext);
+
+                            if (!context.mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  result["message"] ??
+                                      (result["success"] == true
+                                          ? "Seller removed"
+                                          : "Failed to remove seller"),
+                                ),
                               ),
-                            ),
-                          );
+                            );
 
-                          if (result["success"] == true) {
-                            Navigator.pop(
-                              context,
-                              true,
-                            ); // back to list, refresh
+                            if (result["success"] == true) {
+                              Navigator.pop(context, true);
+                            }
+                          } catch (e) {
+                            if (!dialogContext.mounted) {
+                              return;
+                            }
+
+                            setDialogState(() {
+                              sending = false;
+                            });
+
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              SnackBar(
+                                content: Text("Failed to remove seller: $e"),
+                              ),
+                            );
                           }
                         },
                   child: sending
@@ -300,11 +379,18 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
     );
   }
 
+  // =========================
+  // BUILD
+  // =========================
+
   @override
   Widget build(BuildContext context) {
     final shop = widget.shop;
+
     final frontImage = _imageUrl(shop["cnic_image"]);
+
     final backImage = _imageUrl(shop["cnic_back_image"]);
+
     final shopId = int.parse(shop["id"].toString());
 
     return Container(
@@ -327,7 +413,9 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ===== COMPACT INFO CARD =====
+                      // =====================================================
+                      // SHOP INFORMATION
+                      // =====================================================
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
@@ -350,7 +438,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    shop["shop_name"] ?? "-",
+                                    shop["shop_name"]?.toString() ?? "-",
                                     style: AppTextStyles.heading4,
                                   ),
                                 ),
@@ -407,39 +495,46 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
 
                       const SizedBox(height: 18),
 
-                      // ===== PRODUCTS =====
+                      // =====================================================
+                      // PRODUCTS
+                      // =====================================================
                       Text(
                         "Products (${products.length})",
                         style: AppTextStyles.heading4,
                       ),
+
                       const SizedBox(height: 10),
 
-                      loadingProducts
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(20),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          : products.isEmpty
-                          ? Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              child: Text(
-                                "No products listed yet",
-                                style: AppTextStyles.bodySmall,
-                              ),
-                            )
-                          : Column(
-                              children: products.map(_productTile).toList(),
-                            ),
+                      if (loadingProducts)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else if (products.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: Text(
+                            "No products listed yet",
+                            style: AppTextStyles.bodySmall,
+                          ),
+                        )
+                      else
+                        Column(children: products.map(_productTile).toList()),
 
-                      // ===== REVIEWS =====
+                      // =====================================================
+                      // REVIEWS
+                      // =====================================================
                       const SizedBox(height: 24),
+
                       ShopReviewsSection(shopId: shopId),
 
                       const SizedBox(height: 24),
 
-                      // ===== REMOVE SELLER BUTTON =====
+                      // =====================================================
+                      // REMOVE SELLER
+                      // =====================================================
                       SizedBox(
                         width: double.infinity,
                         height: 52,
@@ -465,6 +560,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 30),
                     ],
                   ),

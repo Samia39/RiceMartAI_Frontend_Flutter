@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
-import 'approved_shop_detail_screen.dart';
-import 'shop_details_screen.dart';
+import '../../../routes/app_routes.dart';
 
 class AdminShopsTab extends StatefulWidget {
   const AdminShopsTab({super.key});
@@ -172,17 +172,21 @@ class _AdminShopsTabState extends State<AdminShopsTab>
                     statusColor: _statusColor(status),
                     statusIcon: _statusIcon(status),
                     onTap: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => status == "approved"
-                              ? ApprovedShopDetailScreen(shop: shop)
-                              : ShopDetailsScreen(
-                                  shop: shop,
-                                  readOnly: status != "pending",
-                                ),
-                        ),
-                      );
+                      // Converted from Navigator.push(MaterialPageRoute(...))
+                      // to named routes so AuthMiddleware/PermissionMiddleware
+                      // actually run for them.
+                      final result = status == "approved"
+                          ? await Get.toNamed(
+                              AppRoutes.adminApprovedShopDetail,
+                              arguments: shop,
+                            )
+                          : await Get.toNamed(
+                              AppRoutes.adminShopVerification,
+                              arguments: {
+                                "shop": shop,
+                                "readOnly": status != "pending",
+                              },
+                            );
 
                       if (result == true) _loadAll();
                     },

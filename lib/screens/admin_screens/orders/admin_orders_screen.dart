@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
-import 'admin_order_details_screen.dart';
+import '../../../routes/app_routes.dart';
 
 class AdminOrdersScreen extends StatefulWidget {
   const AdminOrdersScreen({super.key});
@@ -128,11 +128,12 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
                   return GestureDetector(
                     onTap: () async {
-                      await Get.to(
-                        () => AdminOrderDetailsScreen(
-                          order: o,
-                          isHistory: isHistory,
-                        ),
+                      // Converted from Get.to(() => AdminOrderDetailsScreen(...))
+                      // to a named route so AuthMiddleware/PermissionMiddleware
+                      // actually run for it.
+                      await Get.toNamed(
+                        AppRoutes.adminOrderDetail,
+                        arguments: {"order": o, "isHistory": isHistory},
                       );
                       fetchOrders();
                     },

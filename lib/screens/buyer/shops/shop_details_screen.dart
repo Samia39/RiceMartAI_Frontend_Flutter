@@ -15,7 +15,22 @@ class ShopDetailsScreen extends StatefulWidget {
 }
 
 class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
-  Map<String, dynamic> get shop => Get.arguments as Map<String, dynamic>;
+  // ✅ Null-safe: never crashes with a cast error if arguments are missing
+  // (e.g. after a browser refresh on Flutter web, Get.arguments becomes null).
+  Map<String, dynamic> get shop {
+    final args = Get.arguments;
+    if (args is Map<String, dynamic>) return args;
+    if (args is Map) return Map<String, dynamic>.from(args);
+    return const {};
+  }
+
+  // ✅ Null-safe id extraction; handles int, String, or missing id.
+  int? get shopId {
+    final id = shop["id"];
+    if (id is int) return id;
+    if (id is String) return int.tryParse(id);
+    return null;
+  }
 
   List<Map<String, dynamic>> productList = [];
   bool isLoading = true;
@@ -24,11 +39,22 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    fetchProducts();
+    if (shopId != null) {
+      fetchProducts();
+    } else {
+      // No valid shop id (e.g. lost Get.arguments on web reload) -> stop loading,
+      // build() will show a "Shop not found" state instead of crashing.
+      isLoading = false;
+    }
   }
 
   Future<void> fetchProducts() async {
-    final data = await ProductService().fetchShopProducts(shopId: shop["id"]);
+    final id = shopId;
+    if (id == null) return;
+
+    final data = await ProductService().fetchShopProducts(shopId: id);
+
+    if (!mounted) return;
     setState(() {
       productList = data;
       isLoading = false;
@@ -39,12 +65,20 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
   // Opens or creates a conversation with the shop
   // =============================================
   Future<void> openChat() async {
+    final id = shopId;
+    if (id == null) {
+      Get.snackbar(
+        "Error",
+        "Shop information is missing. Please go back and try again.",
+      );
+      return;
+    }
+
     setState(() => isStartingChat = true);
 
-    final result = await ChatService().startConversation(
-      shopId: shop["id"] as int,
-    );
+    final result = await ChatService().startConversation(shopId: id);
 
+    if (!mounted) return;
     setState(() => isStartingChat = false);
 
     if (result["conversation_id"] != null) {
@@ -62,6 +96,49 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Guard: if we truly have no shop id, show a friendly fallback
+    // instead of letting the rest of the widget tree crash on nulls.
+    if (shopId == null) {
+      return Container(
+        decoration: AppDecorations.gradientBackground,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(title: const Text("Shop")),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.storefront_outlined,
+                    size: 56,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "We couldn't load this shop.",
+                    style: AppTextStyles.heading3,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "This can happen if the page was refreshed. Please go back and open the shop again.",
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Get.back(),
+                    child: const Text("Go Back"),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       decoration: AppDecorations.gradientBackground,
       child: Scaffold(
@@ -87,12 +164,12 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      "Owner: ${shop["owner_name"]}",
+                      "Owner: ${shop["owner_name"] ?? "N/A"}",
                       style: AppTextStyles.bodyLarge,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "Address: ${shop["address"]}",
+                      "Address: ${shop["address"] ?? "N/A"}",
                       style: AppTextStyles.bodyLarge,
                     ),
                     const SizedBox(height: 8),
@@ -297,7 +374,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
               // =========================
               Text("Customer Reviews", style: AppTextStyles.heading3),
               const SizedBox(height: 14),
-              ShopReviewsSection(shopId: shop["id"] as int),
+              ShopReviewsSection(shopId: shopId!),
             ],
           ),
         ),

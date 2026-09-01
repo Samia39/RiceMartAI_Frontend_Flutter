@@ -1,3 +1,11 @@
+// Path: lib/screens/admin_screens/dashboard/admin_dashboard_tab.dart
+//
+// FIX (this pass): the Settings shortcut was gated on
+// PermissionService.hasPermission('view settings') — that permission
+// does not exist anywhere in the backend seeder, so this button was
+// permanently invisible to every role, including admin. Corrected to
+// 'manage settings', which is real and already assigned to admin.
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
@@ -125,7 +133,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           title: const Text("Admin Dashboard"),
           centerTitle: true,
           actions: [
-            if (PermissionService.hasPermission('create shop'))
+            if (PermissionService.hasPermission('create sellers'))
               _appBarAction(
                 icon: Icons.add,
                 label: "Add Shop",
@@ -142,7 +150,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
               child: NotificationBell(iconColor: Colors.white, size: 24),
             ),
 
-            if (PermissionService.hasPermission('view settings'))
+            if (PermissionService.hasPermission('manage settings'))
               _appBarAction(
                 icon: Icons.settings,
                 label: "Settings",

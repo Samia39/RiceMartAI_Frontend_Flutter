@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import '../screens/admin_screens/complaints/admin_complaint_list_screen.dart';
 import '../screens/admin_screens/courier_management/courier_charge_screen.dart';
 import '../screens/admin_screens/payout/admin_payouts_screen.dart';
+
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';
 import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
-import '../screens/admin_screens/courier_management/city_screen.dart';
 
 class AdminDrawer extends StatelessWidget {
   const AdminDrawer({super.key});
@@ -182,7 +182,9 @@ class AdminDrawer extends StatelessWidget {
                   ),
                   childrenPadding: const EdgeInsets.only(left: 20),
                   children: [
-                    // CITY SCREEN
+                    // CITY SCREEN — converted from Get.to() to a named
+                    // route so AuthMiddleware/PermissionMiddleware
+                    // ('manage cities') actually run for it.
                     ListTile(
                       leading: const Icon(
                         Icons.location_city,
@@ -191,11 +193,11 @@ class AdminDrawer extends StatelessWidget {
                       title: const Text("Cities"),
                       onTap: () {
                         _navigate(context, () {
-                          Get.to(() => const CityScreen());
+                          Get.toNamed(AppRoutes.adminCities);
                         });
                       },
                     ),
-                    // COURIER CHARGES
+                    // COURIER CHARGES — same conversion as above.
                     ListTile(
                       leading: const Icon(
                         Icons.attach_money,
@@ -204,7 +206,7 @@ class AdminDrawer extends StatelessWidget {
                       title: const Text("Courier Charges"),
                       onTap: () {
                         _navigate(context, () {
-                          Get.to(() => const CourierChargeScreen());
+                          Get.toNamed(AppRoutes.adminCourierCharges);
                         });
                       },
                     ),
@@ -232,23 +234,31 @@ class AdminDrawer extends StatelessWidget {
                   },
                 ),
 
-                // SELLER PAYOUTS
+                // SELLER PAYOUTS — converted from Get.to() to a named
+                // route so AuthMiddleware/PermissionMiddleware actually
+                // run for it.
                 drawerItem(
                   icon: Icons.account_balance_wallet,
                   title: "Seller Payouts",
                   onTap: () {
                     _navigate(context, () {
-                      Get.to(() => const AdminPayoutsScreen());
+                      Get.toNamed(AppRoutes.adminPayouts);
                     });
                   },
                 ),
 
+                // COMPLAINTS — converted from Get.to() to a named route.
+                // Functionally super_admin-only on the backend ('view
+                // complaints' isn't assigned to plain admin), so a plain
+                // admin tapping this now gets redirected to Access
+                // Denied immediately instead of seeing a broken screen.
                 drawerItem(
                   icon: Icons.report_problem,
                   title: "Complaints",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.to(() => const AdminComplaintListScreen());
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.adminComplaints);
+                    });
                   },
                 ),
 
@@ -283,7 +293,7 @@ class AdminDrawer extends StatelessWidget {
             color: Colors.red,
             onTap: () {
               GetStorage().erase();
-              Get.offAllNamed("/login");
+              Get.offAllNamed(AppRoutes.login);
             },
           ),
           const SizedBox(height: 20),
