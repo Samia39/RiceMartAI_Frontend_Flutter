@@ -182,7 +182,8 @@ class ProductService {
     // ✅ Strip trailing "/api" (or any trailing path) from baseUrl
     // so we get just the host, e.g. "http://ricemart.sandbox.pk"
     final host = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
+    final cleanStr = str.startsWith('/') ? str.substring(1) : str;
 
-    return "$host/storage/$str";
+    return "$host/storage/$cleanStr";
   }
 }

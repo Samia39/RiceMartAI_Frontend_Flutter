@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/services/payment_service.dart';
 import '../../../core/utils/themes.dart';
+import '../../../core/constants/app_icons.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
@@ -17,7 +18,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   List payments = [];
   bool isLoading = true;
 
-  static const String imageBaseUrl = "http://ricemart.sandbox.pk";
+  String get imageBaseUrl => BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
 
   @override
   void initState() {

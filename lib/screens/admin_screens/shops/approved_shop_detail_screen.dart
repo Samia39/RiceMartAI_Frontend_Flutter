@@ -4,6 +4,7 @@ import '../../../core/services/shop_service.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../widgets/shop_reviews_section.dart';
+import '../../../core/constants/app_icons.dart';
 
 class ApprovedShopDetailScreen extends StatefulWidget {
   final Map<String, dynamic> shop;
@@ -41,7 +42,12 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
 
   String _imageUrl(dynamic path) {
     if (path == null || path.toString().isEmpty) return "";
-    return "http://ricemart.sandbox.pk/storage/$path";
+    final str = path.toString();
+    if (str.startsWith("http://") || str.startsWith("https://")) {
+      return str;
+    }
+    final host = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
+    return "$host/storage/$str";
   }
 
   // =========================

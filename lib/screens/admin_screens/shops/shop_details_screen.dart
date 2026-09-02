@@ -3,6 +3,8 @@ import 'package:get_storage/get_storage.dart';
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
 
+import '../../../core/constants/app_icons.dart';
+
 class ShopDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> shop;
 
@@ -34,7 +36,12 @@ class ShopDetailsScreen extends StatelessWidget {
 
   String _imageUrl(dynamic path) {
     if (path == null || path.toString().isEmpty) return "";
-    return "http://ricemart.sandbox.pk/storage/$path";
+    final str = path.toString();
+    if (str.startsWith("http://") || str.startsWith("https://")) {
+      return str;
+    }
+    final host = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
+    return "$host/storage/$str";
   }
 
   @override
