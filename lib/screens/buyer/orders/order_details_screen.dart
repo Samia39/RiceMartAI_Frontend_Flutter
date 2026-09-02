@@ -165,7 +165,8 @@ class OrderDetailsScreen extends StatelessWidget {
                       infoRow("Price", "Rs ${item["price"]}"),
                       infoRow("Quantity", item["quantity"].toString()),
 
-                      if (status == "delivered") ...[
+                      if (status == "delivered" &&
+                          order["payment_status"] != "rejected") ...[
                         const SizedBox(height: 10),
 
                         // =========================
@@ -249,6 +250,7 @@ class OrderDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List items = order["items"] ?? [];
+    final bool isRejected = order["payment_status"] == "rejected";
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -262,6 +264,44 @@ class OrderDetailsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (isRejected) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.error.withOpacity(0.4),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                order["payment"]?["rejection_reason"] != null &&
+                                        order["payment"]["rejection_reason"]
+                                            .toString()
+                                            .isNotEmpty
+                                    ? "Your payment was rejected: ${order["payment"]["rejection_reason"]}. This order cannot proceed."
+                                    : "Your payment was rejected. This order cannot proceed.",
+                                style: AppTextStyles.bodyLarge.copyWith(
+                                  color: AppColors.error,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: AppDecorations.card,

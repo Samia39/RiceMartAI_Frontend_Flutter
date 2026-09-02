@@ -112,10 +112,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
         itemBuilder: (context, index) {
           final order = orders[index];
-
-          // =========================
-          // GET ITEMS
-          // =========================
           final items = order["items"] ?? [];
 
           // =========================
@@ -123,77 +119,107 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
           // =========================
           String overallStatus = "pending";
 
-          // ANY CANCELLED
-          if (items.any((i) => i["status"] == "cancelled")) {
+          if (order["payment_status"] == "rejected") {
+            overallStatus = "rejected";
+          } else if (items.any((i) => i["status"] == "cancelled")) {
             overallStatus = "cancelled";
-          }
-          // ALL DELIVERED
-          else if (items.isNotEmpty &&
+          } else if (items.isNotEmpty &&
               items.every((i) => i["status"] == "delivered")) {
-            overallStatus = "delivered";
-          }
-          // ANY SHIPPED
-          else if (items.any((i) => i["status"] == "shipped")) {
+            overallStatus =
+                items.every((i) => i["customer_confirmed_at"] != null)
+                ? "completed"
+                : "delivered";
+          } else if (items.any((i) => i["status"] == "shipped")) {
             overallStatus = "shipped";
-          }
-          // ANY PROCESSING
-          else if (items.any((i) => i["status"] == "processing")) {
+          } else if (items.any((i) => i["status"] == "processing")) {
             overallStatus = "processing";
+          }
+
+          Color tagColor;
+          switch (overallStatus) {
+            case "rejected":
+            case "cancelled":
+              tagColor = AppColors.error;
+              break;
+            case "completed":
+              tagColor = AppColors.success;
+              break;
+            case "processing":
+              tagColor = AppColors.warning;
+              break;
+            case "shipped":
+              tagColor = AppColors.info;
+              break;
+            case "delivered":
+              tagColor = AppColors.success;
+              break;
+            default:
+              tagColor = AppColors.labelSecondary;
           }
 
           return GestureDetector(
             onTap: () async {
               await Get.toNamed(AppRoutes.orderDetails, arguments: order);
-
               fetchAllOrders();
             },
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
-
               padding: const EdgeInsets.all(16),
-
               decoration: AppDecorations.card,
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-
                 children: [
-                  // ORDER ID
-                  Text("Order #${order["id"]}", style: AppTextStyles.heading4),
-
-                  const SizedBox(height: 10),
-
-                  // STATUS
-                  Text(
-                    "Status: $overallStatus",
-                    style: AppTextStyles.bodyLarge,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Order #${order["id"]}",
+                        style: AppTextStyles.heading4,
+                      ),
+                      Chip(
+                        label: Text(
+                          overallStatus.toUpperCase(),
+                          style: AppTextStyles.label.copyWith(
+                            color: tagColor,
+                            fontSize: 11.5,
+                          ),
+                        ),
+                        backgroundColor: tagColor.withOpacity(0.15),
+                        side: BorderSide(color: tagColor.withOpacity(0.45)),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(height: 8),
+                  if (overallStatus == "rejected") ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      "Your payment was rejected. This order cannot proceed.",
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 10),
 
                   Text(
                     "Payment: ${order["payment_method"]}",
                     style: AppTextStyles.bodyLarge,
                   ),
-
                   const SizedBox(height: 8),
-
                   Text(
                     "Payment Status: ${order["payment_status"]}",
                     style: AppTextStyles.bodyLarge,
                   ),
-
                   const SizedBox(height: 10),
-
-                  // TOTAL
                   Text(
                     "Total: Rs ${order["total_price"]}",
                     style: AppTextStyles.heading4,
                   ),
-
                   const SizedBox(height: 10),
-
-                  // ITEMS
                   Text(
                     "Items: ${order["items"].length}",
                     style: AppTextStyles.bodyLarge,
