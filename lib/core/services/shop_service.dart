@@ -373,7 +373,22 @@ class ShopService {
         body: jsonEncode({"reason": reason, "permanently_ban": permanentlyBan}),
       );
 
-      return jsonDecode(response.body);
+      print("REMOVE SELLER STATUS: ${response.statusCode}");
+      print("REMOVE SELLER BODY: ${response.body}");
+
+      final decoded = response.body.isNotEmpty
+          ? jsonDecode(response.body)
+          : null;
+
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+
+      return {
+        "success": false,
+        "message":
+            "Server returned an unexpected response (status ${response.statusCode}).",
+      };
     } catch (e) {
       return {"success": false, "message": e.toString()};
     }

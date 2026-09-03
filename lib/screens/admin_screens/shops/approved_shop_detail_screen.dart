@@ -227,6 +227,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
   // =========================
 
   void _showRemoveDialog() {
+    final shop = widget.shop; // to solve error
     final reasonController = TextEditingController();
 
     bool permanentBan = false;
@@ -317,7 +318,9 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                           try {
                             final result = await ShopService().removeSeller(
                               token: _token,
-                              shopId: int.parse(widget.shop["id"].toString()),
+                              shopId: int.parse(
+                                shop["id"].toString(),
+                              ), // <-- use local `shop`, not widget.shop
                               reason: reason,
                               permanentlyBan: permanentBan,
                             );
