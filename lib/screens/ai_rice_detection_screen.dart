@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/rice_detection_service.dart';
+import '../core/services/rice_detection_service.dart';
 import '../models/rice_detection_result.dart';
 
 class AiRiceDetectionScreen extends StatefulWidget {

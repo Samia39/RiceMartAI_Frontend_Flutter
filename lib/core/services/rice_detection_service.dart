@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import '../models/rice_detection_result.dart';
+import '../../models/rice_detection_result.dart';
 
 class RiceDetectionService {
   // ⚠️ Apna Laravel backend ka URL yahan lagayein
-  // Agar local phone/emulator se test kar rahe hain:
   // Android Emulator: http://10.0.2.2:8000/api
   // Real phone (same WiFi): http://192.168.x.x:8000/api (apne PC ka IP)
   static const String baseUrl = "http://10.0.2.2:8000/api";
