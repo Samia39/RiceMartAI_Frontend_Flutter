@@ -1,20 +1,20 @@
+
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../../models/rice_detection_result.dart';
 
 class RiceDetectionService {
-  // ⚠️ Apna Laravel backend ka URL yahan lagayein
-  // Android Emulator: http://10.0.2.2:8000/api
-  // Real phone (same WiFi): http://192.168.x.x:8000/api (apne PC ka IP)
-  static const String baseUrl = "http://10.0.2.2:8000/api";
+  static const String baseUrl = "http://127.0.0.1:8000/api";
 
-  static Future<RiceDetectionResult> detectRice(File imageFile) async {
+  static Future<RiceDetectionResult> detectRice(
+      Uint8List imageBytes, String fileName) async {
     final uri = Uri.parse("$baseUrl/rice/detect");
     final request = http.MultipartRequest("POST", uri);
+    request.headers['Accept'] = 'application/json';
 
     request.files.add(
-      await http.MultipartFile.fromPath("image", imageFile.path),
+      http.MultipartFile.fromBytes("image", imageBytes, filename: fileName),
     );
 
     final streamedResponse = await request.send();

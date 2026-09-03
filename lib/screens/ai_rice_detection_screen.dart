@@ -1,8 +1,9 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/services/rice_detection_service.dart';
 import '../models/rice_detection_result.dart';
+import 'user_dashboard.dart'; // AppColors, AppGradients, AppTextStyles yahan se aa rahe hain
 
 class AiRiceDetectionScreen extends StatefulWidget {
   const AiRiceDetectionScreen({super.key});
@@ -12,7 +13,8 @@ class AiRiceDetectionScreen extends StatefulWidget {
 }
 
 class _AiRiceDetectionScreenState extends State<AiRiceDetectionScreen> {
-  File? _selectedImage;
+  Uint8List? _selectedImageBytes;
+  String? _selectedFileName;
   bool _isLoading = false;
   RiceDetectionResult? _result;
   String? _error;
@@ -21,8 +23,10 @@ class _AiRiceDetectionScreenState extends State<AiRiceDetectionScreen> {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: source, imageQuality: 80);
     if (picked != null) {
+      final bytes = await picked.readAsBytes();
       setState(() {
-        _selectedImage = File(picked.path);
+        _selectedImageBytes = bytes;
+        _selectedFileName = picked.name;
         _result = null;
         _error = null;
       });
@@ -31,14 +35,17 @@ class _AiRiceDetectionScreenState extends State<AiRiceDetectionScreen> {
   }
 
   Future<void> _uploadAndDetect() async {
-    if (_selectedImage == null) return;
+    if (_selectedImageBytes == null) return;
     setState(() {
       _isLoading = true;
       _error = null;
     });
     final stopwatch = Stopwatch()..start();
     try {
-      final result = await RiceDetectionService.detectRice(_selectedImage!);
+      final result = await RiceDetectionService.detectRice(
+        _selectedImageBytes!,
+        _selectedFileName ?? 'rice_image.jpg',
+      );
       stopwatch.stop();
       setState(() {
         _result = result.copyWith(processingTimeMs: stopwatch.elapsedMilliseconds);
@@ -56,68 +63,107 @@ class _AiRiceDetectionScreenState extends State<AiRiceDetectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF6B7A5E),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text("AI Rice Category Detection",
-            style: TextStyle(color: Colors.white, fontSize: 18)),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: _showImageSourceSheet,
-              child: Container(
-                height: 220,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white38, width: 1.5),
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppGradients.background),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom header (back button + title) — matches app's icon style
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 16, 6),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.cream.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: AppColors.borderGold.withOpacity(0.50)),
+                        ),
+                        child: Icon(Icons.arrow_back,
+                            color: AppColors.darkGreen, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    const Text(
+                      "AI Rice Category Detection",
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkGreen,
+                      ),
+                    ),
+                  ],
                 ),
-                child: _selectedImage == null
-                    ? const Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: _showImageSourceSheet,
+                        child: Container(
+                          height: 220,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: AppColors.cardFill,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.cardBorder, width: 1.5),
+                          ),
+                          child: _selectedImageBytes == null
+                              ? Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.cloud_upload_outlined,
+                                          color: AppColors.iconMuted, size: 40),
+                                      const SizedBox(height: 8),
+                                      Text("Tap to upload rice image",
+                                          style: AppTextStyles.labelMuted),
+                                    ],
+                                  ),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.memory(_selectedImageBytes!,
+                                      fit: BoxFit.cover),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      if (_isLoading)
+                        Column(
                           children: [
-                            Icon(Icons.cloud_upload_outlined,
-                                color: Colors.white70, size: 40),
-                            SizedBox(height: 8),
-                            Text("Tap to upload rice image",
-                                style: TextStyle(color: Colors.white70)),
+                            CircularProgressIndicator(color: AppColors.darkGreen),
+                            const SizedBox(height: 10),
+                            Text("Detecting rice category...",
+                                style: AppTextStyles.labelMuted),
                           ],
                         ),
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.file(_selectedImage!, fit: BoxFit.cover),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (_isLoading)
-              const Column(
-                children: [
-                  CircularProgressIndicator(color: Colors.white),
-                  SizedBox(height: 10),
-                  Text("Detecting rice category...",
-                      style: TextStyle(color: Colors.white70)),
-                ],
-              ),
-            if (_error != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                      if (_error != null)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: AppColors.error.withOpacity(0.4)),
+                          ),
+                          child: Text(_error!,
+                              style: TextStyle(color: AppColors.darkGreen)),
+                        ),
+                      if (_result != null) _buildResultCard(_result!),
+                    ],
+                  ),
                 ),
-                child: Text(_error!, style: const TextStyle(color: Colors.white)),
               ),
-            if (_result != null) _buildResultCard(_result!),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -126,31 +172,40 @@ class _AiRiceDetectionScreenState extends State<AiRiceDetectionScreen> {
   void _showImageSourceSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF6B7A5E),
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt, color: Colors.white),
-              title: const Text("Take Photo", style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library, color: Colors.white),
-              title: const Text("Choose from Gallery",
-                  style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-          ],
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          gradient: AppGradients.background,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt, color: AppColors.darkGreen),
+                title: Text("Take Photo",
+                    style: TextStyle(
+                        color: AppColors.darkGreen, fontFamily: 'Poppins')),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_library, color: AppColors.darkGreen),
+                title: Text("Choose from Gallery",
+                    style: TextStyle(
+                        color: AppColors.darkGreen, fontFamily: 'Poppins')),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -161,32 +216,35 @@ class _AiRiceDetectionScreenState extends State<AiRiceDetectionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: AppColors.cardFill,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.rice_bowl, color: Colors.white),
+              Icon(Icons.rice_bowl, color: AppColors.darkGreen),
               const SizedBox(width: 8),
-              Text(result.category,
-                  style: const TextStyle(
-                      color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-              const Spacer(),
+              Expanded(
+                child: Text(result.category, style: AppTextStyles.heading3),
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.3),
+                  color: AppColors.lightGreen.withOpacity(0.35),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text("${(result.confidence * 100).toStringAsFixed(1)}%",
-                    style: const TextStyle(color: Colors.white, fontSize: 12)),
+                    style: TextStyle(
+                        color: AppColors.darkGreen,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold)),
               ),
             ],
           ),
-          const Divider(color: Colors.white24, height: 28),
+          Divider(color: AppColors.divider, height: 28),
           _detailRow(Icons.timer_outlined, "Detection Time",
               "${result.processingTimeMs} ms"),
           const SizedBox(height: 12),
@@ -205,15 +263,15 @@ class _AiRiceDetectionScreenState extends State<AiRiceDetectionScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Colors.white70, size: 20),
+        Icon(icon, color: AppColors.iconMuted, size: 20),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+              Text(label, style: AppTextStyles.bodySmall),
               const SizedBox(height: 2),
-              Text(value, style: const TextStyle(color: Colors.white, fontSize: 14)),
+              Text(value, style: AppTextStyles.bodyLarge),
             ],
           ),
         ),

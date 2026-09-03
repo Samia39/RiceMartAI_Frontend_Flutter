@@ -6,6 +6,7 @@ import 'rice_marketplace_page.dart';
 import 'user/shops_screen.dart';
 import 'user/profile_screen.dart';
 import 'user/conversations_screen.dart';
+import 'ai_rice_detection_screen.dart';
 
 // ─────────────────────────────────────────────
 //  THEME
@@ -449,13 +450,129 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(gradient: AppGradients.background),
-      child: Center(
-        child: Text('Home',
-          style: TextStyle(
-            fontFamily: 'Poppins', fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.darkGreen, letterSpacing: 1.0,
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.only(
+            top: kToolbarHeight + 20,
+            left: 16,
+            right: 16,
+            bottom: 20,
           ),
+          children: [
+            const Text(
+              'Rice Mart',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkGreen,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.cardFill,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.cardBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Welcome 👋', style: AppTextStyles.labelMuted),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'sheeza',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkGreen,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text('Explore Smart Rice AI', style: AppTextStyles.bodySmall),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Features',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkGreen,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _featureCard(
+              context,
+              icon: Icons.camera_alt_outlined,
+              title: 'AI Rice Category Detection',
+              subtitle: 'Upload rice image and detect category',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AiRiceDetectionScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _featureCard(
+              context,
+              icon: Icons.thumb_up_alt_outlined,
+              title: 'Rice Recommendation',
+              subtitle: 'Get smart rice recommendations',
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _featureCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardFill,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.overlayLight,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: AppColors.darkGreen),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppTextStyles.heading3),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: AppTextStyles.bodySmall),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: AppColors.iconMuted),
+          ],
         ),
       ),
     );
