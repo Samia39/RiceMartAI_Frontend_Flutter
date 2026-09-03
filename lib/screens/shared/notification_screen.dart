@@ -143,8 +143,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         break;
 
       case 'shop_status':
-        // Only sellers get this type — send them to their own shop
-        Get.toNamed(AppRoutes.myShop);
+        if (data['shop_status'] == 'rejected') {
+          _showRejectionDialog(n);
+        } else {
+          // approved / correction requested — only sellers get this type
+          Get.toNamed(AppRoutes.myShop);
+        }
         break;
 
       case 'complaint':
@@ -559,6 +563,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   },
                 ),
               ),
+      ),
+    );
+  }
+
+  void _showRejectionDialog(Map<String, dynamic> n) {
+    Get.dialog(
+      AlertDialog(
+        title: Text(n['title'] ?? 'Shop Rejected'),
+        content: Text(n['body'] ?? ''),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text("OK")),
+        ],
       ),
     );
   }
