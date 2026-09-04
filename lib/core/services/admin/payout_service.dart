@@ -47,11 +47,33 @@ class PayoutService {
         http.MultipartFile.fromBytes('proof', imageBytes, filename: fileName),
       );
 
-      final response = await request.send();
-      final body = await response.stream.bytesToString();
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          throw Exception(
+            "Request timed out. Check your connection and try again.",
+          );
+        },
+      );
+
+      final body = await streamedResponse.stream.bytesToString();
+
+      if (streamedResponse.statusCode >= 500) {
+        return {
+          "success": false,
+          "message":
+              "Server error (${streamedResponse.statusCode}). Please try again.",
+        };
+      }
+
       return jsonDecode(body);
     } catch (e) {
-      return {"success": false, "message": e.toString()};
+      return {
+        "success": false,
+        "message": e is Exception
+            ? e.toString().replaceFirst("Exception: ", "")
+            : "Something went wrong. Please try again.",
+      };
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
+import '../../../controllers/admin/admin_shell_controller.dart';
 
 class AdminShopsTab extends StatefulWidget {
   const AdminShopsTab({super.key});
@@ -15,6 +16,7 @@ class AdminShopsTab extends StatefulWidget {
 class _AdminShopsTabState extends State<AdminShopsTab>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  Worker? _subTabWorker;
 
   List<Map<String, dynamic>> _pending = [];
   List<Map<String, dynamic>> _approved = [];
@@ -27,10 +29,18 @@ class _AdminShopsTabState extends State<AdminShopsTab>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadAll();
+
+    // Sync with drawer-driven sub-tab selection.
+    final shellController = Get.find<AdminShellController>();
+    _tabController.index = shellController.shopsSubTabIndex.value;
+    _subTabWorker = ever<int>(shellController.shopsSubTabIndex, (index) {
+      if (mounted) _tabController.animateTo(index);
+    });
   }
 
   @override
   void dispose() {
+    _subTabWorker?.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -81,14 +91,15 @@ class _AdminShopsTabState extends State<AdminShopsTab>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: AppDecorations.gradientBackground,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text("Shops"),
-          centerTitle: true,
-          bottom: TabBar(
+    // NAV REFACTOR: previously this was a full Scaffold with its own
+    // AppBar(bottom: TabBar(...)). That's removed — the shared shell
+    // now provides the app bar/drawer, and this sub-tab bar (Pending/
+    // Approved/Rejected) is just the first item in the body Column.
+    return Column(
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: TabBar(
             controller: _tabController,
             indicatorColor: AppColors.golden,
             labelColor: AppColors.darkGreen,
@@ -102,17 +113,19 @@ class _AdminShopsTabState extends State<AdminShopsTab>
             ],
           ),
         ),
-        body: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : TabBarView(
-                controller: _tabController,
-                children: [
-                  _shopList(_pending, emptyText: "No pending approvals"),
-                  _shopList(_approved, emptyText: "No approved shops"),
-                  _shopList(_rejected, emptyText: "No rejected shops"),
-                ],
-              ),
-      ),
+        Expanded(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _shopList(_pending, emptyText: "No pending approvals"),
+                    _shopList(_approved, emptyText: "No approved shops"),
+                    _shopList(_rejected, emptyText: "No rejected shops"),
+                  ],
+                ),
+        ),
+      ],
     );
   }
 
@@ -172,9 +185,6 @@ class _AdminShopsTabState extends State<AdminShopsTab>
                     statusColor: _statusColor(status),
                     statusIcon: _statusIcon(status),
                     onTap: () async {
-                      // Converted from Navigator.push(MaterialPageRoute(...))
-                      // to named routes so AuthMiddleware/PermissionMiddleware
-                      // actually run for them.
                       final result = status == "approved"
                           ? await Get.toNamed(
                               AppRoutes.adminApprovedShopDetail,
@@ -201,9 +211,6 @@ class _AdminShopsTabState extends State<AdminShopsTab>
   }
 }
 
-// =========================
-// SHOP CARD
-// =========================
 class _ShopCard extends StatelessWidget {
   final Map<String, dynamic> shop;
   final Color statusColor;

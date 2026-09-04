@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import '../screens/admin_screens/complaints/admin_complaint_list_screen.dart';
-import '../screens/admin_screens/courier_management/courier_charge_screen.dart';
-import '../screens/admin_screens/payout/admin_payouts_screen.dart';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../routes/app_routes.dart';
 import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
+import '../controllers/admin/admin_shell_controller.dart';
 
 class AdminDrawer extends StatelessWidget {
   const AdminDrawer({super.key});
@@ -63,9 +60,8 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.dashboard,
                   title: "Dashboard",
                   onTap: () {
-                    _navigate(context, () {
-                      Get.toNamed(AppRoutes.adminDashboard);
-                    });
+                    Navigator.pop(context);
+                    Get.find<AdminShellController>().goToTab(0);
                   },
                 ),
 
@@ -74,9 +70,8 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.pending_actions,
                   title: "Pending Shops",
                   onTap: () {
-                    _navigate(context, () {
-                      Get.toNamed(AppRoutes.sellerApprovals);
-                    });
+                    Navigator.pop(context);
+                    Get.find<AdminShellController>().goToShopsTab(0);
                   },
                 ),
 
@@ -85,9 +80,8 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.verified,
                   title: "Approved Shops",
                   onTap: () {
-                    _navigate(context, () {
-                      Get.toNamed(AppRoutes.approvedShops);
-                    });
+                    Navigator.pop(context);
+                    Get.find<AdminShellController>().goToShopsTab(1);
                   },
                 ),
 
@@ -96,9 +90,18 @@ class AdminDrawer extends StatelessWidget {
                   icon: Icons.shopping_bag,
                   title: "Orders",
                   onTap: () {
-                    _navigate(context, () {
-                      Get.toNamed(AppRoutes.adminordersscreen);
-                    });
+                    Navigator.pop(context);
+                    Get.find<AdminShellController>().goToTab(2);
+                  },
+                ),
+
+                // PAYMENT APPROVALS
+                drawerItem(
+                  icon: Icons.pending_actions,
+                  title: "Payment Approvals",
+                  onTap: () {
+                    Navigator.pop(context);
+                    Get.find<AdminShellController>().goToTab(3);
                   },
                 ),
 
@@ -213,16 +216,6 @@ class AdminDrawer extends StatelessWidget {
                   ],
                 ),
 
-                // PAYMENT APPROVALS
-                drawerItem(
-                  icon: Icons.pending_actions,
-                  title: "Payment Approvals",
-                  onTap: () {
-                    _navigate(context, () {
-                      Get.toNamed(AppRoutes.paymentScreen);
-                    });
-                  },
-                ),
                 // PAYMENT SETTINGS
                 drawerItem(
                   icon: Icons.payment,

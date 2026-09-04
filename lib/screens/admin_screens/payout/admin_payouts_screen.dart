@@ -128,7 +128,13 @@ class _AdminPayoutsScreenState extends State<AdminPayoutsScreen>
                   final result = await Get.dialog(
                     PaySellerDialog(payout: payout),
                   );
-                  if (result == true) fetchPayouts();
+                  if (result is Map && result["success"] == true) {
+                    fetchPayouts();
+                    Get.snackbar(
+                      "Success",
+                      result["message"] ?? "Payment recorded",
+                    );
+                  }
                 },
                 child: const Text("Pay Seller"),
               ),

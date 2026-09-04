@@ -128,9 +128,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
                   return GestureDetector(
                     onTap: () async {
-                      // Converted from Get.to(() => AdminOrderDetailsScreen(...))
-                      // to a named route so AuthMiddleware/PermissionMiddleware
-                      // actually run for it.
                       await Get.toNamed(
                         AppRoutes.adminOrderDetail,
                         arguments: {"order": o, "isHistory": isHistory},
@@ -186,15 +183,16 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: AppDecorations.gradientBackground,
-      child: DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            title: const Text("Orders"),
-            bottom: TabBar(
+    // NAV REFACTOR: removed the local DefaultTabController+Scaffold+
+    // AppBar(bottom: TabBar(...)). The Active/History sub-tab bar now
+    // sits at the top of the body instead of in an AppBar.
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: TabBar(
               indicatorColor: AppColors.golden,
               labelColor: AppColors.darkGreen,
               unselectedLabelColor: AppColors.darkGreen.withOpacity(0.5),
@@ -206,15 +204,17 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               ],
             ),
           ),
-          body: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : TabBarView(
-                  children: [
-                    buildOrderList(activeOrders, false),
-                    buildOrderList(historyOrders, true),
-                  ],
-                ),
-        ),
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : TabBarView(
+                    children: [
+                      buildOrderList(activeOrders, false),
+                      buildOrderList(historyOrders, true),
+                    ],
+                  ),
+          ),
+        ],
       ),
     );
   }

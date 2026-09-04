@@ -1,17 +1,12 @@
 // Path: lib/screens/admin_screens/dashboard/admin_dashboard_tab.dart
 //
-// FIX (this pass): the Settings shortcut was gated on
-// PermissionService.hasPermission('view settings') — that permission
-// does not exist anywhere in the backend seeder, so this button was
-// permanently invisible to every role, including admin. Corrected to
-// 'manage settings', which is real and already assigned to admin.
+// NAV REFACTOR: this screen no longer owns its own Scaffold/AppBar/
+// Drawer — those moved to AdminHomeShell so they stay visible on every
+// bottom-nav tab instead of disappearing on Shops/Orders/Payments.
+// This widget now returns only the body content.
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../core/utils/themes.dart';
-import '../../../routes/app_routes.dart';
-import '../../../widgets/admin_drawer.dart';
-import '../../../widgets/notification_bell.dart';
 import '../../../core/services/admin/permission_service.dart';
 import '../../../core/services/admin/admin_service.dart';
 
@@ -20,6 +15,22 @@ class AdminDashboardTab extends StatefulWidget {
 
   @override
   State<AdminDashboardTab> createState() => _AdminDashboardTabState();
+}
+
+class _StatItem {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final bool highlight;
+
+  const _StatItem({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+    this.highlight = false,
+  });
 }
 
 class _AdminDashboardTabState extends State<AdminDashboardTab> {
@@ -50,11 +61,6 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
     }
   }
 
-  // Reads an int out of `data[key]` whether the backend sent it as a
-  // real number or (like Laravel's decimal sum()) as a string —
-  // avoids a runtime type crash that was silently triggering the
-  // "Couldn't load dashboard stats" error banner even on a
-  // successful, well-formed response.
   int _asInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;
@@ -88,8 +94,6 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           _approvedShops = _asInt(data['approved_shops']);
           _rejectedShops = _asInt(data['rejected_shops']);
           _totalOrders = _asInt(data['total_orders']);
-          // total_revenue comes back as a STRING from the backend
-          // (e.g. "19548.00") — this was the actual bug.
           _totalRevenue = _asNum(data['total_revenue']);
           _activeProducts = _asInt(data['active_products']);
           _pendingPayments = _asInt(data['pending_payments']);
@@ -124,51 +128,28 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: AppDecorations.gradientBackground,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        drawer: const AdminDrawer(),
-        appBar: AppBar(
-          title: const Text("Admin Dashboard"),
-          centerTitle: true,
-          actions: [
-            if (PermissionService.hasPermission('create sellers'))
-              _appBarAction(
-                icon: Icons.add,
-                label: "Add Shop",
-                color: AppColors.darkGreen,
-                onTap: () => Get.toNamed(AppRoutes.addSeller),
-              ),
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (PermissionService.hasPermission('view admin dashboard')) {
+          await _loadStats();
+        }
+      },
+      color: AppColors.darkGreen,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final isNarrow = width < 360;
+          final isWide = width >= 600;
 
-            // =========================
-            // NOTIFICATIONS — real bell, placed right next to Add Shop.
-            // Replaces the old dead-end icon (see file header note).
-            // =========================
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: NotificationBell(iconColor: Colors.white, size: 24),
-            ),
+          final horizontalPadding = isNarrow ? 14.0 : (isWide ? 28.0 : 20.0);
+          final crossAxisCount = isWide ? 3 : 2;
 
-            if (PermissionService.hasPermission('manage settings'))
-              _appBarAction(
-                icon: Icons.settings,
-                label: "Settings",
-                color: Colors.blue,
-                onTap: () => Get.toNamed(AppRoutes.adminSettings),
-              ),
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            if (PermissionService.hasPermission('view admin dashboard')) {
-              await _loadStats();
-            }
-          },
-          color: AppColors.darkGreen,
-          child: SingleChildScrollView(
+          return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 20,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -181,157 +162,127 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
                 const SizedBox(height: 20),
 
                 if (PermissionService.hasPermission('view admin dashboard'))
-                  if (_hasError) _errorBanner() else _statsSection(),
+                  if (_hasError)
+                    _errorBanner()
+                  else
+                    _statsSection(
+                      crossAxisCount: crossAxisCount,
+                      isNarrow: isNarrow,
+                    ),
 
                 const SizedBox(height: 10),
               ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  // =========================
-  // STATS SECTION
-  // =========================
-  Widget _statsSection() {
+  Widget _statsSection({required int crossAxisCount, required bool isNarrow}) {
     if (_isLoading) {
-      return Column(
-        children: List.generate(
-          5,
-          (_) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              children: [
-                Expanded(child: _statSkeleton()),
-                const SizedBox(width: 12),
-                Expanded(child: _statSkeleton()),
-              ],
-            ),
-          ),
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 6,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: isNarrow ? 1.4 : 1.7,
         ),
+        itemBuilder: (_, __) => _statSkeleton(),
       );
     }
 
+    final items = <_StatItem>[
+      _StatItem(
+        title: "Users",
+        value: "$_totalUsers",
+        icon: Icons.people_alt,
+        color: AppColors.darkGreen,
+      ),
+      _StatItem(
+        title: "Sellers",
+        value: "$_totalSellers",
+        icon: Icons.storefront,
+        color: AppColors.golden,
+      ),
+      _StatItem(
+        title: "Customers",
+        value: "$_totalCustomers",
+        icon: Icons.person,
+        color: AppColors.lightGreen,
+      ),
+      _StatItem(
+        title: "Total Shops",
+        value: "$_totalShops",
+        icon: Icons.store,
+        color: AppColors.info,
+      ),
+      _StatItem(
+        title: "Pending Shops",
+        value: "$_pendingShops",
+        icon: Icons.hourglass_top,
+        color: AppColors.warning,
+      ),
+      _StatItem(
+        title: "Approved Shops",
+        value: "$_approvedShops",
+        icon: Icons.verified,
+        color: AppColors.success,
+      ),
+      _StatItem(
+        title: "Rejected Shops",
+        value: "$_rejectedShops",
+        icon: Icons.cancel,
+        color: AppColors.error,
+      ),
+      _StatItem(
+        title: "Orders",
+        value: "$_totalOrders",
+        icon: Icons.shopping_bag,
+        color: AppColors.warning,
+      ),
+      _StatItem(
+        title: "Active Products",
+        value: "$_activeProducts",
+        icon: Icons.inventory_2,
+        color: AppColors.success,
+      ),
+      _StatItem(
+        title: "Pending Payments",
+        value: "$_pendingPayments",
+        icon: Icons.pending_actions,
+        color: AppColors.info,
+      ),
+    ];
+
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: quickStatCard(
-                "Users",
-                "$_totalUsers",
-                icon: Icons.people_alt,
-                color: AppColors.darkGreen,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: quickStatCard(
-                "Sellers",
-                "$_totalSellers",
-                icon: Icons.storefront,
-                color: AppColors.golden,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: quickStatCard(
-                "Customers",
-                "$_totalCustomers",
-                icon: Icons.person,
-                color: AppColors.lightGreen,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: quickStatCard(
-                "Total Shops",
-                "$_totalShops",
-                icon: Icons.store,
-                color: AppColors.info,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: quickStatCard(
-                "Pending Shops",
-                "$_pendingShops",
-                icon: Icons.hourglass_top,
-                color: AppColors.warning,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: quickStatCard(
-                "Approved Shops",
-                "$_approvedShops",
-                icon: Icons.verified,
-                color: AppColors.success,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: quickStatCard(
-                "Rejected Shops",
-                "$_rejectedShops",
-                icon: Icons.cancel,
-                color: AppColors.error,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: quickStatCard(
-                "Orders",
-                "$_totalOrders",
-                icon: Icons.shopping_bag,
-                color: AppColors.warning,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: quickStatCard(
-                "Active Products",
-                "$_activeProducts",
-                icon: Icons.inventory_2,
-                color: AppColors.success,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: quickStatCard(
-                "Pending Payments",
-                "$_pendingPayments",
-                icon: Icons.pending_actions,
-                color: AppColors.info,
-              ),
-            ),
-          ],
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: items.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: isNarrow ? 1.4 : 1.7,
+          ),
+          itemBuilder: (_, i) => quickStatCard(items[i], isNarrow: isNarrow),
         ),
         const SizedBox(height: 12),
         quickStatCard(
-          "Total Revenue",
-          _formatMoney(_totalRevenue),
-          icon: Icons.payments,
-          color: AppColors.darkGreen,
-          highlight: true,
+          _StatItem(
+            title: "Total Revenue",
+            value: _formatMoney(_totalRevenue),
+            icon: Icons.payments,
+            color: AppColors.darkGreen,
+            highlight: true,
+          ),
+          isNarrow: isNarrow,
+          fullWidth: true,
         ),
       ],
     );
@@ -339,7 +290,6 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
 
   Widget _statSkeleton() {
     return Container(
-      height: 80,
       decoration: AppDecorations.card,
       child: const Center(
         child: SizedBox(
@@ -371,48 +321,20 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
     );
   }
 
-  Widget _appBarAction({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
-            const SizedBox(height: 2),
-            Text(label, style: const TextStyle(fontSize: 10)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // =========================
-  // QUICK STATS CARD
-  // =========================
   Widget quickStatCard(
-    String title,
-    String value, {
-    IconData? icon,
-    Color? color,
-    bool highlight = false,
+    _StatItem item, {
+    required bool isNarrow,
+    bool fullWidth = false,
   }) {
-    final accent = color ?? AppColors.darkGreen;
+    final accent = item.color;
+    final cardPadding = isNarrow ? 12.0 : 16.0;
+    final iconBoxPadding = isNarrow ? 8.0 : 10.0;
+    final iconSize = isNarrow ? 18.0 : 20.0;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: highlight
+    final card = Container(
+      width: fullWidth ? double.infinity : null,
+      padding: EdgeInsets.all(cardPadding),
+      decoration: item.highlight
           ? AppDecorations.card.copyWith(
               gradient: LinearGradient(
                 colors: [accent.withOpacity(0.18), accent.withOpacity(0.05)],
@@ -422,30 +344,41 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
             )
           : AppDecorations.card,
       child: Row(
+        mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
         children: [
-          if (icon != null) ...[
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: accent.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: accent, size: 20),
+          Container(
+            padding: EdgeInsets.all(iconBoxPadding),
+            decoration: BoxDecoration(
+              color: accent.withOpacity(0.15),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(width: 12),
-          ],
+            child: Icon(item.icon, color: accent, size: iconSize),
+          ),
+          SizedBox(width: isNarrow ? 8 : 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: AppTextStyles.heading4),
-                const SizedBox(height: 4),
-                Text(value, style: AppTextStyles.heading3),
-              ],
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: AppTextStyles.heading4,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(item.value, style: AppTextStyles.heading3, maxLines: 1),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
+
+    return fullWidth ? card : SizedBox.expand(child: card);
   }
 }
