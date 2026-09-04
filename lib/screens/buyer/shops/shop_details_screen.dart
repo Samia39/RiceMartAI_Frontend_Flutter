@@ -3,9 +3,10 @@ import 'package:get/get.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/services/chat_service.dart';
 import '../../../core/services/cart_service.dart';
+import '../../../core/services/shop_service.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
-import '../../../widgets/shop_reviews_section.dart'; // ✅ adjust path to match your project structure
+import '../../../widgets/shop_reviews_section.dart';
 
 class ShopDetailsScreen extends StatefulWidget {
   const ShopDetailsScreen({super.key});
@@ -15,22 +16,24 @@ class ShopDetailsScreen extends StatefulWidget {
 }
 
 class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
-  // ✅ Null-safe: never crashes with a cast error if arguments are missing
-  // (e.g. after a browser refresh on Flutter web, Get.arguments becomes null).
-  Map<String, dynamic> get shop {
-    final args = Get.arguments;
-    if (args is Map<String, dynamic>) return args;
-    if (args is Map) return Map<String, dynamic>.from(args);
-    return const {};
-  }
+  // ✅ Shop data now lives in local state instead of being read directly
+  // from Get.arguments each build — this lets us REPLACE it once we
+  // recover the shop from the URL id after a web refresh.
+  Map<String, dynamic> _shop = {};
+
+  // ✅ True while we're trying to recover the shop from the URL id
+  // (only happens when Get.arguments was lost, e.g. web page refresh).
+  bool isResolvingShop = false;
 
   // ✅ Null-safe id extraction; handles int, String, or missing id.
-  int? get shopId {
-    final id = shop["id"];
+  int? _extractId(Map<String, dynamic> map) {
+    final id = map["id"];
     if (id is int) return id;
     if (id is String) return int.tryParse(id);
     return null;
   }
+
+  int? get shopId => _extractId(_shop);
 
   List<Map<String, dynamic>> productList = [];
   bool isLoading = true;
@@ -39,12 +42,54 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    if (shopId != null) {
+    _initShop();
+  }
+
+  Future<void> _initShop() async {
+    // 1. Try normal in-memory navigation arguments first (fast path —
+    // this is what happens on every regular in-app tap).
+    final args = Get.arguments;
+    Map<String, dynamic> argShop = {};
+    if (args is Map<String, dynamic>) {
+      argShop = args;
+    } else if (args is Map) {
+      argShop = Map<String, dynamic>.from(args);
+    }
+
+    if (_extractId(argShop) != null) {
+      setState(() => _shop = argShop);
+      fetchProducts();
+      return;
+    }
+
+    // 2. Arguments were empty/lost (e.g. web page refresh). Fall back to
+    // the shop id carried in the URL itself, e.g. #/shop-details?id=12
+    final idFromUrl = Get.parameters['id'];
+    final parsedId = idFromUrl != null ? int.tryParse(idFromUrl) : null;
+
+    if (parsedId == null) {
+      // No id anywhere — genuinely nothing to show.
+      setState(() => isLoading = false);
+      return;
+    }
+
+    setState(() => isResolvingShop = true);
+
+    final recovered = await ShopService().fetchShopById(parsedId);
+
+    if (!mounted) return;
+
+    if (recovered != null) {
+      setState(() {
+        _shop = recovered;
+        isResolvingShop = false;
+      });
       fetchProducts();
     } else {
-      // No valid shop id (e.g. lost Get.arguments on web reload) -> stop loading,
-      // build() will show a "Shop not found" state instead of crashing.
-      isLoading = false;
+      setState(() {
+        isResolvingShop = false;
+        isLoading = false;
+      });
     }
   }
 
@@ -86,7 +131,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
         AppRoutes.chat,
         arguments: {
           "conversation_id": result["conversation_id"],
-          "other_name": shop["shop_name"] ?? "Shop",
+          "other_name": _shop["shop_name"] ?? "Shop",
         },
       );
     } else {
@@ -96,7 +141,21 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Guard: if we truly have no shop id, show a friendly fallback
+    // ✅ Still resolving the shop from the URL id — show a loading state
+    // instead of immediately showing "not found".
+    if (isResolvingShop) {
+      return Container(
+        decoration: AppDecorations.gradientBackground,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(title: const Text("Shop")),
+          body: const Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    // ✅ Guard: if we truly have no shop id (no arguments AND no URL id,
+    // or the URL id didn't match any shop), show a friendly fallback
     // instead of letting the rest of the widget tree crash on nulls.
     if (shopId == null) {
       return Container(
@@ -143,239 +202,260 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       decoration: AppDecorations.gradientBackground,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: Text(shop["shop_name"] ?? "")),
+        appBar: AppBar(title: Text(_shop["shop_name"] ?? "")),
+        // =========================
+        // ✅ RESPONSIVE BODY
+        // Content is centered and width-capped on large screens.
+        // Product grid uses SliverGridDelegateWithMaxCrossAxisExtent so
+        // column count adjusts automatically to screen width, while
+        // mainAxisExtent keeps card height fixed.
+        // =========================
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // =========================
-              // SHOP INFO CARD
-              // =========================
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: AppDecorations.card,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shop["shop_name"] ?? "",
-                      style: AppTextStyles.heading2,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "Owner: ${shop["owner_name"] ?? "N/A"}",
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Address: ${shop["address"] ?? "N/A"}",
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      shop["description"] ?? "",
-                      style: AppTextStyles.bodyLarge,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // =========================
-              // CHAT WITH SELLER BUTTON
-              // =========================
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: isStartingChat ? null : openChat,
-                  icon: isStartingChat
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.chat_bubble_outline),
-                  label: Text(
-                    isStartingChat ? "Opening..." : "Chat with Seller",
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // =========================
+                  // SHOP INFO CARD
+                  // =========================
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: AppDecorations.card,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _shop["shop_name"] ?? "",
+                          style: AppTextStyles.heading2,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "Owner: ${_shop["owner_name"] ?? "N/A"}",
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Address: ${_shop["address"] ?? "N/A"}",
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _shop["description"] ?? "",
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
 
-              const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
-              // =========================
-              // TITLE
-              // =========================
-              Text("Available Products", style: AppTextStyles.heading3),
-              const SizedBox(height: 14),
-
-              if (isLoading) const Center(child: CircularProgressIndicator()),
-
-              if (!isLoading && productList.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: AppDecorations.card,
-                  child: const Text("No products available"),
-                ),
-
-              if (!isLoading && productList.isNotEmpty)
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: productList.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.68,
-                  ),
-                  itemBuilder: (context, index) {
-                    final product = productList[index];
-                    final imageUrl = ProductService.getImageUrl(product);
-
-                    // ✅ Whole card is now clickable -> goes to product details
-                    return GestureDetector(
-                      onTap: () async {
-                        final result = await Get.toNamed(
-                          AppRoutes.riceDetails,
-                          arguments: product,
-                        );
-                        if (result == true) {
-                          setState(() {});
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: AppDecorations.card,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // ✅ PRODUCT IMAGE
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Container(
-                                height: 90,
-                                width: double.infinity,
-                                color: AppColors.cream,
-                                child: imageUrl != null
-                                    ? Image.network(
-                                        imageUrl,
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: 90,
-                                        errorBuilder: (c, e, s) => const Icon(
-                                          Icons.rice_bowl,
-                                          size: 50,
-                                          color: AppColors.darkGreen,
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.rice_bowl,
-                                        size: 50,
-                                        color: AppColors.darkGreen,
-                                      ),
+                  // =========================
+                  // CHAT WITH SELLER BUTTON
+                  // =========================
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: isStartingChat ? null : openChat,
+                      icon: isStartingChat
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              product["name"] ?? "",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.heading4,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              product["rice_category"]?["name"] ?? "",
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.bodyMedium,
-                            ),
-                            const SizedBox(height: 8),
+                            )
+                          : const Icon(Icons.chat_bubble_outline),
+                      label: Text(
+                        isStartingChat ? "Opening..." : "Chat with Seller",
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
 
-                            // ✅ PRICE + ADD TO CART
-                            Row(
+                  const SizedBox(height: 24),
+
+                  // =========================
+                  // TITLE
+                  // =========================
+                  Text("Available Products", style: AppTextStyles.heading3),
+                  const SizedBox(height: 14),
+
+                  if (isLoading)
+                    const Center(child: CircularProgressIndicator()),
+
+                  if (!isLoading && productList.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: AppDecorations.card,
+                      child: const Text("No products available"),
+                    ),
+
+                  if (!isLoading && productList.isNotEmpty)
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: productList.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 200,
+                            mainAxisExtent: 260,
+                            mainAxisSpacing: 16,
+                            crossAxisSpacing: 16,
+                          ),
+                      itemBuilder: (context, index) {
+                        final product = productList[index];
+                        final imageUrl = ProductService.getImageUrl(product);
+
+                        // ✅ Whole card is now clickable -> goes to product details
+                        return GestureDetector(
+                          onTap: () async {
+                            final result = await Get.toNamed(
+                              AppRoutes.riceDetails,
+                              arguments: product,
+                            );
+                            if (result == true) {
+                              setState(() {});
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: AppDecorations.card,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    "Rs ${product["price"]}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.heading4.copyWith(
-                                      color: AppColors.darkGreen,
-                                      fontSize: 14,
-                                    ),
+                                // ✅ PRODUCT IMAGE
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Container(
+                                    height: 90,
+                                    width: double.infinity,
+                                    color: AppColors.cream,
+                                    child: imageUrl != null
+                                        ? Image.network(
+                                            imageUrl,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: 90,
+                                            errorBuilder: (c, e, s) =>
+                                                const Icon(
+                                                  Icons.rice_bowl,
+                                                  size: 50,
+                                                  color: AppColors.darkGreen,
+                                                ),
+                                          )
+                                        : const Icon(
+                                            Icons.rice_bowl,
+                                            size: 50,
+                                            color: AppColors.darkGreen,
+                                          ),
                                   ),
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    CartService().addToCart(
-                                      rice: product,
-                                      quantity: 1,
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "${product["name"]} added to cart",
+                                const SizedBox(height: 12),
+                                Text(
+                                  product["name"] ?? "",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.heading4,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  product["rice_category"]?["name"] ?? "",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.bodyMedium,
+                                ),
+                                const SizedBox(height: 8),
+
+                                // ✅ PRICE + ADD TO CART
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "Rs ${product["price"]}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTextStyles.heading4.copyWith(
+                                          color: AppColors.darkGreen,
+                                          fontSize: 14,
                                         ),
-                                        duration: const Duration(seconds: 1),
                                       ),
-                                    );
-                                  },
-                                  child: Container(
-                                    height: 28,
-                                    width: 28,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.darkGreen,
-                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Icon(
-                                      Icons.add_shopping_cart_rounded,
-                                      color: Colors.white,
-                                      size: 15,
+                                    GestureDetector(
+                                      onTap: () {
+                                        CartService().addToCart(
+                                          rice: product,
+                                          quantity: 1,
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "${product["name"]} added to cart",
+                                            ),
+                                            duration: const Duration(
+                                              seconds: 1,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 28,
+                                        width: 28,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.darkGreen,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.add_shopping_cart_rounded,
+                                          color: Colors.white,
+                                          size: 15,
+                                        ),
+                                      ),
                                     ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "${product["stock"]} KG left",
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: Colors.grey[600],
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "${product["stock"]} KG left",
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                          ),
+                        );
+                      },
+                    ),
 
-              const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-              // =========================
-              // SHOP REVIEWS
-              // Visible to any customer viewing this shop, so they
-              // can see what past buyers said before purchasing.
-              // =========================
-              Text("Customer Reviews", style: AppTextStyles.heading3),
-              const SizedBox(height: 14),
-              ShopReviewsSection(shopId: shopId!),
-            ],
+                  // =========================
+                  // SHOP REVIEWS
+                  // Visible to any customer viewing this shop, so they
+                  // can see what past buyers said before purchasing.
+                  // =========================
+                  Text("Customer Reviews", style: AppTextStyles.heading3),
+                  const SizedBox(height: 14),
+                  ShopReviewsSection(shopId: shopId!),
+                ],
+              ),
+            ),
           ),
         ),
       ),

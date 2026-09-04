@@ -480,331 +480,255 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 700;
 
-            return SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: isWide ? 40 : 16,
-                vertical: 16,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
+            // =========================
+            // FORM FIELDS (name, phone, city, address)
+            // =========================
+            final formFields = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Customer Name"),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: "Phone Number"),
+                ),
+
+                const SizedBox(height: 16),
+
+                loadingCities
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      )
+                    : DropdownButtonFormField<int>(
+                        initialValue: selectedCityId,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: "Delivery City",
+                        ),
+                        items: _cities.map<DropdownMenuItem<int>>((city) {
+                          return DropdownMenuItem<int>(
+                            value: city['id'],
+                            child: Text(
+                              "${city['name']} (Rs ${city['delivery_charge']})",
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCityId = value;
+                          });
+                        },
+                      ),
+
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: addressController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(labelText: "Address"),
+                ),
+              ],
+            );
+
+            // =========================
+            // PAYMENT METHOD SECTION
+            // =========================
+            final paymentMethodSection = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text("Payment Method", style: AppTextStyles.heading4),
+
+                const SizedBox(height: 10),
+
+                Container(
+                  decoration: AppDecorations.card,
                   child: Column(
+                    children: [
+                      RadioListTile(
+                        value: "easypaisa",
+                        groupValue: paymentMethod,
+                        activeColor: AppColors.golden,
+                        title: Text(
+                          "EasyPaisa",
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            paymentMethod = value!;
+                          });
+                        },
+                      ),
+
+                      Divider(height: 1, color: AppColors.divider),
+
+                      RadioListTile(
+                        value: "jazzcash",
+                        groupValue: paymentMethod,
+                        activeColor: AppColors.golden,
+                        title: Text("JazzCash", style: AppTextStyles.bodyLarge),
+                        onChanged: (value) {
+                          setState(() {
+                            paymentMethod = value!;
+                          });
+                        },
+                      ),
+
+                      Divider(height: 1, color: AppColors.divider),
+
+                      RadioListTile(
+                        value: "card",
+                        groupValue: paymentMethod,
+                        activeColor: AppColors.golden,
+                        title: Text("Card", style: AppTextStyles.bodyLarge),
+                        onChanged: (value) {
+                          setState(() {
+                            paymentMethod = value!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                if (paymentMethod == "easypaisa" || paymentMethod == "jazzcash")
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // =========================
-                      // NAME
-                      // =========================
+                      _sendPaymentToSection(),
+
+                      const SizedBox(height: 20),
+
                       TextField(
-                        controller: nameController,
+                        controller: transactionIdController,
                         decoration: const InputDecoration(
-                          labelText: "Customer Name",
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // =========================
-                      // PHONE
-                      // =========================
-                      TextField(
-                        controller: phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: "Phone Number",
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // =========================
-                      // CITY (delivery charge dropdown)
-                      // =========================
-                      loadingCities
-                          ? const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Center(
-                                child: SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : DropdownButtonFormField<int>(
-                              initialValue: selectedCityId,
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                labelText: "Delivery City",
-                              ),
-                              items: _cities.map<DropdownMenuItem<int>>((city) {
-                                return DropdownMenuItem<int>(
-                                  value: city['id'],
-                                  child: Text(
-                                    "${city['name']} (Rs ${city['delivery_charge']})",
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedCityId = value;
-                                });
-                              },
-                            ),
-
-                      const SizedBox(height: 16),
-
-                      // =========================
-                      // ADDRESS
-                      // =========================
-                      TextField(
-                        controller: addressController,
-                        maxLines: 3,
-                        decoration: const InputDecoration(labelText: "Address"),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // =========================
-                      // ORDER SUMMARY
-                      // =========================
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: AppDecorations.card,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Order Summary",
-                              style: AppTextStyles.heading3,
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            ...cart.map((item) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            item["name"] ?? "",
-                                            style: AppTextStyles.heading4,
-                                          ),
-
-                                          Text(
-                                            "Shop: ${item["shop"]?["shop_name"] ?? "-"}",
-                                            style: AppTextStyles.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    Text(
-                                      "x${item["quantity"]}",
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-
-                                    const SizedBox(width: 15),
-
-                                    Text(
-                                      "Rs ${item["price"]}",
-                                      style: AppTextStyles.bodyMedium,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }),
-
-                            const Divider(),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Subtotal",
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                                Text(
-                                  "Rs ${subtotal.toStringAsFixed(0)}",
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Delivery",
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                                Text(
-                                  "Rs ${deliveryCharge.toStringAsFixed(0)}",
-                                  style: AppTextStyles.bodyMedium,
-                                ),
-                              ],
-                            ),
-
-                            const Divider(),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Total", style: AppTextStyles.heading3),
-                                Text(
-                                  "Rs ${total.toStringAsFixed(0)}",
-                                  style: AppTextStyles.heading3,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      Text("Payment Method", style: AppTextStyles.heading4),
-
-                      const SizedBox(height: 10),
-
-                      Container(
-                        decoration: AppDecorations.card,
-                        child: Column(
-                          children: [
-                            RadioListTile(
-                              value: "easypaisa",
-                              groupValue: paymentMethod,
-                              activeColor: AppColors.golden,
-                              title: Text(
-                                "EasyPaisa",
-                                style: AppTextStyles.bodyLarge,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  paymentMethod = value!;
-                                });
-                              },
-                            ),
-
-                            Divider(height: 1, color: AppColors.divider),
-
-                            RadioListTile(
-                              value: "jazzcash",
-                              groupValue: paymentMethod,
-                              activeColor: AppColors.golden,
-                              title: Text(
-                                "JazzCash",
-                                style: AppTextStyles.bodyLarge,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  paymentMethod = value!;
-                                });
-                              },
-                            ),
-
-                            Divider(height: 1, color: AppColors.divider),
-
-                            RadioListTile(
-                              value: "card",
-                              groupValue: paymentMethod,
-                              activeColor: AppColors.golden,
-                              title: Text(
-                                "Card",
-                                style: AppTextStyles.bodyLarge,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  paymentMethod = value!;
-                                });
-                              },
-                            ),
-                          ],
+                          labelText: "Transaction ID",
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      if (paymentMethod == "easypaisa" ||
-                          paymentMethod == "jazzcash")
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _sendPaymentToSection(),
-
-                            const SizedBox(height: 20),
-
-                            TextField(
-                              controller: transactionIdController,
-                              decoration: const InputDecoration(
-                                labelText: "Transaction ID",
-                              ),
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            SizedBox(
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: pickImage,
-                                child: Text(
-                                  paymentFileName == null
-                                      ? "Upload Screenshot"
-                                      : paymentFileName!,
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            if (paymentImageBytes != null)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.memory(
-                                  paymentImageBytes!,
-                                  height: 180,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                          ],
+                      SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: pickImage,
+                          child: Text(
+                            paymentFileName == null
+                                ? "Upload Screenshot"
+                                : paymentFileName!,
+                          ),
                         ),
+                      ),
 
-                      // =========================
-                      // CARD — Stripe test-mode payment
-                      // =========================
-                      if (paymentMethod == "card")
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: AppDecorations.card,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 15),
+
+                      if (paymentImageBytes != null)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            paymentImageBytes!,
+                            height: 180,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                    ],
+                  ),
+
+                if (paymentMethod == "card")
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: AppDecorations.card,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "You'll be asked for card details on the next step, "
+                          "via a secure Stripe payment sheet.",
+                          style: AppTextStyles.bodyMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Test mode — no real charge occurs.",
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.labelSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+
+            // =========================
+            // ORDER SUMMARY CARD (with totals + place order button)
+            // =========================
+            final orderSummaryCard = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: AppDecorations.card,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Order Summary", style: AppTextStyles.heading3),
+
+                      const SizedBox(height: 15),
+
+                      ...cart.map((item) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
                             children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item["name"] ?? "",
+                                      style: AppTextStyles.heading4,
+                                    ),
+
+                                    Text(
+                                      "Shop: ${item["shop"]?["shop_name"] ?? "-"}",
+                                      style: AppTextStyles.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+
                               Text(
-                                "You'll be asked for card details on the next step, "
-                                "via a secure Stripe payment sheet.",
+                                "x${item["quantity"]}",
                                 style: AppTextStyles.bodyMedium,
                               ),
-                              const SizedBox(height: 8),
+
+                              const SizedBox(width: 15),
+
                               Text(
-                                "Test mode — no real charge occurs.",
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.labelSecondary,
-                                ),
+                                "Rs ${item["price"]}",
+                                style: AppTextStyles.bodyMedium,
                               ),
                             ],
                           ),
-                        ),
+                        );
+                      }),
 
-                      const SizedBox(height: 30),
+                      const Divider(),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -842,22 +766,100 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 30),
-
-                      SizedBox(
-                        height: 55,
-                        child: ElevatedButton(
-                          onPressed: isLoading ? null : placeOrder,
-                          child: isLoading
-                              ? const CircularProgressIndicator()
-                              : const Text("Place Order"),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 30),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Subtotal", style: AppTextStyles.bodyMedium),
+                    Text(
+                      "Rs ${subtotal.toStringAsFixed(0)}",
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 6),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Delivery", style: AppTextStyles.bodyMedium),
+                    Text(
+                      "Rs ${deliveryCharge.toStringAsFixed(0)}",
+                      style: AppTextStyles.bodyMedium,
+                    ),
+                  ],
+                ),
+
+                const Divider(),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Total", style: AppTextStyles.heading3),
+                    Text(
+                      "Rs ${total.toStringAsFixed(0)}",
+                      style: AppTextStyles.heading3,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 30),
+
+                SizedBox(
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : placeOrder,
+                    child: isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text("Place Order"),
+                  ),
+                ),
+              ],
+            );
+
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isWide ? 40 : 16,
+                vertical: 16,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isWide ? 1100 : 600),
+                  child: isWide
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  formFields,
+                                  const SizedBox(height: 24),
+                                  paymentMethodSection,
+                                  const SizedBox(height: 16),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(flex: 2, child: orderSummaryCard),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            formFields,
+                            const SizedBox(height: 24),
+                            orderSummaryCard,
+                            const SizedBox(height: 16),
+                          ],
+                        ),
                 ),
               ),
             );

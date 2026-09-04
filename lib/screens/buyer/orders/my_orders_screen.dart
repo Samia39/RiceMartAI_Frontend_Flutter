@@ -166,63 +166,81 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(16),
               decoration: AppDecorations.card,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Order #${order["id"]}",
-                        style: AppTextStyles.heading4,
-                      ),
-                      Chip(
-                        label: Text(
-                          overallStatus.toUpperCase(),
-                          style: AppTextStyles.label.copyWith(
-                            color: tagColor,
-                            fontSize: 11.5,
-                          ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Order #${order["id"]}",
+                              style: AppTextStyles.heading4,
+                            ),
+                            Chip(
+                              label: Text(
+                                overallStatus.toUpperCase(),
+                                style: AppTextStyles.label.copyWith(
+                                  color: tagColor,
+                                  fontSize: 11.5,
+                                ),
+                              ),
+                              backgroundColor: tagColor.withOpacity(0.15),
+                              side: BorderSide(
+                                color: tagColor.withOpacity(0.45),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                            ),
+                          ],
                         ),
-                        backgroundColor: tagColor.withOpacity(0.15),
-                        side: BorderSide(color: tagColor.withOpacity(0.45)),
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                      ),
-                    ],
-                  ),
 
-                  if (overallStatus == "rejected") ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      "Your payment was rejected. This order cannot proceed.",
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.error,
-                      ),
+                        if (overallStatus == "rejected") ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            "Your payment was rejected. This order cannot proceed.",
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.error,
+                            ),
+                          ),
+                        ],
+
+                        const SizedBox(height: 10),
+
+                        Text(
+                          "Payment: ${order["payment_method"]}",
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Payment Status: ${order["payment_status"]}",
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Total: Rs ${order["total_price"]}",
+                          style: AppTextStyles.heading4,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Items: ${order["items"].length}",
+                          style: AppTextStyles.bodyLarge,
+                        ),
+                      ],
                     ),
-                  ],
-
-                  const SizedBox(height: 10),
-
-                  Text(
-                    "Payment: ${order["payment_method"]}",
-                    style: AppTextStyles.bodyLarge,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Payment Status: ${order["payment_status"]}",
-                    style: AppTextStyles.bodyLarge,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Total: Rs ${order["total_price"]}",
-                    style: AppTextStyles.heading4,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Items: ${order["items"].length}",
-                    style: AppTextStyles.bodyLarge,
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                    color: AppColors.darkGreen.withOpacity(0.5),
                   ),
                 ],
               ),

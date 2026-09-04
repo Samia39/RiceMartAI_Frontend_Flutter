@@ -120,67 +120,70 @@ class _ShopsScreenState extends State<ShopsScreen> {
                           final shop = filteredShops[index];
 
                           return GestureDetector(
+                            // change to fix the error of reload shop
                             onTap: () {
                               Get.toNamed(
-                                AppRoutes.shopDetails,
+                                "${AppRoutes.shopDetails}?id=${shop["id"]}",
                                 arguments: shop,
                               );
                             },
 
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 16),
-
                               padding: const EdgeInsets.all(16),
-
                               decoration: AppDecorations.card,
-
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    shop["shop_name"] ?? "",
-
-                                    style: AppTextStyles.heading3,
-                                  ),
-
-                                  const SizedBox(height: 10),
-
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.person),
-
-                                      const SizedBox(width: 8),
-
-                                      Text(
-                                        shop["owner_name"] ?? "",
-
-                                        style: AppTextStyles.bodyLarge,
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 8),
-
-                                  const SizedBox(height: 8),
-
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-
-                                    children: [
-                                      const Icon(Icons.location_on),
-
-                                      const SizedBox(width: 8),
-
-                                      Expanded(
-                                        child: Text(
-                                          shop["address"] ?? "",
-
-                                          style: AppTextStyles.bodyLarge,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          shop["shop_name"] ?? "",
+                                          style: AppTextStyles.heading3,
                                         ),
-                                      ),
-                                    ],
+
+                                        const SizedBox(height: 10),
+
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.person),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              shop["owner_name"] ?? "",
+                                              style: AppTextStyles.bodyLarge,
+                                            ),
+                                          ],
+                                        ),
+
+                                        const SizedBox(height: 8),
+
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Icon(Icons.location_on),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                shop["address"] ?? "",
+                                                style: AppTextStyles.bodyLarge,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  // ✅ Arrow to make it obvious the card is tappable
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 16,
+                                    color: AppColors.darkGreen.withOpacity(0.5),
                                   ),
                                 ],
                               ),

@@ -106,86 +106,91 @@ class _CartScreenState extends State<CartScreen> {
             ? Center(
                 child: Text("Cart is empty", style: AppTextStyles.heading3),
               )
-            : Column(
-                children: [
+            : LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth > 700;
+
                   // =========================
-                  // CART ITEMS
+                  // SINGLE CART ITEM CARD
                   // =========================
-                  Expanded(
-                    child: ListView.builder(
+                  Widget buildItemCard(int index) {
+                    final item = cart[index];
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
                       padding: const EdgeInsets.all(16),
-                      itemCount: cart.length,
-                      itemBuilder: (context, index) {
-                        final item = cart[index];
+                      decoration: AppDecorations.card,
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: AppDecorations.card,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(item["name"], style: AppTextStyles.heading4),
 
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 10),
+
+                          Text(
+                            "Price: Rs ${item["price"]}",
+                            style: AppTextStyles.bodyLarge,
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Text(
+                            "Stock: ${item["stock"]} KG",
+                            style: AppTextStyles.bodyLarge,
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // =========================
+                          // QUANTITY CONTROLS
+                          // =========================
+                          Row(
                             children: [
-                              Text(item["name"], style: AppTextStyles.heading4),
-
-                              const SizedBox(height: 10),
-
-                              Text(
-                                "Price: Rs ${item["price"]}",
-                                style: AppTextStyles.bodyLarge,
+                              IconButton(
+                                onPressed: () => decreaseQuantity(index),
+                                icon: const Icon(Icons.remove),
                               ),
 
-                              const SizedBox(height: 10),
-
                               Text(
-                                "Stock: ${item["stock"]} KG",
-                                style: AppTextStyles.bodyLarge,
+                                item["quantity"].toString(),
+                                style: AppTextStyles.heading4,
                               ),
 
-                              const SizedBox(height: 16),
+                              IconButton(
+                                onPressed: () => increaseQuantity(index),
+                                icon: const Icon(Icons.add),
+                              ),
 
-                              // =========================
-                              // QUANTITY CONTROLS
-                              // =========================
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () => decreaseQuantity(index),
-                                    icon: const Icon(Icons.remove),
-                                  ),
+                              const Spacer(),
 
-                                  Text(
-                                    item["quantity"].toString(),
-                                    style: AppTextStyles.heading4,
-                                  ),
-
-                                  IconButton(
-                                    onPressed: () => increaseQuantity(index),
-                                    icon: const Icon(Icons.add),
-                                  ),
-
-                                  const Spacer(),
-
-                                  IconButton(
-                                    onPressed: () => removeItem(item["id"]),
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ],
+                              IconButton(
+                                onPressed: () => removeItem(item["id"]),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
                               ),
                             ],
                           ),
-                        );
-                      },
-                    ),
-                  ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // =========================
+                  // CART ITEMS LIST
+                  // =========================
+                  final itemsList = ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: cart.length,
+                    itemBuilder: (context, index) => buildItemCard(index),
+                  );
 
                   // =========================
                   // TOTAL SECTION
                   // =========================
-                  Container(
+                  final totalSection = Container(
                     padding: const EdgeInsets.all(20),
                     decoration: AppDecorations.card,
 
@@ -217,8 +222,55 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  );
+
+                  if (!isWide) {
+                    // =========================
+                    // NARROW LAYOUT (unchanged behavior)
+                    // =========================
+                    return Column(
+                      children: [
+                        Expanded(child: itemsList),
+                        totalSection,
+                      ],
+                    );
+                  }
+
+                  // =========================
+                  // WIDE LAYOUT: items on the left, sticky total on the right
+                  // =========================
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1100),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: SizedBox(
+                                height: constraints.maxHeight - 32,
+                                child: ListView.builder(
+                                  itemCount: cart.length,
+                                  itemBuilder: (context, index) =>
+                                      buildItemCard(index),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 24),
+
+                            Expanded(flex: 2, child: totalSection),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
       ),
     );

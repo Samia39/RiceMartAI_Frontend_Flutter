@@ -411,4 +411,21 @@ class ShopService {
 
     return [];
   }
+
+  // =========================
+  // FETCH SINGLE SHOP BY ID
+  // Reuses the existing approved-shops endpoint (no backend changes
+  // needed) and finds the matching shop. Used to recover shop details
+  // after a web page refresh wipes Get.arguments.
+  // =========================
+  Future<Map<String, dynamic>?> fetchShopById(int shopId) async {
+    final shops = await fetchApprovedShops();
+    try {
+      return shops.firstWhere(
+        (s) => int.tryParse(s["id"].toString()) == shopId,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 }

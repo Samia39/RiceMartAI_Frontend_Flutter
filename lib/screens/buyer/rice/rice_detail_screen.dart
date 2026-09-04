@@ -222,8 +222,12 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton.icon(
+                  // fix it to solve the reload shop problem
                   onPressed: () {
-                    Get.toNamed(AppRoutes.shopDetails, arguments: shop);
+                    Get.toNamed(
+                      "${AppRoutes.shopDetails}?id=${shop["id"]}",
+                      arguments: shop,
+                    );
                   },
                   icon: const Icon(Icons.store),
                   label: const Text("Go To Shop"),

@@ -236,8 +236,9 @@ class AiRecommendationResultScreen extends StatelessWidget {
                       // Navigate to ShopDetailsScreen, same arguments shape
                       // it already reads from elsewhere in the app
                       // (id, shop_name, owner_name, phone, address, description).
+                      // change the route to solve the reload shop problem
                       Get.toNamed(
-                        AppRoutes.shopDetails,
+                        "${AppRoutes.shopDetails}?id=${p["shop_id"]}",
                         arguments: {
                           "id": p["shop_id"],
                           "shop_name": p["shop_name"] ?? "",
