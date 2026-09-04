@@ -7,6 +7,7 @@ import 'user/shops_screen.dart';
 import 'user/profile_screen.dart';
 import 'user/conversations_screen.dart';
 import 'ai_rice_detection_screen.dart';
+import 'rice_recommendation_screen.dart';
 
 // ─────────────────────────────────────────────
 //  THEME
@@ -525,7 +526,12 @@ class HomePage extends StatelessWidget {
               icon: Icons.thumb_up_alt_outlined,
               title: 'Rice Recommendation',
               subtitle: 'Get smart rice recommendations',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RiceRecommendationScreen()),
+                );
+              },
             ),
           ],
         ),
