@@ -242,7 +242,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
                         arguments: {
                           "id": p["shop_id"],
                           "shop_name": p["shop_name"] ?? "",
-                          "owner_name": p["owner_name"] ?? "",
+                          "owner_name": p["shop_owner_name"] ?? "",
                           "phone": p["shop_phone"] ?? "",
                           "address": p["shop_address"] ?? "",
                           "description": p["shop_description"] ?? "",

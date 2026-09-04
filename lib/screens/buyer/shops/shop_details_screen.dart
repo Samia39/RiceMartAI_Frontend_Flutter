@@ -56,6 +56,12 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       argShop = Map<String, dynamic>.from(args);
     }
 
+    // 🔍 DEBUG
+    debugPrint("=== SHOP DETAILS INIT DEBUG ===");
+    debugPrint("Get.arguments = $args");
+    debugPrint("Get.parameters = ${Get.parameters}");
+    debugPrint("argShop extracted id = ${_extractId(argShop)}");
+
     if (_extractId(argShop) != null) {
       setState(() => _shop = argShop);
       fetchProducts();
@@ -67,6 +73,9 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
     final idFromUrl = Get.parameters['id'];
     final parsedId = idFromUrl != null ? int.tryParse(idFromUrl) : null;
 
+    debugPrint("idFromUrl (raw) = $idFromUrl");
+    debugPrint("parsedId = $parsedId");
+
     if (parsedId == null) {
       // No id anywhere — genuinely nothing to show.
       setState(() => isLoading = false);
@@ -74,12 +83,15 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
     }
 
     setState(() => isResolvingShop = true);
+    debugPrint("→ Calling ShopService().fetchShopById($parsedId)...");
 
     final recovered = await ShopService().fetchShopById(parsedId);
+    debugPrint("→ fetchShopById result = $recovered");
 
     if (!mounted) return;
 
     if (recovered != null) {
+      debugPrint("→ Recovered shop successfully.");
       setState(() {
         _shop = recovered;
         isResolvingShop = false;
@@ -87,6 +99,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       fetchProducts();
     } else {
       setState(() {
+        debugPrint("→ fetchShopById returned null. Showing 'not found'.");
         isResolvingShop = false;
         isLoading = false;
       });

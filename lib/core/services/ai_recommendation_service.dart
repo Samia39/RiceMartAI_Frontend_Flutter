@@ -138,7 +138,11 @@ class MatchedProduct {
   final String name;
   final double price;
   final int stock;
+  final int? shopId;
   final String shopName;
+  final String shopAddress;
+  final String shopOwnerName;
+  final String shopDescription;
   final String categoryName;
 
   MatchedProduct({
@@ -146,7 +150,11 @@ class MatchedProduct {
     required this.name,
     required this.price,
     required this.stock,
+    required this.shopId,
     required this.shopName,
+    required this.shopAddress,
+    required this.shopOwnerName,
+    required this.shopDescription,
     required this.categoryName,
   });
 
@@ -156,7 +164,13 @@ class MatchedProduct {
       name: json['name'] ?? '',
       price: (json['price'] as num).toDouble(),
       stock: json['stock'] ?? 0,
+      shopId: json['shop_id'] is int
+          ? json['shop_id']
+          : int.tryParse(json['shop_id']?.toString() ?? ''),
       shopName: json['shop_name'] ?? 'N/A',
+      shopAddress: json['shop_address'] ?? '',
+      shopOwnerName: json['shop_owner_name'] ?? '',
+      shopDescription: json['shop_description'] ?? '',
       categoryName: json['category_name'] ?? 'N/A',
     );
   }
