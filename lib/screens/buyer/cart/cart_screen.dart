@@ -31,8 +31,8 @@ class _CartScreenState extends State<CartScreen> {
   // LOAD CART
   // =========================
   void loadCart() {
-    cart = CartService().getCart();
-    total = CartService().totalPrice();
+    cart = Get.find<CartService>().getCart();
+    total = Get.find<CartService>().totalPrice();
     setState(() {});
   }
 
@@ -40,7 +40,7 @@ class _CartScreenState extends State<CartScreen> {
   // REMOVE ITEM
   // =========================
   void removeItem(int riceId) {
-    CartService().removeItem(riceId);
+    Get.find<CartService>().removeItem(riceId);
     loadCart();
     widget.onCartUpdated?.call();
 
@@ -64,7 +64,7 @@ class _CartScreenState extends State<CartScreen> {
       return;
     }
 
-    final int newQty = CartService().updateQuantity(
+    final int newQty = Get.find<CartService>().updateQuantity(
       riceId: cart[index]["id"],
       quantity: currentQty + 1,
     );
@@ -82,7 +82,7 @@ class _CartScreenState extends State<CartScreen> {
     if (cart[index]["quantity"] > 1) {
       cart[index]["quantity"]--;
 
-      CartService().updateQuantity(
+      Get.find<CartService>().updateQuantity(
         riceId: cart[index]["id"],
         quantity: cart[index]["quantity"],
       );

@@ -199,7 +199,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                           child: IconButton(
                             padding: EdgeInsets.zero,
                             onPressed: () {
-                              CartService().addToCart(
+                              Get.find<CartService>().addToCart(
                                 rice: product,
                                 quantity: 1,
                               );

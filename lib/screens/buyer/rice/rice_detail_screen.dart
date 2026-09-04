@@ -200,7 +200,10 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                 height: 55,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    CartService().addToCart(rice: product, quantity: quantity);
+                    Get.find<CartService>().addToCart(
+                      rice: product,
+                      quantity: quantity,
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text("${product["name"]} added to cart"),

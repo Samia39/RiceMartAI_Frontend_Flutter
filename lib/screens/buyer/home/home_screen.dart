@@ -7,7 +7,9 @@ import '../../../core/services/cart_service.dart';
 import '../../../routes/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback? onSeeAllProducts;
+
+  const HomeScreen({super.key, this.onSeeAllProducts});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -136,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       // SEE ALL BUTTON
                       GestureDetector(
                         onTap: () {
-                          Get.toNamed(AppRoutes.allRice);
+                          widget.onSeeAllProducts?.call();
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -150,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: AppColors.cream.withOpacity(0.5),
                             ),
                           ),
+
                           child: Text(
                             "See All Products",
                             style: AppTextStyles.bodySmall.copyWith(
@@ -196,6 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     arguments: product,
                                   );
                                 },
+
                                 child: Container(
                                   width: 155,
 
@@ -293,7 +297,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                               overflow: TextOverflow.ellipsis,
                                               style: AppTextStyles.bodySmall
                                                   .copyWith(
-                                                    color: Colors.grey[600],
+                                                    color: AppColors.darkGreen
+                                                        .withOpacity(0.75),
                                                     fontSize: 11,
                                                   ),
                                             ),
@@ -321,10 +326,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                                 GestureDetector(
                                                   onTap: () {
-                                                    CartService().addToCart(
-                                                      rice: product,
-                                                      quantity: 1,
-                                                    );
+                                                    Get.find<CartService>()
+                                                        .addToCart(
+                                                          rice: product,
+                                                          quantity: 1,
+                                                        );
 
                                                     ScaffoldMessenger.of(
                                                       context,

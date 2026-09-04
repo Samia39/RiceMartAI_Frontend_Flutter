@@ -207,9 +207,10 @@ class AIResultScreen extends StatelessWidget {
                             child: ElevatedButton.icon(
                               onPressed: () {
                                 Get.toNamed(
-                                  AppRoutes.allRice,
+                                  AppRoutes.dashboard,
                                   arguments: {
-                                    'initialSearchQuery': searchQuery,
+                                    'tabIndex': 1,
+                                    'riceSearchQuery': searchQuery,
                                   },
                                 );
                               },

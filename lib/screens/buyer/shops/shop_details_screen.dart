@@ -407,7 +407,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                     ),
                                     GestureDetector(
                                       onTap: () {
-                                        CartService().addToCart(
+                                        Get.find<CartService>().addToCart(
                                           rice: product,
                                           quantity: 1,
                                         );

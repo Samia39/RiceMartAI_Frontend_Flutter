@@ -23,19 +23,42 @@ class BuyerDashboardScreen extends StatefulWidget {
 
 class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
   final box = GetStorage();
-  final CartService cartService = CartService();
+  final CartService cartService = Get.find<CartService>();
   int currentIndex = 0;
+  String riceSearchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final args = Get.arguments;
+    if (args is Map) {
+      if (args['tabIndex'] is int) {
+        currentIndex = args['tabIndex'] as int;
+      }
+      if (args['riceSearchQuery'] is String) {
+        riceSearchQuery = args['riceSearchQuery'] as String;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      const HomeScreen(),
+      HomeScreen(
+        onSeeAllProducts: () {
+          setState(() {
+            riceSearchQuery = ''; // no filter — show everything
+            currentIndex = 1; // Rice tab index
+          });
+        },
+      ),
 
       AllRiceScreen(
+        key: ValueKey(riceSearchQuery), // rebuild state when query changes
         onCartUpdated: () {
           setState(() {});
         },
-        initialSearchQuery: '',
+        initialSearchQuery: riceSearchQuery,
       ),
 
       const ShopsScreen(),
@@ -64,31 +87,27 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
             Stack(
               children: [
                 IconButton(
-                  onPressed: () async {
-                    await Get.toNamed(AppRoutes.cart);
-
-                    setState(() {});
+                  onPressed: () {
+                    Get.toNamed(AppRoutes.cart);
                   },
-
                   icon: const Icon(Icons.shopping_cart),
                 ),
 
-                if (cartService.getCart().isNotEmpty)
-                  Positioned(
+                Obx(() {
+                  final count = cartService.cart.length;
+                  if (count == 0) return const SizedBox.shrink();
+
+                  return Positioned(
                     right: 5,
                     top: 5,
-
                     child: Container(
                       padding: const EdgeInsets.all(5),
-
                       decoration: const BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
-
                       child: Text(
-                        cartService.getCart().length.toString(),
-
+                        count.toString(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -96,7 +115,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
                         ),
                       ),
                     ),
-                  ),
+                  );
+                }),
               ],
             ),
           ],

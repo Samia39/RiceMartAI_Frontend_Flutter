@@ -4,6 +4,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'core/services/cart_service.dart';
 import 'core/utils/themes.dart';
 import 'routes/app_routes.dart';
 import 'routes/app_pages.dart';
@@ -12,6 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await GetStorage.init();
+  Get.put(CartService());
 
   // Initialize Stripe only on native platforms.
   // flutter_stripe is causing Platform._operatingSystem
