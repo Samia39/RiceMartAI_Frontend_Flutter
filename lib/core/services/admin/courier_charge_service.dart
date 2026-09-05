@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:ricemart_ai/core/constants/app_icons.dart';
 
 class CourierChargeService {
   final box = GetStorage();
 
-  final String baseUrl = "http://ricemart.sandbox.pk/api";
+  final String baseUrl = BaseUrl.url;
 
   // =========================
   // GET ALL COURIER CHARGES

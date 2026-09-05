@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ricemart_ai/core/utils/themes.dart';
 
 import '../../../controllers/admin/user_management/permissions_controller.dart';
 
@@ -17,6 +18,13 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
 
   final PermissionsController controller = Get.find<PermissionsController>();
 
+  // =========================
+  // SEARCH
+  // =========================
+
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +39,12 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -38,295 +52,390 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
         centerTitle: true,
       ),
 
-      body: GetBuilder<PermissionsController>(
-        builder: (controller) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
+      body: Container(
+        decoration: AppDecorations.gradientBackground,
+        child: GetBuilder<PermissionsController>(
+          builder: (controller) {
+            // =========================
+            // FILTERED PERMISSIONS
+            // =========================
+            final List filteredPermissions = _searchQuery.isEmpty
+                ? controller.permissions
+                : controller.permissions
+                      .where(
+                        (p) => p['name'].toString().toLowerCase().contains(
+                          _searchQuery,
+                        ),
+                      )
+                      .toList();
 
-            child: Column(
-              children: [
-                // =========================
-                // ROLE DROPDOWN
-                // =========================
-                DropdownButtonFormField<int>(
-                  value: controller.selectedRoleId.value,
+            return Padding(
+              padding: const EdgeInsets.all(16),
 
-                  decoration: InputDecoration(
-                    labelText: "Select Role",
+              child: Column(
+                children: [
+                  // =========================
+                  // ROLE DROPDOWN
+                  // =========================
+                  DropdownButtonFormField<int>(
+                    value: controller.selectedRoleId.value,
 
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    decoration: InputDecoration(
+                      labelText: "Select Role",
+
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+
+                    items: controller.roles.map<DropdownMenuItem<int>>((role) {
+                      return DropdownMenuItem<int>(
+                        value: role['id'],
+                        child: Text(role['name']),
+                      );
+                    }).toList(),
+
+                    onChanged: (value) async {
+                      await controller.onRoleChanged(value);
+                    },
                   ),
 
-                  items: controller.roles.map<DropdownMenuItem<int>>((role) {
-                    return DropdownMenuItem<int>(
-                      value: role['id'],
-                      child: Text(role['name']),
-                    );
-                  }).toList(),
+                  const SizedBox(height: 20),
 
-                  onChanged: (value) async {
-                    await controller.onRoleChanged(value);
-                  },
-                ),
+                  // =========================
+                  // CONTENT
+                  // =========================
+                  Expanded(
+                    child: Column(
+                      children: [
+                        // =========================
+                        // AVAILABLE PERMISSIONS
+                        // =========================
+                        Expanded(
+                          flex: 2,
 
-                const SizedBox(height: 20),
+                          child: Container(
+                            decoration: AppDecorations.card,
 
-                // =========================
-                // CONTENT
-                // =========================
-                Expanded(
-                  child: Column(
-                    children: [
-                      // =========================
-                      // AVAILABLE PERMISSIONS
-                      // =========================
-                      Expanded(
-                        flex: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
 
-                        child: Card(
-                          elevation: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
 
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-
-                              children: [
-                                const Text(
-                                  "Available Permissions",
-
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                children: [
+                                  Text(
+                                    "Available Permissions",
+                                    style: AppTextStyles.heading3,
                                   ),
-                                ),
 
-                                const SizedBox(height: 10),
+                                  const SizedBox(height: 10),
 
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: controller.permissions.length,
+                                  // =========================
+                                  // SEARCH FIELD
+                                  // =========================
+                                  TextField(
+                                    controller: _searchController,
 
-                                    itemBuilder: (context, index) {
-                                      final permission =
-                                          controller.permissions[index];
+                                    style: AppTextStyles.bodyMedium,
 
-                                      final int id = permission['id'];
+                                    decoration: InputDecoration(
+                                      hintText: "Search permissions...",
+                                      hintStyle: AppTextStyles.hint,
 
-                                      final String name = permission['name'];
+                                      prefixIcon: Icon(
+                                        Icons.search,
+                                        color: AppColors.iconMuted,
+                                      ),
 
-                                      final bool isSelected = controller
-                                          .selectedPermissions
-                                          .contains(id);
-
-                                      return Container(
-                                        margin: const EdgeInsets.only(
-                                          bottom: 8,
-                                        ),
-
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? Colors.green.withOpacity(0.12)
-                                              : Colors.grey.withOpacity(0.05),
-
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? Colors.green
-                                                : Colors.grey.shade300,
-                                          ),
-                                        ),
-
-                                        child: CheckboxListTile(
-                                          value: isSelected,
-
-                                          activeColor: Colors.green,
-
-                                          controlAffinity:
-                                              ListTileControlAffinity.leading,
-
-                                          title: Text(
-                                            name,
-
-                                            style: TextStyle(
-                                              fontWeight: isSelected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
+                                      suffixIcon: _searchQuery.isEmpty
+                                          ? null
+                                          : IconButton(
+                                              icon: Icon(
+                                                Icons.clear,
+                                                color: AppColors.iconMuted,
+                                              ),
+                                              onPressed: () {
+                                                _searchController.clear();
+                                                setState(() {
+                                                  _searchQuery = "";
+                                                });
+                                              },
                                             ),
+
+                                      isDense: true,
+
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 14,
+                                            vertical: 10,
                                           ),
 
-                                          onChanged: (value) {
-                                            controller.togglePermission(id);
-                                          },
+                                      filled: true,
+                                      fillColor: AppColors.inputFill,
+
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                          color: AppColors.inputBorder,
                                         ),
-                                      );
+                                      ),
+
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: const BorderSide(
+                                          color: AppColors.darkGreen,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _searchQuery = value
+                                            .trim()
+                                            .toLowerCase();
+                                      });
                                     },
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
 
-                      const SizedBox(height: 16),
+                                  const SizedBox(height: 10),
 
-                      // =========================
-                      // ASSIGNED PERMISSIONS
-                      // =========================
-                      Expanded(
-                        child: Card(
-                          elevation: 3,
+                                  Expanded(
+                                    child: filteredPermissions.isEmpty
+                                        ? Center(
+                                            child: Text(
+                                              "No matching permissions",
+                                              style: AppTextStyles.bodyMedium,
+                                            ),
+                                          )
+                                        : ListView.builder(
+                                            itemCount:
+                                                filteredPermissions.length,
 
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
+                                            itemBuilder: (context, index) {
+                                              final permission =
+                                                  filteredPermissions[index];
 
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
+                                              final int id = permission['id'];
 
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              final String name =
+                                                  permission['name'];
 
-                              children: [
-                                const Text(
-                                  "Assigned Permissions",
+                                              final bool isSelected = controller
+                                                  .selectedPermissions
+                                                  .contains(id);
 
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Expanded(
-                                  child: controller.selectedPermissions.isEmpty
-                                      ? const Center(
-                                          child: Text(
-                                            "No Permissions Assigned",
-                                          ),
-                                        )
-                                      : ListView.builder(
-                                          itemCount: controller
-                                              .selectedPermissions
-                                              .length,
-
-                                          itemBuilder: (context, index) {
-                                            final selectedId = controller
-                                                .selectedPermissions[index];
-
-                                            final permission = controller
-                                                .permissions
-                                                .firstWhere(
-                                                  (element) =>
-                                                      element['id'] ==
-                                                      selectedId,
-                                                );
-
-                                            return Container(
-                                              margin: const EdgeInsets.only(
-                                                bottom: 8,
-                                              ),
-
-                                              padding: const EdgeInsets.all(12),
-
-                                              decoration: BoxDecoration(
-                                                color: Colors.green.withOpacity(
-                                                  0.1,
+                                              return Container(
+                                                margin: const EdgeInsets.only(
+                                                  bottom: 8,
                                                 ),
 
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
+                                                decoration: BoxDecoration(
+                                                  color: isSelected
+                                                      ? AppColors.golden
+                                                            .withOpacity(0.18)
+                                                      : AppColors.cream
+                                                            .withOpacity(0.20),
 
-                                                border: Border.all(
-                                                  color: Colors.green,
-                                                ),
-                                              ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
 
-                                              child: Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.check_circle,
-
-                                                    color: Colors.green,
+                                                  border: Border.all(
+                                                    color: isSelected
+                                                        ? AppColors.golden
+                                                        : AppColors.borderGold
+                                                              .withOpacity(
+                                                                0.55,
+                                                              ),
                                                   ),
+                                                ),
 
-                                                  const SizedBox(width: 10),
+                                                child: CheckboxListTile(
+                                                  value: isSelected,
 
-                                                  Expanded(
-                                                    child: Text(
-                                                      permission['name'],
+                                                  activeColor: AppColors.golden,
 
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
+                                                  controlAffinity:
+                                                      ListTileControlAffinity
+                                                          .leading,
+
+                                                  title: Text(
+                                                    name,
+
+                                                    style: TextStyle(
+                                                      fontWeight: isSelected
+                                                          ? FontWeight.bold
+                                                          : FontWeight.normal,
+                                                      color:
+                                                          AppColors.darkGreen,
                                                     ),
                                                   ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                ),
-                              ],
+
+                                                  onChanged: (value) {
+                                                    controller.togglePermission(
+                                                      id,
+                                                    );
+                                                  },
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                const SizedBox(height: 20),
+                        const SizedBox(height: 16),
 
-                // =========================
-                // SAVE BUTTON
-                // =========================
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
+                        // =========================
+                        // ASSIGNED PERMISSIONS
+                        // =========================
+                        Expanded(
+                          child: Container(
+                            decoration: AppDecorations.card,
 
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (controller.selectedRoleId.value == null) {
-                        Get.snackbar("Error", "Please select a role");
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
 
-                        return;
-                      }
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
 
-                      final message = await controller.assignPermissions();
+                                children: [
+                                  Text(
+                                    "Assigned Permissions",
+                                    style: AppTextStyles.heading3,
+                                  ),
 
-                      Get.snackbar(
-                        "Success",
-                        message,
+                                  const SizedBox(height: 10),
 
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
-                    },
+                                  Expanded(
+                                    child:
+                                        controller.selectedPermissions.isEmpty
+                                        ? Center(
+                                            child: Text(
+                                              "No Permissions Assigned",
+                                              style: AppTextStyles.bodyMedium,
+                                            ),
+                                          )
+                                        : ListView.builder(
+                                            itemCount: controller
+                                                .selectedPermissions
+                                                .length,
 
-                    child: const Text(
-                      "Save Permissions",
+                                            itemBuilder: (context, index) {
+                                              final selectedId = controller
+                                                  .selectedPermissions[index];
 
-                      style: TextStyle(fontSize: 16),
+                                              final permission = controller
+                                                  .permissions
+                                                  .firstWhere(
+                                                    (element) =>
+                                                        element['id'] ==
+                                                        selectedId,
+                                                  );
+
+                                              return Container(
+                                                margin: const EdgeInsets.only(
+                                                  bottom: 8,
+                                                ),
+
+                                                padding: const EdgeInsets.all(
+                                                  12,
+                                                ),
+
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.golden
+                                                      .withOpacity(0.14),
+
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+
+                                                  border: Border.all(
+                                                    color: AppColors.golden,
+                                                  ),
+                                                ),
+
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.check_circle,
+
+                                                      color: AppColors.golden,
+                                                    ),
+
+                                                    const SizedBox(width: 10),
+
+                                                    Expanded(
+                                                      child: Text(
+                                                        permission['name'],
+
+                                                        style: AppTextStyles
+                                                            .bodyLarge
+                                                            .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+
+                  const SizedBox(height: 20),
+
+                  // =========================
+                  // SAVE BUTTON
+                  // =========================
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+
+                    child: ElevatedButton(
+                      style: AppButtonStyles.primary,
+
+                      onPressed: () async {
+                        if (controller.selectedRoleId.value == null) {
+                          Get.snackbar("Error", "Please select a role");
+
+                          return;
+                        }
+
+                        final message = await controller.assignPermissions();
+
+                        Get.snackbar(
+                          "Success",
+                          message,
+
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      },
+
+                      child: Text(
+                        "Save Permissions",
+                        style: AppTextStyles.button,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
