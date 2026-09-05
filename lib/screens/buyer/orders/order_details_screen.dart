@@ -4,11 +4,34 @@ import 'package:get/get.dart';
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 import '../review/shop_review_dialog.dart';
+import '../../../routes/app_routes.dart';
 
-class OrderDetailsScreen extends StatelessWidget {
+class OrderDetailsScreen extends StatefulWidget {
   final dynamic order;
 
   const OrderDetailsScreen({super.key, required this.order});
+
+  @override
+  State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
+}
+
+class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
+  late final Set<int> _reviewedItemIds;
+  late final Set<int> _confirmedItemIds;
+
+  @override
+  void initState() {
+    super.initState();
+    final List items = widget.order["items"] ?? [];
+    _reviewedItemIds = items
+        .where((item) => item["review"] != null)
+        .map<int>((item) => int.tryParse(item["id"].toString()) ?? -1)
+        .toSet();
+    _confirmedItemIds = items
+        .where((item) => item["customer_confirmed_at"] != null)
+        .map<int>((item) => int.tryParse(item["id"].toString()) ?? -1)
+        .toSet();
+  }
 
   Color statusColor(String status) {
     switch (status) {
@@ -137,7 +160,8 @@ class OrderDetailsScreen extends StatelessWidget {
               ...shopItems.map((item) {
                 final product = item["product"];
                 final status = (item["status"] ?? "pending").toString();
-                final confirmed = item["customer_confirmed_at"] != null;
+                final itemId = int.tryParse(item["id"].toString()) ?? -1;
+                final confirmed = _confirmedItemIds.contains(itemId);
 
                 return Container(
                   margin: const EdgeInsets.only(top: 8),
@@ -166,31 +190,56 @@ class OrderDetailsScreen extends StatelessWidget {
                       infoRow("Quantity", item["quantity"].toString()),
 
                       if (status == "delivered" &&
-                          order["payment_status"] != "rejected") ...[
+                          widget.order["payment_status"] != "rejected") ...[
                         const SizedBox(height: 10),
 
                         // =========================
                         // CONFIRM RECEIVED
                         // =========================
                         if (!confirmed)
-                          Builder(
-                            builder: (ctx) => SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final res = await OrderService()
-                                      .confirmReceived(item["id"]);
-
-                                  Get.snackbar(
-                                    res["success"] == true
-                                        ? "Thanks!"
-                                        : "Error",
-                                    res["message"] ?? "",
-                                  );
-                                },
-                                child: const Text("Confirm Received"),
+                          Column(
+                            children: [
+                              Text(
+                                "Did you receive this item?",
+                                style: AppTextStyles.bodySmall,
                               ),
-                            ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final res = await OrderService()
+                                        .confirmReceived(item["id"]);
+
+                                    Get.snackbar(
+                                      res["success"] == true
+                                          ? "Thanks!"
+                                          : "Error",
+                                      res["message"] ?? "",
+                                    );
+
+                                    if (res["success"] == true) {
+                                      setState(
+                                        () => _confirmedItemIds.add(itemId),
+                                      );
+                                    }
+                                  },
+                                  child: const Text("Yes, Confirm Received"),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    await Get.toNamed(
+                                      AppRoutes.customerNewComplaint,
+                                    );
+                                  },
+                                  child: const Text("No, Report an Issue"),
+                                ),
+                              ),
+                            ],
                           )
                         else
                           Row(
@@ -212,17 +261,45 @@ class OrderDetailsScreen extends StatelessWidget {
 
                         const SizedBox(height: 8),
 
+                        const SizedBox(height: 8),
+
                         Builder(
-                          builder: (ctx) => ElevatedButton(
-                            onPressed: () {
-                              showDialog(
-                                context: ctx,
-                                builder: (_) =>
-                                    ShopReviewDialog(orderItemId: item["id"]),
+                          builder: (ctx) {
+                            final reviewed = _reviewedItemIds.contains(itemId);
+
+                            if (reviewed) {
+                              return Row(
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    size: 18,
+                                    color: AppColors.golden,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "Reviewed",
+                                    style: AppTextStyles.label.copyWith(
+                                      color: AppColors.golden,
+                                    ),
+                                  ),
+                                ],
                               );
-                            },
-                            child: const Text("Rate Shop"),
-                          ),
+                            }
+
+                            return ElevatedButton(
+                              onPressed: () async {
+                                final submitted = await showDialog<bool>(
+                                  context: ctx,
+                                  builder: (_) =>
+                                      ShopReviewDialog(orderItemId: item["id"]),
+                                );
+                                if (submitted == true) {
+                                  setState(() => _reviewedItemIds.add(itemId));
+                                }
+                              },
+                              child: const Text("Rate Shop"),
+                            );
+                          },
                         ),
                       ],
                     ],
@@ -249,6 +326,7 @@ class OrderDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final order = widget.order;
     final List items = order["items"] ?? [];
     final bool isRejected = order["payment_status"] == "rejected";
 

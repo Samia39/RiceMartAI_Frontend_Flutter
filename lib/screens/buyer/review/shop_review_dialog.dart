@@ -31,7 +31,7 @@ class _ShopReviewDialogState extends State<ShopReviewDialog> {
     setState(() => loading = false);
 
     if (result) {
-      Navigator.pop(context);
+      Navigator.pop(context, true);
 
       ScaffoldMessenger.of(
         context,
