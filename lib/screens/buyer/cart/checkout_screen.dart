@@ -83,7 +83,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // =========================
   // SUBTOTAL (cart items only, no delivery)
   // =========================
-  double get subtotal => CartService().totalPrice();
+  double get subtotal => Get.find<CartService>().totalPrice();
 
   // =========================
   // TOTAL (subtotal + delivery)
@@ -99,7 +99,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void initState() {
     super.initState();
 
-    cart = CartService().getCart();
+    cart = Get.find<CartService>().getCart();
 
     _loadPaymentSettings();
     _loadCities();
@@ -377,7 +377,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         // — not instantly here.
         setState(() => isLoading = false);
 
-        CartService().clearCart();
+        Get.find<CartService>().clearCart();
 
         Get.snackbar(
           "Success",
@@ -395,7 +395,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // =========================
       setState(() => isLoading = false);
 
-      CartService().clearCart();
+      Get.find<CartService>().clearCart();
 
       Get.snackbar(
         "Success",
@@ -481,7 +481,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             final isWide = constraints.maxWidth > 700;
 
             // =========================
-            // FORM FIELDS (name, phone, city, address)
+            // 1. FORM FIELDS (name, phone, city, address)
             // =========================
             final formFields = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -523,6 +523,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             value: city['id'],
                             child: Text(
                               "${city['name']} (Rs ${city['delivery_charge']})",
+                              overflow: TextOverflow.ellipsis,
                             ),
                           );
                         }).toList(),
@@ -544,7 +545,107 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // PAYMENT METHOD SECTION
+            // 2. ORDER SUMMARY (items + totals only — button lives separately)
+            // =========================
+            final orderSummaryCard = Container(
+              padding: const EdgeInsets.all(16),
+              decoration: AppDecorations.card,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Order Summary", style: AppTextStyles.heading3),
+
+                  const SizedBox(height: 15),
+
+                  ...cart.map((item) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item["name"] ?? "",
+                                  style: AppTextStyles.heading4,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  "Shop: ${item["shop"]?["shop_name"] ?? "-"}",
+                                  style: AppTextStyles.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "x${item["quantity"]}",
+                                style: AppTextStyles.bodyMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Rs ${item["price"]}",
+                                style: AppTextStyles.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
+                  const Divider(),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Subtotal", style: AppTextStyles.bodyMedium),
+                      Text(
+                        "Rs ${subtotal.toStringAsFixed(0)}",
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Delivery", style: AppTextStyles.bodyMedium),
+                      Text(
+                        "Rs ${deliveryCharge.toStringAsFixed(0)}",
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                    ],
+                  ),
+
+                  const Divider(),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Total", style: AppTextStyles.heading3),
+                      Text(
+                        "Rs ${total.toStringAsFixed(0)}",
+                        style: AppTextStyles.heading3,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+
+            // =========================
+            // 3. PAYMENT METHOD SECTION
             // =========================
             final paymentMethodSection = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -675,152 +776,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // ORDER SUMMARY CARD (with totals + place order button)
+            // 4. PLACE ORDER BUTTON
             // =========================
-            final orderSummaryCard = Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: AppDecorations.card,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Order Summary", style: AppTextStyles.heading3),
-
-                      const SizedBox(height: 15),
-
-                      ...cart.map((item) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item["name"] ?? "",
-                                      style: AppTextStyles.heading4,
-                                    ),
-
-                                    Text(
-                                      "Shop: ${item["shop"]?["shop_name"] ?? "-"}",
-                                      style: AppTextStyles.bodySmall,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              Text(
-                                "x${item["quantity"]}",
-                                style: AppTextStyles.bodyMedium,
-                              ),
-
-                              const SizedBox(width: 15),
-
-                              Text(
-                                "Rs ${item["price"]}",
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-
-                      const Divider(),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Subtotal", style: AppTextStyles.bodyMedium),
-                          Text(
-                            "Rs ${subtotal.toStringAsFixed(0)}",
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Delivery", style: AppTextStyles.bodyMedium),
-                          Text(
-                            "Rs ${deliveryCharge.toStringAsFixed(0)}",
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                        ],
-                      ),
-
-                      const Divider(),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Total", style: AppTextStyles.heading3),
-                          Text(
-                            "Rs ${total.toStringAsFixed(0)}",
-                            style: AppTextStyles.heading3,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Subtotal", style: AppTextStyles.bodyMedium),
-                    Text(
-                      "Rs ${subtotal.toStringAsFixed(0)}",
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 6),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Delivery", style: AppTextStyles.bodyMedium),
-                    Text(
-                      "Rs ${deliveryCharge.toStringAsFixed(0)}",
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                  ],
-                ),
-
-                const Divider(),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Total", style: AppTextStyles.heading3),
-                    Text(
-                      "Rs ${total.toStringAsFixed(0)}",
-                      style: AppTextStyles.heading3,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                SizedBox(
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : placeOrder,
-                    child: isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text("Place Order"),
-                  ),
-                ),
-              ],
+            final placeOrderButton = SizedBox(
+              height: 55,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : placeOrder,
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text("Place Order"),
+              ),
             );
 
             return SingleChildScrollView(
@@ -832,23 +797,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: isWide ? 1100 : 600),
                   child: isWide
-                      ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  formFields,
-                                  const SizedBox(height: 24),
-                                  paymentMethodSection,
-                                  const SizedBox(height: 16),
-                                ],
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [formFields],
+                                  ),
+                                ),
+                                const SizedBox(width: 24),
+                                Expanded(flex: 2, child: orderSummaryCard),
+                              ],
                             ),
-                            const SizedBox(width: 24),
-                            Expanded(flex: 2, child: orderSummaryCard),
+                            const SizedBox(height: 24),
+                            paymentMethodSection,
+                            const SizedBox(height: 24),
+                            placeOrderButton,
+                            const SizedBox(height: 16),
                           ],
                         )
                       : Column(
@@ -857,6 +828,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             formFields,
                             const SizedBox(height: 24),
                             orderSummaryCard,
+                            const SizedBox(height: 24),
+                            paymentMethodSection,
+                            const SizedBox(height: 24),
+                            placeOrderButton,
                             const SizedBox(height: 16),
                           ],
                         ),
