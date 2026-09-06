@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../core/services/admin/payout_service.dart';
 import '../../../core/utils/themes.dart';
@@ -66,6 +67,37 @@ class _SellerPayoutsScreenState extends State<SellerPayoutsScreen>
     );
   }
 
+  void _showProofImage(String url) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            InteractiveViewer(
+              child: Image.network(
+                url,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    "Couldn't load screenshot",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Get.back(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String statusMessage(String status) {
     switch (status) {
       case "pending":
@@ -120,6 +152,26 @@ class _SellerPayoutsScreenState extends State<SellerPayoutsScreen>
               "Paid via ${payout["payout_method"] ?? "-"} · ${payout["transaction_id"] ?? "-"}",
               style: AppTextStyles.bodySmall,
             ),
+            if ((payout["proof_url"] ?? "").toString().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () => _showProofImage(payout["proof_url"].toString()),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.image_outlined, size: 16, color: AppColors.info),
+                    const SizedBox(width: 6),
+                    Text(
+                      "View Payment Screenshot",
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.info,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ] else ...[
             const SizedBox(height: 8),
             Text(

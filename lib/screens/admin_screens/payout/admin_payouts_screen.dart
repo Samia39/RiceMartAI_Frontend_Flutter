@@ -68,6 +68,37 @@ class _AdminPayoutsScreenState extends State<AdminPayoutsScreen>
     );
   }
 
+  void _showProofImage(String url) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            InteractiveViewer(
+              child: Image.network(
+                url,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    "Couldn't load screenshot",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Get.back(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget buildCard(dynamic payout) {
     final order = payout["order"] ?? {};
     final shop = payout["shop"] ?? {};
@@ -117,30 +148,69 @@ class _AdminPayoutsScreenState extends State<AdminPayoutsScreen>
               "Paid via ${payout["payout_method"] ?? "-"} · ${payout["transaction_id"] ?? "-"}",
               style: AppTextStyles.bodySmall,
             ),
+            if ((payout["proof_url"] ?? "").toString().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () => _showProofImage(payout["proof_url"].toString()),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.image_outlined, size: 16, color: AppColors.info),
+                    const SizedBox(width: 6),
+                    Text(
+                      "View Payment Screenshot",
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.info,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
 
           if (status == "ready") ...[
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final result = await Get.dialog(
-                    PaySellerDialog(payout: payout),
+            Builder(
+              builder: (_) {
+                final hasEasypaisa = (shop["payout_easypaisa_number"] ?? "")
+                    .toString()
+                    .isNotEmpty;
+                final hasJazzcash = (shop["payout_jazzcash_number"] ?? "")
+                    .toString()
+                    .isNotEmpty;
+
+                if (!hasEasypaisa && !hasJazzcash) {
+                  return Text(
+                    "Seller hasn't added a payout account yet — payment is blocked until they do.",
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.error,
+                    ),
                   );
-                  if (result is Map && result["success"] == true) {
-                    fetchPayouts();
-                    Get.snackbar(
-                      "Success",
-                      result["message"] ?? "Payment recorded",
-                    );
-                  }
-                },
-                child: const Text("Pay Seller"),
-              ),
+                }
+
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final result = await Get.dialog(
+                        PaySellerDialog(payout: payout),
+                      );
+                      if (result is Map && result["success"] == true) {
+                        fetchPayouts();
+                        Get.snackbar(
+                          "Success",
+                          result["message"] ?? "Payment recorded",
+                        );
+                      }
+                    },
+                    child: const Text("Pay Seller"),
+                  ),
+                );
+              },
             ),
           ],
-
           if (status == "pending") ...[
             const SizedBox(height: 8),
             Text(

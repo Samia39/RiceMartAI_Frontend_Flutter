@@ -32,6 +32,16 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
   @override
   void initState() {
     super.initState();
+    final shop = widget.payout["shop"] ?? {};
+    final hasEasypaisa = (shop["payout_easypaisa_number"] ?? "")
+        .toString()
+        .isNotEmpty;
+    final hasJazzcash = (shop["payout_jazzcash_number"] ?? "")
+        .toString()
+        .isNotEmpty;
+    if (!hasEasypaisa && hasJazzcash) {
+      payoutMethod = "jazzcash";
+    }
     _loadSettings();
   }
 
@@ -66,6 +76,19 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
   // Step 1: validate, then switch this same dialog into a confirm view.
   void goToConfirmStep() {
     if (isSubmitting) return;
+
+    final shop = widget.payout["shop"] ?? {};
+    final hasNumber = payoutMethod == "easypaisa"
+        ? (shop["payout_easypaisa_number"] ?? "").toString().isNotEmpty
+        : (shop["payout_jazzcash_number"] ?? "").toString().isNotEmpty;
+
+    if (!hasNumber) {
+      setState(
+        () => errorText =
+            "Seller hasn't added a ${payoutMethod == "easypaisa" ? "EasyPaisa" : "JazzCash"} account.",
+      );
+      return;
+    }
 
     if (transactionIdController.text.trim().isEmpty) {
       setState(() => errorText = "Please enter the transaction ID");
@@ -156,7 +179,10 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
                 groupValue: payoutMethod,
                 contentPadding: EdgeInsets.zero,
                 title: const Text("EasyPaisa"),
-                onChanged: (v) => setState(() => payoutMethod = v!),
+                onChanged:
+                    (shop["payout_easypaisa_number"] ?? "").toString().isEmpty
+                    ? null
+                    : (v) => setState(() => payoutMethod = v!),
               ),
             ),
             Expanded(
@@ -165,11 +191,15 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
                 groupValue: payoutMethod,
                 contentPadding: EdgeInsets.zero,
                 title: const Text("JazzCash"),
-                onChanged: (v) => setState(() => payoutMethod = v!),
+                onChanged:
+                    (shop["payout_jazzcash_number"] ?? "").toString().isEmpty
+                    ? null
+                    : (v) => setState(() => payoutMethod = v!),
               ),
             ),
           ],
         ),
+
         if (!loadingSettings)
           Text(
             "Sending from: ${myNumber.isNotEmpty ? myNumber : 'not set in Payment Settings'}",
