@@ -1,10 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../models/app_notification_model.dart';
-
-// NOTE: 'notifications.{userId}' ab ek PUBLIC channel hai (PrivateChannel nahi),
-// isliye subscribe karte waqt 'private-' prefix ki zaroorat nahi.
 
 class NotificationService {
   // ⚠️ Chrome/Web testing k liye 127.0.0.1 theek hai.
@@ -14,7 +12,8 @@ class NotificationService {
   static const int reverbPort = 8080;
   static const String reverbKey = "pgfhbcq6axprlwvndujo"; // .env REVERB_APP_KEY
 
-  static PusherChannelsFlutter? _pusher;
+  static WebSocketChannel? _channel;
+  static StreamSubscription? _subscription;
 
   /// Naye notifications get karein (list + unread count)
   static Future<Map<String, dynamic>> fetchNotifications(String token) async {
@@ -50,35 +49,43 @@ class NotificationService {
     );
   }
 
-  /// Reverb se connect karke real-time notifications sunna shuru karein.
-  /// [userId] wahi user hai jo currently login hai.
+  /// Reverb se seedha WebSocket connect karke real-time notifications sunna.
+  /// [userId] currently login user hai.
   /// [onNotification] callback har baar chalega jab nayi notification aayegi.
-  static Future<void> connectAndListen({
+  static void connectAndListen({
     required int userId,
     required Function(Map<String, dynamic>) onNotification,
-  }) async {
-    _pusher = PusherChannelsFlutter.getInstance();
+  }) {
+    final wsUrl =
+        'ws://$reverbHost:$reverbPort/app/$reverbKey?protocol=7&client=flutter&version=1.0';
 
-    await _pusher!.init(
-      apiKey: reverbKey,
-      cluster: 'mt1', // Reverb k liye ye value use hoti hai, ignored effectively
-      useTLS: false,
-      host: reverbHost,
-      wsPort: reverbPort,
-      wssPort: reverbPort,
-      onEvent: (event) {
-        if (event.eventName == 'new-notification') {
-          final data = jsonDecode(event.data);
-          onNotification(data);
-        }
-      },
-    );
+    _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
 
-    await _pusher!.connect();
-    await _pusher!.subscribe(channelName: 'notifications.$userId');
+    _subscription = _channel!.stream.listen((message) {
+      final decoded = jsonDecode(message);
+      final event = decoded['event'];
+
+      // Connection establish hote hi channel subscribe karein
+      if (event == 'pusher:connection_established') {
+        final subscribeMsg = jsonEncode({
+          'event': 'pusher:subscribe',
+          'data': {'channel': 'notifications.$userId'},
+        });
+        _channel!.sink.add(subscribeMsg);
+      }
+
+      // Hamara custom event jo Laravel se broadcast hota hai
+      if (event == 'new-notification') {
+        final data = jsonDecode(decoded['data']);
+        onNotification(data);
+      }
+    }, onError: (e) {
+      // Connection error - silently ignore ya debug print karein
+    });
   }
 
-  static Future<void> disconnect() async {
-    await _pusher?.disconnect();
+  static void disconnect() {
+    _subscription?.cancel();
+    _channel?.sink.close();
   }
 }
