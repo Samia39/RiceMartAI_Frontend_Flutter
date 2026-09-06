@@ -385,8 +385,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           snackPosition: SnackPosition.TOP,
         );
 
-        Get.offAllNamed(AppRoutes.dashboard);
-        Get.toNamed(AppRoutes.myOrders);
+        Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
         return;
       }
 
@@ -403,8 +402,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         snackPosition: SnackPosition.TOP,
       );
 
-      Get.offAllNamed(AppRoutes.dashboard);
-      Get.toNamed(AppRoutes.myOrders);
+      Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
     } catch (e) {
       setState(() {
         isLoading = false;

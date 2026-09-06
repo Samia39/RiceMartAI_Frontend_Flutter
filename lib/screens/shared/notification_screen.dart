@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:ricemart_ai/controllers/admin/admin_shell_controller.dart';
 
 import '../../core/services/notification_service.dart';
 import '../../core/services/order_service.dart';
@@ -126,6 +127,25 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case 'order_status':
       case 'payment_status':
         await _openOrder(data);
+        break;
+
+      case 'payment_pending':
+        if (_isAdmin) {
+          if (Get.isRegistered<AdminShellController>()) {
+            // Shell already alive — just switch its tab and pop back to it.
+            Get.find<AdminShellController>().goToTab(3);
+            Get.until((route) => route.isFirst);
+          } else {
+            // Cold start — rebuild the shell, then set the tab once its
+            // controller exists (it's created in AdminHomeShell's initState).
+            await Get.offAllNamed(AppRoutes.adminDashboard);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (Get.isRegistered<AdminShellController>()) {
+                Get.find<AdminShellController>().goToTab(3);
+              }
+            });
+          }
+        }
         break;
 
       // Sent to admins when a payout becomes ready to release
@@ -373,6 +393,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   IconData _iconForType(String? type) {
     switch (type) {
+      case 'payment_pending':
+        return Icons.receipt_long_rounded;
+
       case 'order_placed':
       case 'order_status':
         return Icons.shopping_bag_rounded;

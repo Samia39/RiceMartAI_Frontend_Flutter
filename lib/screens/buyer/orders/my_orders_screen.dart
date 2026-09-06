@@ -63,13 +63,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
         appBar: AppBar(
           title: const Text("My Orders"),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+          automaticallyImplyLeading:
+              false, // no back arrow — this is a bottom-nav tab now
           bottom: TabBar(
             controller: tabController,
-
             tabs: const [
               Tab(text: "Active"),
               Tab(text: "History"),
