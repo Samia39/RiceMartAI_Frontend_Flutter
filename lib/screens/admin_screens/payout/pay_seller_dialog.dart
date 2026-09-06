@@ -262,7 +262,12 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
   @override
   Widget build(BuildContext context) {
     final shop = widget.payout["shop"] ?? {};
-    final netAmount = widget.payout["net_amount"]?.toString() ?? "0";
+    num asNum(dynamic v) =>
+        v is num ? v : num.tryParse(v?.toString() ?? '') ?? 0;
+    final totalPayable =
+        (asNum(widget.payout["net_amount"]) +
+        asNum(widget.payout["delivery_charge"]));
+    final netAmount = totalPayable.toStringAsFixed(2);
     final isEasypaisa = payoutMethod == "easypaisa";
     final sellerNumber = isEasypaisa
         ? (shop["payout_easypaisa_number"] ?? "")

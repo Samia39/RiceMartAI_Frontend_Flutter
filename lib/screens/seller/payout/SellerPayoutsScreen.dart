@@ -133,17 +133,36 @@ class _SellerPayoutsScreenState extends State<SellerPayoutsScreen>
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            "Gross: Rs ${payout["gross_amount"]}",
-            style: AppTextStyles.bodySmall,
-          ),
-          Text(
-            "Commission (5%): Rs ${payout["commission_amount"]}",
-            style: AppTextStyles.bodySmall,
-          ),
-          Text(
-            "You'll receive: Rs ${payout["net_amount"]}",
-            style: AppTextStyles.heading4,
+          Builder(
+            builder: (context) {
+              num asNum(dynamic v) =>
+                  v is num ? v : num.tryParse(v?.toString() ?? '') ?? 0;
+              final net = asNum(payout["net_amount"]);
+              final delivery = asNum(payout["delivery_charge"]);
+              final total = net + delivery;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Gross: Rs ${payout["gross_amount"]}",
+                    style: AppTextStyles.bodySmall,
+                  ),
+                  Text(
+                    "Commission (5%): Rs ${payout["commission_amount"]}",
+                    style: AppTextStyles.bodySmall,
+                  ),
+                  Text(
+                    "Delivery charges: Rs ${delivery.toStringAsFixed(2)}",
+                    style: AppTextStyles.bodySmall,
+                  ),
+                  Text(
+                    "Total to send: Rs ${total.toStringAsFixed(2)}",
+                    style: AppTextStyles.heading4,
+                  ),
+                ],
+              );
+            },
           ),
 
           if (status == "paid") ...[

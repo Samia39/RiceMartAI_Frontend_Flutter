@@ -155,10 +155,57 @@ class SellerOrderDetailScreen extends StatelessWidget {
                             infoRow("Phone", order["phone"].toString()),
 
                             if (item["net_amount"] != null) ...[
-                              const SizedBox(height: 6),
-                              infoRow(
-                                "You'll receive",
-                                "Rs ${item["net_amount"]} (after 5% commission)",
+                              const SizedBox(height: 10),
+                              Divider(color: AppColors.golden.withOpacity(0.3)),
+                              const SizedBox(height: 4),
+
+                              Builder(
+                                builder: (context) {
+                                  num asNum(dynamic v) => v is num
+                                      ? v
+                                      : num.tryParse(v?.toString() ?? '') ?? 0;
+
+                                  final price = asNum(item["price"]);
+                                  final qty = asNum(item["quantity"]);
+                                  final riceGross = price * qty;
+                                  final commission = asNum(
+                                    item["commission_amount"],
+                                  );
+                                  final riceNet = asNum(item["net_amount"]);
+                                  final delivery = asNum(
+                                    order["shop_delivery_charge"] ??
+                                        order["delivery_charge"],
+                                  );
+                                  final total = riceNet + delivery;
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      infoRow(
+                                        "Rice price",
+                                        "Rs ${riceGross.toStringAsFixed(2)}",
+                                      ),
+                                      infoRow(
+                                        "Commission (5%)",
+                                        "- Rs ${commission.toStringAsFixed(2)}",
+                                      ),
+                                      infoRow(
+                                        "Rice price after commission",
+                                        "Rs ${riceNet.toStringAsFixed(2)}",
+                                      ),
+                                      infoRow(
+                                        "Delivery charges",
+                                        "Rs ${delivery.toStringAsFixed(2)}",
+                                      ),
+                                      const SizedBox(height: 4),
+                                      infoRow(
+                                        "Total",
+                                        "Rs ${total.toStringAsFixed(2)}",
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                             ],
 
