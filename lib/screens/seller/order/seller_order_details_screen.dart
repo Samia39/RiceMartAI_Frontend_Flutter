@@ -4,23 +4,55 @@ import 'package:get/get.dart';
 import '../../../core/services/order_service.dart';
 import '../../../core/utils/themes.dart';
 
-class SellerOrderDetailScreen extends StatelessWidget {
-  SellerOrderDetailScreen({super.key});
+class SellerOrderDetailScreen extends StatefulWidget {
+  const SellerOrderDetailScreen({super.key});
 
-  // Reached via Get.toNamed(AppRoutes.sellerOrderDetail, arguments: item)
-  dynamic get item => Get.arguments;
+  @override
+  State<SellerOrderDetailScreen> createState() =>
+      _SellerOrderDetailScreenState();
+}
+
+class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
+  // The seller-controlled progression. A button for a step only shows
+  // if that step is still AHEAD of the current status.
+  static const List<String> _statusSteps = [
+    "processing",
+    "shipped",
+    "delivered",
+  ];
 
   final service = OrderService();
 
+  late Map item;
+  bool isUpdating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Local mutable copy so we can update status in place instead of
+    // popping the screen.
+    item = Map.from(Get.arguments as Map);
+  }
+
   Future<void> update(BuildContext context, int id, String status) async {
+    if (isUpdating) return;
+    setState(() => isUpdating = true);
+
     final res = await service.updateItemStatus(itemId: id, status: status);
+
+    if (!mounted) return;
 
     Get.snackbar(
       res["success"] == true ? "Success" : "Error",
       res["message"] ?? "",
     );
 
-    if (res["success"] == true) Get.back();
+    setState(() {
+      isUpdating = false;
+      if (res["success"] == true) {
+        item["status"] = status; // <-- this is the "refresh"
+      }
+    });
   }
 
   Widget infoRow(String label, String value) {
@@ -69,7 +101,6 @@ class SellerOrderDetailScreen extends StatelessWidget {
     );
   }
 
-  // Only the 4 fields needed: shop name, owner, location, city.
   Widget shopInfoBlock(Map shop) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -101,6 +132,7 @@ class SellerOrderDetailScreen extends StatelessWidget {
     final order = item["order"];
     final shop = item["shop"] ?? {};
     final status = item["status"].toString();
+    final currentStepIndex = _statusSteps.indexOf(status);
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -123,9 +155,7 @@ class SellerOrderDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       shopInfoBlock(shop),
-
                       const SizedBox(height: 16),
-
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: AppDecorations.card,
@@ -144,9 +174,7 @@ class SellerOrderDetailScreen extends StatelessWidget {
                                 statusChip(status),
                               ],
                             ),
-
                             const SizedBox(height: 14),
-
                             infoRow("Order", order["order_number"].toString()),
                             infoRow(
                               "Customer",
@@ -158,7 +186,6 @@ class SellerOrderDetailScreen extends StatelessWidget {
                               const SizedBox(height: 10),
                               Divider(color: AppColors.golden.withOpacity(0.3)),
                               const SizedBox(height: 4),
-
                               Builder(
                                 builder: (context) {
                                   num asNum(dynamic v) => v is num
@@ -209,35 +236,51 @@ class SellerOrderDetailScreen extends StatelessWidget {
                               ),
                             ],
 
-                            // No cancel button here — sellers only see paid, approved
-                            // orders and can only progress them, never cancel.
+                            // Buttons only for steps still ahead of the
+                            // current status — this is what makes them
+                            // disappear one by one as the seller progresses.
                             if (status != "delivered") ...[
                               const SizedBox(height: 20),
                               Wrap(
                                 spacing: 10,
                                 runSpacing: 10,
                                 children: [
-                                  ElevatedButton(
-                                    onPressed: () => update(
-                                      context,
-                                      item["id"],
-                                      "processing",
+                                  if (_statusSteps.indexOf("processing") >
+                                      currentStepIndex)
+                                    ElevatedButton(
+                                      onPressed: isUpdating
+                                          ? null
+                                          : () => update(
+                                              context,
+                                              item["id"],
+                                              "processing",
+                                            ),
+                                      child: const Text("Processing"),
                                     ),
-                                    child: const Text("Processing"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        update(context, item["id"], "shipped"),
-                                    child: const Text("Shipped"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () => update(
-                                      context,
-                                      item["id"],
-                                      "delivered",
+                                  if (_statusSteps.indexOf("shipped") >
+                                      currentStepIndex)
+                                    ElevatedButton(
+                                      onPressed: isUpdating
+                                          ? null
+                                          : () => update(
+                                              context,
+                                              item["id"],
+                                              "shipped",
+                                            ),
+                                      child: const Text("Shipped"),
                                     ),
-                                    child: const Text("Delivered"),
-                                  ),
+                                  if (_statusSteps.indexOf("delivered") >
+                                      currentStepIndex)
+                                    ElevatedButton(
+                                      onPressed: isUpdating
+                                          ? null
+                                          : () => update(
+                                              context,
+                                              item["id"],
+                                              "delivered",
+                                            ),
+                                      child: const Text("Delivered"),
+                                    ),
                                 ],
                               ),
                             ],
