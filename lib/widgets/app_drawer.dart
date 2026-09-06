@@ -98,7 +98,7 @@ class AppDrawer extends StatelessWidget {
                 title: "Profile",
                 onTap: () {
                   Navigator.pop(context);
-                  onTabSelected(4);
+                  onTabSelected(5);
                 },
               ),
 
@@ -110,7 +110,7 @@ class AppDrawer extends StatelessWidget {
                 title: "My Orders",
                 onTap: () {
                   Navigator.pop(context);
-                  Get.toNamed(AppRoutes.myOrders);
+                  onTabSelected(3);
                 },
               ),
 

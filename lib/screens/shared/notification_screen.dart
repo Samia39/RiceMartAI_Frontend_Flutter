@@ -271,7 +271,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Get.snackbar("Not found", "This order could not be loaded.");
         }
       } else {
-        // Buyer
+        // Buyer — send them to the same Orders screen now in the bottom
+        // nav (tab index 5) instead of pushing order details directly.
         final active = await _orderService.getActiveOrders();
         final history = await _orderService.getOrderHistory();
 
@@ -280,7 +281,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         final found = all.firstWhereOrNull((o) => o['id'] == orderId);
 
         if (found != null) {
-          await Get.toNamed(AppRoutes.orderDetails, arguments: found);
+          Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
         } else {
           Get.snackbar("Not found", "This order could not be loaded.");
         }

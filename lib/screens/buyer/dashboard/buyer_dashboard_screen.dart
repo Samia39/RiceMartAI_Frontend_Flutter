@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ricemart_ai/screens/buyer/orders/my_orders_screen.dart';
 import '../../chats/conversation.dart';
 import '../../../routes/app_routes.dart';
 import 'package:get/get.dart';
@@ -47,14 +48,14 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       HomeScreen(
         onSeeAllProducts: () {
           setState(() {
-            riceSearchQuery = ''; // no filter — show everything
-            currentIndex = 1; // Rice tab index
+            riceSearchQuery = '';
+            currentIndex = 1;
           });
         },
       ),
 
       AllRiceScreen(
-        key: ValueKey(riceSearchQuery), // rebuild state when query changes
+        key: ValueKey(riceSearchQuery),
         onCartUpdated: () {
           setState(() {});
         },
@@ -63,9 +64,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
       const ShopsScreen(),
 
-      ConversationsScreen(),
+      const MyOrdersScreen(), // NEW — index 3
 
-      const ProfileScreen(),
+      ConversationsScreen(), // now index 4
+
+      const ProfileScreen(), // now index 5
     ];
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -154,13 +157,13 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
           items: const [
             BottomNavigationBarItem(icon: Icon(AppIcons.home), label: "Home"),
-
             BottomNavigationBarItem(icon: Icon(AppIcons.rice), label: "Rice"),
-
             BottomNavigationBarItem(icon: Icon(AppIcons.shops), label: "Shops"),
-
+            BottomNavigationBarItem(
+              icon: Icon(Icons.receipt_long),
+              label: "Orders",
+            ),
             BottomNavigationBarItem(icon: Icon(AppIcons.chat), label: "Chat"),
-
             BottomNavigationBarItem(
               icon: Icon(AppIcons.profile),
               label: "Profile",
