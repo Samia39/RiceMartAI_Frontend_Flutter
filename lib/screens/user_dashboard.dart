@@ -8,6 +8,10 @@ import 'user/profile_screen.dart';
 import 'user/conversations_screen.dart';
 import 'ai_rice_detection_screen.dart';
 import 'rice_recommendation_screen.dart';
+import 'notification_bell_icon.dart';
+import 'notification_screen.dart';
+import '../core/services/notification_service.dart';
+import '../core/services/auth_service.dart';
 
 // ─────────────────────────────────────────────
 //  THEME
@@ -112,11 +116,52 @@ class UserDashboard extends StatefulWidget {
 
 class _UserDashboardState extends State<UserDashboard> {
   int _currentIndex = 0;
+  int _unreadCount = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<String> _titles = [
     'Marketplace', 'Rice', 'Shops', 'Chat', 'Profile',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnreadCount();
+    _startListeningForNotifications();
+  }
+
+  @override
+  void dispose() {
+    NotificationService.disconnect();
+    super.dispose();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final token = AuthService.getToken() ?? '';
+      final result = await NotificationService.fetchNotifications(token);
+      if (mounted) {
+        setState(() => _unreadCount = result['unread_count'] ?? 0);
+      }
+    } catch (_) {
+      // Silently ignore - unread count sirf UI ka hint hai
+    }
+  }
+
+  void _startListeningForNotifications() {
+    final user = AuthService.getCurrentUser();
+    final userId = user['id'];
+    if (userId == null) return;
+
+    NotificationService.connectAndListen(
+      userId: userId is int ? userId : int.tryParse(userId.toString()) ?? 0,
+      onNotification: (data) {
+        if (mounted) {
+          setState(() => _unreadCount += 1);
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,6 +207,19 @@ class _UserDashboardState extends State<UserDashboard> {
         ),
         centerTitle: true,
         actions: [
+          GestureDetector(
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationScreen()),
+              );
+              _loadUnreadCount(); // wapas aane pe count refresh karein
+            },
+            child: NotificationBellIcon(
+              unreadCount: _unreadCount,
+              iconColor: AppColors.darkGreen,
+            ),
+          ),
           GestureDetector(
             onTap: () {},
             child: Container(

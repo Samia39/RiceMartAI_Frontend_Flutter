@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
+import '../core/services/auth_service.dart';
 import '../core/services/notification_service.dart';
 import '../models/app_notification_model.dart';
 import 'user_dashboard.dart'; // AppColors, AppGradients, AppTextStyles
@@ -25,8 +25,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Future<void> _loadNotifications() async {
     setState(() => _isLoading = true);
     try {
-      // ⚠️ Apne app k token storage k mutabiq ye line adjust karein
-      final token = GetStorage().read('token') ?? '';
+      final token = AuthService.getToken() ?? '';
       final result = await NotificationService.fetchNotifications(token);
       setState(() {
         _notifications = result['notifications'];
@@ -42,7 +41,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Future<void> _markRead(AppNotificationModel n) async {
     if (n.isRead) return;
-    final token = GetStorage().read('token') ?? '';
+    final token = AuthService.getToken() ?? '';
     await NotificationService.markAsRead(token, n.id);
     _loadNotifications();
   }
