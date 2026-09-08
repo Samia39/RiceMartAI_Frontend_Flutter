@@ -33,9 +33,9 @@ String _categoryLabel(String category) {
 // file wouldn't compile as given. Using the same base-URL pattern already
 // used elsewhere in the admin screens (ApprovedShopDetailScreen,
 // PaymentScreen) for consistency.
-const String _imageBaseUrl = "http://ricemart.sandbox.pk";
+// const String _imageBaseUrl = "http://ricemart.sandbox.pk";
 
-String _attachmentUrl(String path) => "$_imageBaseUrl/storage/$path";
+// String _attachmentUrl(String path) => "$_imageBaseUrl/storage/$path";
 
 // ─────────────────────────────────────────────────────────
 // ZOOM VIEWER — opens full-screen pinch-to-zoom image
@@ -460,7 +460,7 @@ class _AdminComplaintDetailScreenState
                                 if (m.attachmentPath != null) ...[
                                   const SizedBox(height: 8),
                                   _AttachmentThumbnail(
-                                    imageUrl: _attachmentUrl(m.attachmentPath!),
+                                    imageUrl: m.attachmentPath!,
                                   ),
                                 ],
                               ],

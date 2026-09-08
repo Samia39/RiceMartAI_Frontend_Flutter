@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import '../constants/app_icons.dart';
 
 String attachmentUrl(String path) {
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
   final storageBase = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
   return '$storageBase/storage/$path';
 }
