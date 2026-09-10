@@ -158,8 +158,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         break;
 
       case 'shop_pending':
-        // Only admins get this type — send them to the approvals queue
-        Get.toNamed(AppRoutes.sellerApprovals);
+        if (Get.isRegistered<AdminShellController>()) {
+          Get.find<AdminShellController>().goToShopsTab(0);
+          Get.until((route) => route.isFirst);
+        } else {
+          await Get.offAllNamed(AppRoutes.adminDashboard);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (Get.isRegistered<AdminShellController>()) {
+              Get.find<AdminShellController>().goToShopsTab(0);
+            }
+          });
+        }
         break;
 
       case 'shop_status':
