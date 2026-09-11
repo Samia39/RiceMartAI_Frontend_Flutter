@@ -354,7 +354,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (shopId == null) return;
 
     if (_isSeller) {
-      Get.toNamed(AppRoutes.myShop);
+      Get.offAllNamed(AppRoutes.sellerDashboard, arguments: {'tabIndex': 2});
       return;
     }
 

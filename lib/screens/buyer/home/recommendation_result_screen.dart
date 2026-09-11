@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ricemart_ai/core/services/admin/permission_service.dart';
 
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
@@ -29,6 +30,9 @@ class AiRecommendationResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final aiData = result["ai"] as Map<String, dynamic>? ?? {};
     final products = result["products"] as List<dynamic>? ?? [];
+    final bool isSeller = PermissionService.hasPermission(
+      'view seller dashboard',
+    );
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -192,155 +196,156 @@ class AiRecommendationResultScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // ── Available Products ─────────────────────────────
-              Row(
-                children: [
-                  const Icon(
-                    Icons.store,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                    size: 22,
-                  ),
-                  const SizedBox(width: 8),
-                  Text("Available in Our Shop", style: AppTextStyles.heading3),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              if (products.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: AppDecorations.card,
-                  child: Center(
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.store_mall_directory_outlined,
-                          size: 40,
-                          color: AppColors.darkGreen.withOpacity(0.35),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "No matching products found in our shop currently.",
-                          style: AppTextStyles.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+              if (!isSeller) ...[
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.store,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                      size: 22,
                     ),
-                  ),
-                )
-              else
-                ...products.map((product) {
-                  final p = product as Map<String, dynamic>;
+                    const SizedBox(width: 8),
+                    Text(
+                      "Available in Our Shop",
+                      style: AppTextStyles.heading3,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-                  return GestureDetector(
-                    onTap: () {
-                      // Navigate to ShopDetailsScreen, same arguments shape
-                      // it already reads from elsewhere in the app
-                      // (id, shop_name, owner_name, phone, address, description).
-                      // change the route to solve the reload shop problem
-                      Get.toNamed(
-                        "${AppRoutes.shopDetails}?id=${p["shop_id"]}",
-                        arguments: {
-                          "id": p["shop_id"],
-                          "shop_name": p["shop_name"] ?? "",
-                          "owner_name": p["shop_owner_name"] ?? "",
-                          "phone": p["shop_phone"] ?? "",
-                          "address": p["shop_address"] ?? "",
-                          "description": p["shop_description"] ?? "",
-                        },
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: AppDecorations.card,
-                      child: Row(
+                if (products.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: AppDecorations.card,
+                    child: Center(
+                      child: Column(
                         children: [
-                          // Icon container
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(
-                                255,
-                                4,
-                                4,
-                                4,
-                              ).withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.rice_bowl,
-                              color: Color.fromARGB(255, 0, 0, 0),
-                              size: 24,
-                            ),
+                          Icon(
+                            Icons.store_mall_directory_outlined,
+                            size: 40,
+                            color: AppColors.darkGreen.withOpacity(0.35),
                           ),
-                          const SizedBox(width: 14),
-                          // Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p["name"] ?? "",
-                                  style: AppTextStyles.heading4,
-                                ),
-                                const SizedBox(height: 4),
-                                if (p["category_name"] != null)
-                                  Text(
-                                    p["category_name"],
-                                    style: AppTextStyles.bodySmall,
-                                  ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    _infoBadge(
-                                      "Rs ${p["price"]} / kg",
-                                      Icons.currency_rupee,
-                                      const Color.fromARGB(255, 37, 37, 37),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _infoBadge(
-                                      "${p["stock"]} kg",
-                                      Icons.inventory,
-                                      const Color.fromARGB(255, 0, 239, 100),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Shop info
-                          Column(
-                            children: [
-                              if (p["shop_name"] != null) ...[
-                                const Icon(
-                                  Icons.store,
-                                  size: 14,
-                                  color: AppColors.lightGreen,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  p["shop_name"],
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    color: AppColors.lightGreen,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 4),
-                              ],
-                              Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 12,
-                                color: AppColors.darkGreen.withOpacity(0.5),
-                              ),
-                            ],
+                          const SizedBox(height: 10),
+                          Text(
+                            "No matching products found in our shop currently.",
+                            style: AppTextStyles.bodyMedium,
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
-                  );
-                }).toList(),
+                  )
+                else
+                  ...products.map((product) {
+                    final p = product as Map<String, dynamic>;
+
+                    return GestureDetector(
+                      onTap: () {
+                        Get.toNamed(
+                          "${AppRoutes.shopDetails}?id=${p["shop_id"]}",
+                          arguments: {
+                            "id": p["shop_id"],
+                            "shop_name": p["shop_name"] ?? "",
+                            "owner_name": p["shop_owner_name"] ?? "",
+                            "phone": p["shop_phone"] ?? "",
+                            "address": p["shop_address"] ?? "",
+                            "description": p["shop_description"] ?? "",
+                          },
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: AppDecorations.card,
+                        child: Row(
+                          children: [
+                            // Icon container
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(
+                                  255,
+                                  4,
+                                  4,
+                                  4,
+                                ).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.rice_bowl,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            // Info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    p["name"] ?? "",
+                                    style: AppTextStyles.heading4,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  if (p["category_name"] != null)
+                                    Text(
+                                      p["category_name"],
+                                      style: AppTextStyles.bodySmall,
+                                    ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      _infoBadge(
+                                        "Rs ${p["price"]} / kg",
+                                        Icons.currency_rupee,
+                                        const Color.fromARGB(255, 37, 37, 37),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _infoBadge(
+                                        "${p["stock"]} kg",
+                                        Icons.inventory,
+                                        const Color.fromARGB(255, 0, 239, 100),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Shop info
+                            Column(
+                              children: [
+                                if (p["shop_name"] != null) ...[
+                                  const Icon(
+                                    Icons.store,
+                                    size: 14,
+                                    color: AppColors.lightGreen,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    p["shop_name"],
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: AppColors.lightGreen,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 4),
+                                ],
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 12,
+                                  color: AppColors.darkGreen.withOpacity(0.5),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+              ],
 
               const SizedBox(height: 30),
             ],
