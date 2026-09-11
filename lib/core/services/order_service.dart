@@ -271,4 +271,45 @@ class OrderService {
 
     return jsonDecode(response.body);
   }
+
+  //=========================
+  // seller now change whole status for all items in an order
+  //========================
+
+  Future<Map<String, dynamic>> updateShopOrderStatus({
+    required int orderId,
+    required String status,
+  }) async {
+    final token = box.read("token");
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/seller/order/$orderId/status"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"status": status}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  //=========================
+  // customer now confirm whole order for all items in an order
+  //=========================
+
+  Future<Map<String, dynamic>> confirmShopReceived(
+    int orderId,
+    int shopId,
+  ) async {
+    final token = box.read("token");
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/order/$orderId/shop/$shopId/confirm-received"),
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+    );
+
+    return jsonDecode(response.body);
+  }
 }

@@ -23,7 +23,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
 
   final service = OrderService();
 
-  late Map item;
+  late Map order;
   bool isUpdating = false;
 
   @override
@@ -31,14 +31,17 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
     super.initState();
     // Local mutable copy so we can update status in place instead of
     // popping the screen.
-    item = Map.from(Get.arguments as Map);
+    order = Map.from(Get.arguments as Map);
   }
 
-  Future<void> update(BuildContext context, int id, String status) async {
+  Future<void> update(String status) async {
     if (isUpdating) return;
     setState(() => isUpdating = true);
 
-    final res = await service.updateItemStatus(itemId: id, status: status);
+    final res = await service.updateShopOrderStatus(
+      orderId: order["order_id"],
+      status: status,
+    );
 
     if (!mounted) return;
 
@@ -50,7 +53,10 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
     setState(() {
       isUpdating = false;
       if (res["success"] == true) {
-        item["status"] = status; // <-- this is the "refresh"
+        order["status"] = status; // <-- this is the "refresh"
+        for (final item in order["items"]) {
+          item["status"] = status;
+        }
       }
     });
   }
@@ -128,11 +134,28 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final product = item["product"];
-    final order = item["order"];
-    final shop = item["shop"] ?? {};
-    final status = item["status"].toString();
+    final shop = order["shop"] ?? {};
+    final status = order["status"].toString();
+    final items = order["items"] as List;
     final currentStepIndex = _statusSteps.indexOf(status);
+
+    num asNum(dynamic v) =>
+        v is num ? v : num.tryParse(v?.toString() ?? '') ?? 0;
+
+    final totalRiceGross = items.fold<num>(
+      0,
+      (sum, i) => sum + asNum(i["price"]) * asNum(i["quantity"]),
+    );
+    final totalCommission = items.fold<num>(
+      0,
+      (sum, i) => sum + asNum(i["commission_amount"]),
+    );
+    final totalNet = items.fold<num>(
+      0,
+      (sum, i) => sum + asNum(i["net_amount"]),
+    );
+    final delivery = asNum(order["shop_delivery_charge"]);
+    final grandTotal = totalNet + delivery;
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -167,7 +190,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    product["name"],
+                                    "Order #: ${order["order_number"]}",
                                     style: AppTextStyles.heading3,
                                   ),
                                 ),
@@ -175,66 +198,65 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: 14),
-                            infoRow("Order", order["order_number"].toString()),
                             infoRow(
                               "Customer",
                               order["customer_name"].toString(),
                             ),
                             infoRow("Phone", order["phone"].toString()),
 
-                            if (item["net_amount"] != null) ...[
-                              const SizedBox(height: 10),
-                              Divider(color: AppColors.golden.withOpacity(0.3)),
-                              const SizedBox(height: 4),
-                              Builder(
-                                builder: (context) {
-                                  num asNum(dynamic v) => v is num
-                                      ? v
-                                      : num.tryParse(v?.toString() ?? '') ?? 0;
+                            const SizedBox(height: 14),
+                            Divider(color: AppColors.golden.withOpacity(0.3)),
+                            const SizedBox(height: 6),
+                            Text("Items", style: AppTextStyles.heading4),
+                            const SizedBox(height: 8),
 
-                                  final price = asNum(item["price"]);
-                                  final qty = asNum(item["quantity"]);
-                                  final riceGross = price * qty;
-                                  final commission = asNum(
-                                    item["commission_amount"],
-                                  );
-                                  final riceNet = asNum(item["net_amount"]);
-                                  final delivery = asNum(
-                                    order["shop_delivery_charge"] ??
-                                        order["delivery_charge"],
-                                  );
-                                  final total = riceNet + delivery;
+                            ...items.map((item) {
+                              final product = item["product"];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        product["name"],
+                                        style: AppTextStyles.bodyMedium,
+                                      ),
+                                    ),
+                                    Text(
+                                      "x${item["quantity"]}  Rs ${item["price"]}",
+                                      style: AppTextStyles.bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
 
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      infoRow(
-                                        "Rice price",
-                                        "Rs ${riceGross.toStringAsFixed(2)}",
-                                      ),
-                                      infoRow(
-                                        "Commission (5%)",
-                                        "- Rs ${commission.toStringAsFixed(2)}",
-                                      ),
-                                      infoRow(
-                                        "Rice price after commission",
-                                        "Rs ${riceNet.toStringAsFixed(2)}",
-                                      ),
-                                      infoRow(
-                                        "Delivery charges",
-                                        "Rs ${delivery.toStringAsFixed(2)}",
-                                      ),
-                                      const SizedBox(height: 4),
-                                      infoRow(
-                                        "Total",
-                                        "Rs ${total.toStringAsFixed(2)}",
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ],
+                            const SizedBox(height: 10),
+                            Divider(color: AppColors.golden.withOpacity(0.3)),
+                            const SizedBox(height: 4),
+                            infoRow(
+                              "Rice price",
+                              "Rs ${totalRiceGross.toStringAsFixed(2)}",
+                            ),
+                            infoRow(
+                              "Commission (5%)",
+                              "- Rs ${totalCommission.toStringAsFixed(2)}",
+                            ),
+                            infoRow(
+                              "Rice price after commission",
+                              "Rs ${totalNet.toStringAsFixed(2)}",
+                            ),
+                            infoRow(
+                              "Delivery charges",
+                              "Rs ${delivery.toStringAsFixed(2)}",
+                            ),
+                            const SizedBox(height: 4),
+                            infoRow(
+                              "Total",
+                              "Rs ${grandTotal.toStringAsFixed(2)}",
+                            ),
 
                             // Buttons only for steps still ahead of the
                             // current status — this is what makes them
@@ -250,11 +272,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
                                     ElevatedButton(
                                       onPressed: isUpdating
                                           ? null
-                                          : () => update(
-                                              context,
-                                              item["id"],
-                                              "processing",
-                                            ),
+                                          : () => update("processing"),
                                       child: const Text("Processing"),
                                     ),
                                   if (_statusSteps.indexOf("shipped") >
@@ -262,11 +280,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
                                     ElevatedButton(
                                       onPressed: isUpdating
                                           ? null
-                                          : () => update(
-                                              context,
-                                              item["id"],
-                                              "shipped",
-                                            ),
+                                          : () => update("shipped"),
                                       child: const Text("Shipped"),
                                     ),
                                   if (_statusSteps.indexOf("delivered") >
@@ -274,11 +288,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
                                     ElevatedButton(
                                       onPressed: isUpdating
                                           ? null
-                                          : () => update(
-                                              context,
-                                              item["id"],
-                                              "delivered",
-                                            ),
+                                          : () => update("delivered"),
                                       child: const Text("Delivered"),
                                     ),
                                 ],

@@ -16,9 +16,9 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
     with SingleTickerProviderStateMixin {
   final OrderService service = OrderService();
 
-  List items = [];
-  List activeItems = [];
-  List historyItems = [];
+  List orders = [];
+  List activeOrders = [];
+  List historyOrders = [];
 
   bool isLoading = true;
   late TabController tabController;
@@ -44,20 +44,20 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
       final active = data
           .where(
-            (i) => i["status"] != "delivered" && i["status"] != "cancelled",
+            (o) => o["status"] != "delivered" && o["status"] != "cancelled",
           )
           .toList();
 
       final history = data
           .where(
-            (i) => i["status"] == "delivered" || i["status"] == "cancelled",
+            (o) => o["status"] == "delivered" || o["status"] == "cancelled",
           )
           .toList();
 
       setState(() {
-        items = data;
-        activeItems = active;
-        historyItems = history;
+        orders = data;
+        activeOrders = active;
+        historyOrders = history;
         isLoading = false;
       });
     } catch (e) {
@@ -97,17 +97,20 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
     );
   }
 
-  Widget buildItemCard(dynamic item) {
-    final product = item["product"];
-    final order = item["order"];
-    final status = item["status"].toString();
+  Widget buildOrderCard(dynamic order) {
+    final items = order["items"] as List;
+    final status = order["status"].toString();
+
+    final productSummary = items
+        .map((i) => "${i["product"]["name"]} x${i["quantity"]}")
+        .join(", ");
 
     return GestureDetector(
       onTap: () async {
         // Converted from Get.to(() => SellerOrderDetailScreen(item: item))
         // to a named route so AuthMiddleware/PermissionMiddleware
         // actually run for it.
-        await Get.toNamed(AppRoutes.sellerOrderDetail, arguments: item);
+        await Get.toNamed(AppRoutes.sellerOrderDetail, arguments: order);
         fetchOrders();
       },
       child: Container(
@@ -121,31 +124,25 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(product["name"], style: AppTextStyles.heading4),
+                  child: Text(
+                    "Order #: ${order["order_number"]}",
+                    style: AppTextStyles.heading4,
+                  ),
                 ),
                 statusChip(status),
               ],
             ),
             const SizedBox(height: 6),
-            Text(
-              "Order #: ${order["order_number"]}",
-              style: AppTextStyles.bodyMedium,
-            ),
-
-            if (item["net_amount"] != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                "You'll receive: Rs ${item["net_amount"]}",
-                style: AppTextStyles.bodyMedium,
-              ),
-            ],
+            Text(productSummary, style: AppTextStyles.bodyMedium),
+            const SizedBox(height: 4),
+            Text("${items.length} item(s)", style: AppTextStyles.bodyMedium),
           ],
         ),
       ),
     );
   }
 
-  Widget buildItemList(List orders) {
+  Widget buildOrderList(List orders) {
     if (orders.isEmpty) {
       return Center(
         child: Text("No orders found", style: AppTextStyles.bodyLarge),
@@ -166,7 +163,7 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
                   horizontal: isWide ? 24 : 12,
                   vertical: 12,
                 ),
-                children: orders.map((e) => buildItemCard(e)).toList(),
+                children: orders.map((o) => buildOrderCard(o)).toList(),
               ),
             ),
           ),
@@ -203,8 +200,8 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
               : TabBarView(
                   controller: tabController,
                   children: [
-                    buildItemList(activeItems),
-                    buildItemList(historyItems),
+                    buildOrderList(activeOrders),
+                    buildOrderList(historyOrders),
                   ],
                 ),
         ),

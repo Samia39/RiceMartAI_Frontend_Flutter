@@ -288,10 +288,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       } else if (_isSeller) {
         final items = await _orderService.fetchSellerOrders();
 
-        // Notification stores order_id, but the seller screen needs an
-        // order ITEM — pick the first item belonging to that order.
         final found = items.firstWhereOrNull(
-          (i) => i['order']?['id'] == orderId,
+          (i) => i['order_id'].toString() == orderId.toString(),
         );
 
         if (found != null) {
