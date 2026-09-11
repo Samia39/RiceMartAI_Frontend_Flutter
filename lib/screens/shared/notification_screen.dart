@@ -175,8 +175,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         if (data['shop_status'] == 'rejected') {
           _showRejectionDialog(n);
         } else {
-          // approved / correction requested — only sellers get this type
-          Get.toNamed(AppRoutes.myShop);
+          // approved only sellers get this type
+          Get.offAllNamed(
+            AppRoutes.sellerDashboard,
+            arguments: {'tabIndex': 2},
+          );
         }
         break;
 
