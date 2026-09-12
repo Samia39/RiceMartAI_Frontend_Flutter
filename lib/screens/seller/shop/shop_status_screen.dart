@@ -69,8 +69,11 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
     return roles.contains('seller');
   }
 
-  bool get _mustStayHere =>
-      _isExistingSeller && (_status == "pending" || _hasCorrection);
+  // Pending or correction-requested shops lock the screen — applies to
+  // both a brand-new applicant and an existing seller re-submitting an
+  // edit. Rejected/approved always have their own way forward (a button),
+  // so they don't need to be forced to stay.
+  bool get _mustStayHere => _status == "pending" || _hasCorrection;
 
   void _goToBuyerDashboard() {
     final box = GetStorage();
@@ -178,13 +181,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
           icon: const Icon(Icons.refresh),
           label: const Text("Check Status"),
         ),
-        if (!_isExistingSeller) ...[
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: _goToBuyerDashboard,
-            child: const Text("Continue Browsing as Customer"),
-          ),
-        ],
       ],
     );
   }
@@ -223,6 +219,25 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
   }
 
   Widget _approvedCard() {
+    if (_isExistingSeller) {
+      // Re-approval after an edit — role never changed, just send them back.
+      return _statusCard(
+        icon: Icons.celebration,
+        iconColor: AppColors.success,
+        title: "Shop Updated",
+        message:
+            "Your changes to \"${shop!["shop_name"] ?? ''}\" have been "
+            "approved and your shop is live again.",
+        children: [
+          ElevatedButton(
+            onPressed: _continueToSellerDashboard,
+            child: const Text("Back to Your Shop"),
+          ),
+        ],
+      );
+    }
+
+    // First-time approval — customer becomes a seller.
     return _statusCard(
       icon: Icons.celebration,
       iconColor: AppColors.success,
