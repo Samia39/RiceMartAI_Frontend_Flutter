@@ -204,6 +204,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // PLACE ORDER
   // =========================
   Future<void> placeOrder() async {
+    int? orderId;
     // =========================
     // BASIC VALIDATION
     // =========================
@@ -327,7 +328,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // 2. IF CARD — open Stripe's payment sheet using the new order's id
       // =========================
       if (paymentMethod == "card") {
-        final orderId = result["order"]?["id"] ?? result["order_id"];
+        orderId = result["order"]?["id"] ?? result["order_id"];
 
         if (orderId == null) {
           setState(() => isLoading = false);
@@ -344,6 +345,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         );
 
         if (intentResult["success"] != true) {
+          await OrderService().cancelUnpaidOrder(orderId);
           setState(() => isLoading = false);
           Get.snackbar(
             "Error",
@@ -363,6 +365,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
           await Stripe.instance.presentPaymentSheet();
         } on StripeException catch (e) {
+          await OrderService().cancelUnpaidOrder(orderId);
           setState(() => isLoading = false);
           Get.snackbar(
             "Payment Cancelled",
@@ -404,6 +407,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
     } catch (e) {
+      // Order may have already been created for "card" before this failure
+      // hit (e.g. a network drop mid-payment). Clean it up so a retry with
+      // a different payment method doesn't leave a duplicate order behind.
+      if (paymentMethod == "card" && orderId != null) {
+        await OrderService().cancelUnpaidOrder(orderId);
+      }
+
       setState(() {
         isLoading = false;
       });

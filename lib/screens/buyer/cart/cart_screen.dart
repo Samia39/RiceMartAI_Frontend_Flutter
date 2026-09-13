@@ -20,6 +20,7 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   List cart = [];
   double total = 0;
+  final Map<int, TextEditingController> quantityControllers = {};
 
   @override
   void initState() {
@@ -55,9 +56,11 @@ class _CartScreenState extends State<CartScreen> {
   // =========================
   void increaseQuantity(int index) {
     final int stock = int.tryParse(cart[index]["stock"].toString()) ?? 0;
-    final int currentQty = cart[index]["quantity"];
+    final controller = quantityControllers[cart[index]["id"]];
+    final int baseQty =
+        int.tryParse(controller?.text ?? '') ?? cart[index]["quantity"];
 
-    if (currentQty >= stock) {
+    if (baseQty >= stock) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Only $stock KG in stock")));
@@ -66,10 +69,11 @@ class _CartScreenState extends State<CartScreen> {
 
     final int newQty = Get.find<CartService>().updateQuantity(
       riceId: cart[index]["id"],
-      quantity: currentQty + 1,
+      quantity: baseQty + 1,
     );
 
     cart[index]["quantity"] = newQty;
+    controller?.text = newQty.toString();
 
     loadCart();
     widget.onCartUpdated?.call();
@@ -79,17 +83,50 @@ class _CartScreenState extends State<CartScreen> {
   // DECREASE QUANTITY
   // =========================
   void decreaseQuantity(int index) {
-    if (cart[index]["quantity"] > 1) {
-      cart[index]["quantity"]--;
+    final controller = quantityControllers[cart[index]["id"]];
+    final int baseQty =
+        int.tryParse(controller?.text ?? '') ?? cart[index]["quantity"];
+
+    if (baseQty > 1) {
+      final int newQty = baseQty - 1;
 
       Get.find<CartService>().updateQuantity(
         riceId: cart[index]["id"],
-        quantity: cart[index]["quantity"],
+        quantity: newQty,
       );
+
+      cart[index]["quantity"] = newQty;
+      controller?.text = newQty.toString();
 
       loadCart();
       widget.onCartUpdated?.call();
     }
+  }
+
+  void setQuantityFromInput(int index, String value) {
+    final int stock = int.tryParse(cart[index]["stock"].toString()) ?? 0;
+    int typed = int.tryParse(value) ?? cart[index]["quantity"];
+
+    if (typed < 1) typed = 1;
+
+    if (typed > stock) {
+      typed = stock;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Only $stock KG in stock")));
+    }
+
+    final int newQty = Get.find<CartService>().updateQuantity(
+      riceId: cart[index]["id"],
+      quantity: typed,
+    );
+
+    cart[index]["quantity"] = newQty;
+    quantityControllers[cart[index]["id"]]?.text = newQty
+        .toString(); // ADD THIS
+
+    loadCart();
+    widget.onCartUpdated?.call();
   }
 
   @override
@@ -152,11 +189,35 @@ class _CartScreenState extends State<CartScreen> {
                                 icon: const Icon(Icons.remove),
                               ),
 
-                              Text(
-                                item["quantity"].toString(),
-                                style: AppTextStyles.heading4,
+                              SizedBox(
+                                width: 60,
+                                child: TextField(
+                                  controller: quantityControllers.putIfAbsent(
+                                    item["id"],
+                                    () => TextEditingController(
+                                      text: item["quantity"].toString(),
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.heading4,
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+                                  ),
+                                  onSubmitted: (value) =>
+                                      setQuantityFromInput(index, value),
+                                  onTapOutside: (_) {
+                                    FocusScope.of(context).unfocus();
+                                    setQuantityFromInput(
+                                      index,
+                                      quantityControllers[item["id"]]!.text,
+                                    );
+                                  },
+                                ),
                               ),
-
                               IconButton(
                                 onPressed: () => increaseQuantity(index),
                                 icon: const Icon(Icons.add),
