@@ -16,26 +16,34 @@ class _ShopReviewDialogState extends State<ShopReviewDialog> {
   final controller = TextEditingController();
 
   bool loading = false;
+  String? errorText;
 
   submit() async {
-    setState(() => loading = true);
+    setState(() {
+      loading = true;
+      errorText = null;
+    });
 
     final result = await ReviewService().submitReview(
       orderItemId: widget.orderItemId,
-
       rating: rating,
-
       review: controller.text,
     );
 
+    if (!mounted) return;
+
     setState(() => loading = false);
 
-    if (result) {
+    if (result["success"] == true) {
       Navigator.pop(context, true);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Review submitted")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result["message"] ?? "Review submitted")),
+      );
+    } else {
+      // Stay open, show the reason inline (e.g. "You already reviewed
+      // this shop for this order") instead of silently doing nothing.
+      setState(() => errorText = result["message"]);
     }
   }
 
@@ -75,6 +83,14 @@ class _ShopReviewDialogState extends State<ShopReviewDialog> {
               hintText: "Write review (optional)",
             ),
           ),
+
+          if (errorText != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 13),
+            ),
+          ],
         ],
       ),
 
@@ -89,7 +105,11 @@ class _ShopReviewDialogState extends State<ShopReviewDialog> {
           onPressed: loading ? null : submit,
 
           child: loading
-              ? const CircularProgressIndicator()
+              ? const SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text("Submit"),
         ),
       ],

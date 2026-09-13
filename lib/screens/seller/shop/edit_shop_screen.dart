@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:ricemart_ai/routes/app_routes.dart';
 import '../../../core/services/shop_service.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/utils/themes.dart';
@@ -139,8 +140,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
       box.write("shop_approved", false);
 
       Get.snackbar("Success", "Shop updated and sent for approval");
-
-      Navigator.pop(context, true);
+      Get.offAllNamed(AppRoutes.shopStatus, arguments: shop);
     } else {
       Get.snackbar("Error", result["message"] ?? "Failed");
     }

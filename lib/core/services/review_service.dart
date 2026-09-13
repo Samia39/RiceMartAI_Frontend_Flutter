@@ -8,7 +8,7 @@ class ReviewService {
 
   static const String baseUrl = BaseUrl.url;
 
-  Future<bool> submitReview({
+  Future<Map<String, dynamic>> submitReview({
     required int orderItemId,
     required int rating,
     String? review,
@@ -29,13 +29,19 @@ class ReviewService {
       },
     );
 
+    final data = jsonDecode(response.body);
+
     if (response.statusCode == 201) {
-      return true;
+      return {
+        "success": true,
+        "message": data["message"] ?? "Review submitted",
+      };
     }
 
-    print(response.body);
-
-    return false;
+    return {
+      "success": false,
+      "message": data["message"] ?? "Could not submit review",
+    };
   }
 
   // =========================

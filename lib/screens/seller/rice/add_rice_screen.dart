@@ -249,24 +249,22 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
           // =========================
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20),
+            height: 110,
             color: AppColors.cream.withOpacity(0.5),
-            child: Center(
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: AppColors.darkGreen.withOpacity(0.12),
-                backgroundImage: imageUrl != null
-                    ? NetworkImage(imageUrl)
-                    : null,
-                child: imageUrl == null
-                    ? Icon(
-                        Icons.rice_bowl,
-                        color: AppColors.darkGreen,
-                        size: 28,
-                      )
-                    : null,
-              ),
-            ),
+            child: imageUrl != null
+                ? Image.network(
+                    imageUrl,
+                    width: double.infinity,
+                    height: 110,
+                    fit: BoxFit.cover,
+                  )
+                : Center(
+                    child: Icon(
+                      Icons.rice_bowl,
+                      color: AppColors.darkGreen,
+                      size: 28,
+                    ),
+                  ),
           ),
 
           // =========================

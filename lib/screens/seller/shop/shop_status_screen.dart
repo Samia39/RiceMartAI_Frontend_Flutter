@@ -69,6 +69,12 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
     return roles.contains('seller');
   }
 
+  // Pending or correction-requested shops lock the screen — applies to
+  // both a brand-new applicant and an existing seller re-submitting an
+  // edit. Rejected/approved always have their own way forward (a button),
+  // so they don't need to be forced to stay.
+  bool get _mustStayHere => _status == "pending" || _hasCorrection;
+
   void _goToBuyerDashboard() {
     final box = GetStorage();
     box.remove("has_shop");
@@ -106,35 +112,47 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: AppDecorations.gradientBackground,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text("Shop Status"),
-          automaticallyImplyLeading: false,
-        ),
-        body: loading
-            ? const Center(child: CircularProgressIndicator())
-            : shop == null
-            ? Center(
-                child: Text("No shop found", style: AppTextStyles.heading4),
-              )
-            : RefreshIndicator(
-                onRefresh: _refresh,
-                child: LayoutBuilder(
-                  builder: (context, constraints) => SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(24),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight - 48,
+    return PopScope(
+      canPop: !_mustStayHere,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Get.snackbar(
+            "Please wait",
+            "You'll be able to leave once your shop is re-approved.",
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      },
+      child: Container(
+        decoration: AppDecorations.gradientBackground,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text("Shop Status"),
+            automaticallyImplyLeading: false,
+          ),
+          body: loading
+              ? const Center(child: CircularProgressIndicator())
+              : shop == null
+              ? Center(
+                  child: Text("No shop found", style: AppTextStyles.heading4),
+                )
+              : RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(24),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight - 48,
+                        ),
+                        child: Center(child: _buildStateCard()),
                       ),
-                      child: Center(child: _buildStateCard()),
                     ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -153,8 +171,8 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       title: "Application Under Review",
       message: _isExistingSeller
           ? "Your shop \"${shop!["shop_name"] ?? ''}\" was updated and is "
-                "waiting for admin re-approval. You can keep using your seller "
-                "dashboard in the meantime — we'll notify you once it's reviewed."
+                "waiting for admin re-approval. You'll regain access to your "
+                "seller dashboard once it's reviewed."
           : "Your shop \"${shop!["shop_name"] ?? ''}\" has been submitted and is "
                 "waiting for admin approval. We'll notify you once it's reviewed.",
       children: [
@@ -162,17 +180,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
           onPressed: _refresh,
           icon: const Icon(Icons.refresh),
           label: const Text("Check Status"),
-        ),
-        const SizedBox(height: 10),
-        TextButton(
-          onPressed: _isExistingSeller
-              ? _continueToSellerDashboard
-              : _goToBuyerDashboard,
-          child: Text(
-            _isExistingSeller
-                ? "Continue to Seller Dashboard"
-                : "Continue Browsing as Customer",
-          ),
         ),
       ],
     );
@@ -212,6 +219,25 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
   }
 
   Widget _approvedCard() {
+    if (_isExistingSeller) {
+      // Re-approval after an edit — role never changed, just send them back.
+      return _statusCard(
+        icon: Icons.celebration,
+        iconColor: AppColors.success,
+        title: "Shop Updated",
+        message:
+            "Your changes to \"${shop!["shop_name"] ?? ''}\" have been "
+            "approved and your shop is live again.",
+        children: [
+          ElevatedButton(
+            onPressed: _continueToSellerDashboard,
+            child: const Text("Back to Your Shop"),
+          ),
+        ],
+      );
+    }
+
+    // First-time approval — customer becomes a seller.
     return _statusCard(
       icon: Icons.celebration,
       iconColor: AppColors.success,

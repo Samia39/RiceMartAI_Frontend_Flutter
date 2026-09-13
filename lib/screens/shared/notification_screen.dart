@@ -158,16 +158,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         break;
 
       case 'shop_pending':
-        // Only admins get this type — send them to the approvals queue
-        Get.toNamed(AppRoutes.sellerApprovals);
+        if (Get.isRegistered<AdminShellController>()) {
+          Get.find<AdminShellController>().goToShopsTab(0);
+          Get.until((route) => route.isFirst);
+        } else {
+          await Get.offAllNamed(AppRoutes.adminDashboard);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (Get.isRegistered<AdminShellController>()) {
+              Get.find<AdminShellController>().goToShopsTab(0);
+            }
+          });
+        }
         break;
 
       case 'shop_status':
         if (data['shop_status'] == 'rejected') {
           _showRejectionDialog(n);
         } else {
-          // approved / correction requested — only sellers get this type
-          Get.toNamed(AppRoutes.myShop);
+          // approved only sellers get this type
+          Get.offAllNamed(
+            AppRoutes.sellerDashboard,
+            arguments: {'tabIndex': 2},
+          );
         }
         break;
 
@@ -279,10 +291,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       } else if (_isSeller) {
         final items = await _orderService.fetchSellerOrders();
 
-        // Notification stores order_id, but the seller screen needs an
-        // order ITEM — pick the first item belonging to that order.
         final found = items.firstWhereOrNull(
-          (i) => i['order']?['id'] == orderId,
+          (i) => i['order_id'].toString() == orderId.toString(),
         );
 
         if (found != null) {
@@ -344,7 +354,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (shopId == null) return;
 
     if (_isSeller) {
-      Get.toNamed(AppRoutes.myShop);
+      Get.offAllNamed(AppRoutes.sellerDashboard, arguments: {'tabIndex': 2});
       return;
     }
 

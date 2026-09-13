@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'seller_home.dart';
 import '../../chats/conversation.dart';
 import 'package:get_storage/get_storage.dart';
@@ -22,6 +23,14 @@ class SellerDashboardScreen extends StatefulWidget {
 
 class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   int currentIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    final args = Get.arguments;
+    if (args is Map && args['tabIndex'] is int) {
+      currentIndex = args['tabIndex'] as int;
+    }
+  }
 
   // =========================
   // TAB SWITCH

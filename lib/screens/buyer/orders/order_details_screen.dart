@@ -17,7 +17,8 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   late final Set<int> _reviewedItemIds;
-  late final Set<int> _confirmedItemIds;
+  late final Set<int> _confirmedShopIds;
+  bool _confirmingShop = false;
 
   @override
   void initState() {
@@ -27,9 +28,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         .where((item) => item["review"] != null)
         .map<int>((item) => int.tryParse(item["id"].toString()) ?? -1)
         .toSet();
-    _confirmedItemIds = items
-        .where((item) => item["customer_confirmed_at"] != null)
-        .map<int>((item) => int.tryParse(item["id"].toString()) ?? -1)
+
+    // A shop counts as "confirmed" only if ALL its items in this
+    // order are confirmed.
+    final Map<int, List> byShop = {};
+    for (final item in items) {
+      final shopId = int.tryParse(item["shop"]?["id"].toString() ?? '') ?? 0;
+      byShop.putIfAbsent(shopId, () => []).add(item);
+    }
+    _confirmedShopIds = byShop.entries
+        .where((e) => e.value.every((i) => i["customer_confirmed_at"] != null))
+        .map((e) => e.key)
         .toSet();
   }
 
@@ -139,15 +148,38 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     return total;
   }
 
-  Widget buildShopGroups(BuildContext context, List items) {
+  Future<void> confirmShop(int orderId, int shopId) async {
+    if (_confirmingShop) return;
+    setState(() => _confirmingShop = true);
+
+    final res = await OrderService().confirmShopReceived(orderId, shopId);
+
+    Get.snackbar(
+      res["success"] == true ? "Thanks!" : "Error",
+      res["message"] ?? "",
+    );
+
+    if (res["success"] == true) {
+      setState(() => _confirmedShopIds.add(shopId));
+    }
+
+    if (mounted) setState(() => _confirmingShop = false);
+  }
+
+  Widget buildShopGroups(BuildContext context, List items, int orderId) {
     final groups = groupItemsByShop(items);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: groups.values.map<Widget>((group) {
-        final shop = group["shop"] as Map;
-        final shopItems = group["items"] as List;
+      children: groups.entries.map<Widget>((entry) {
+        final shopId = entry.key;
+        final shop = entry.value["shop"] as Map;
+        final shopItems = entry.value["items"] as List;
         final subtotal = shopSubtotal(shopItems);
+
+        final allDelivered = shopItems.every((i) => i["status"] == "delivered");
+        final confirmed = _confirmedShopIds.contains(shopId);
+        final rejected = widget.order["payment_status"] == "rejected";
 
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
@@ -160,8 +192,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               ...shopItems.map((item) {
                 final product = item["product"];
                 final status = (item["status"] ?? "pending").toString();
-                final itemId = int.tryParse(item["id"].toString()) ?? -1;
-                final confirmed = _confirmedItemIds.contains(itemId);
 
                 return Container(
                   margin: const EdgeInsets.only(top: 8),
@@ -188,124 +218,109 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       const SizedBox(height: 8),
                       infoRow("Price", "Rs ${item["price"]}"),
                       infoRow("Quantity", item["quantity"].toString()),
-
-                      if (status == "delivered" &&
-                          widget.order["payment_status"] != "rejected") ...[
-                        const SizedBox(height: 10),
-
-                        // =========================
-                        // CONFIRM RECEIVED
-                        // =========================
-                        if (!confirmed)
-                          Column(
-                            children: [
-                              Text(
-                                "Did you receive this item?",
-                                style: AppTextStyles.bodySmall,
-                              ),
-                              const SizedBox(height: 6),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final res = await OrderService()
-                                        .confirmReceived(item["id"]);
-
-                                    Get.snackbar(
-                                      res["success"] == true
-                                          ? "Thanks!"
-                                          : "Error",
-                                      res["message"] ?? "",
-                                    );
-
-                                    if (res["success"] == true) {
-                                      setState(
-                                        () => _confirmedItemIds.add(itemId),
-                                      );
-                                    }
-                                  },
-                                  child: const Text("Yes, Confirm Received"),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              SizedBox(
-                                width: double.infinity,
-                                child: OutlinedButton(
-                                  onPressed: () async {
-                                    await Get.toNamed(
-                                      AppRoutes.customerNewComplaint,
-                                    );
-                                  },
-                                  child: const Text("No, Report an Issue"),
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle,
-                                size: 18,
-                                color: AppColors.success,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                "Received",
-                                style: AppTextStyles.label.copyWith(
-                                  color: AppColors.success,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                        const SizedBox(height: 8),
-
-                        const SizedBox(height: 8),
-
-                        Builder(
-                          builder: (ctx) {
-                            final reviewed = _reviewedItemIds.contains(itemId);
-
-                            if (reviewed) {
-                              return Row(
-                                children: [
-                                  Icon(
-                                    Icons.star,
-                                    size: 18,
-                                    color: AppColors.golden,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    "Reviewed",
-                                    style: AppTextStyles.label.copyWith(
-                                      color: AppColors.golden,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }
-
-                            return ElevatedButton(
-                              onPressed: () async {
-                                final submitted = await showDialog<bool>(
-                                  context: ctx,
-                                  builder: (_) =>
-                                      ShopReviewDialog(orderItemId: item["id"]),
-                                );
-                                if (submitted == true) {
-                                  setState(() => _reviewedItemIds.add(itemId));
-                                }
-                              },
-                              child: const Text("Rate Shop"),
-                            );
-                          },
-                        ),
-                      ],
                     ],
                   ),
                 );
               }),
+
+              // =========================
+              // CONFIRM RECEIVED — once per shop, not per item
+              // =========================
+              if (allDelivered && !rejected) ...[
+                const SizedBox(height: 10),
+                if (!confirmed)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        "Did you receive all items from this shop?",
+                        style: AppTextStyles.bodySmall,
+                      ),
+                      const SizedBox(height: 6),
+                      ElevatedButton(
+                        onPressed: _confirmingShop
+                            ? null
+                            : () => confirmShop(orderId, shopId),
+                        child: const Text("Yes, Confirm Received"),
+                      ),
+                      const SizedBox(height: 6),
+                      OutlinedButton(
+                        onPressed: () async {
+                          await Get.toNamed(AppRoutes.customerNewComplaint);
+                        },
+                        child: const Text("No, Report an Issue"),
+                      ),
+                    ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: 18,
+                        color: AppColors.success,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Received",
+                        style: AppTextStyles.label.copyWith(
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                const SizedBox(height: 8),
+
+                // Rating still keyed off the first item for now — see
+                // note below about needing the ShopReview files to make
+                // this properly one-review-per-shop on the backend too.
+                if (confirmed)
+                  Builder(
+                    builder: (ctx) {
+                      final reviewed = shopItems.any(
+                        (i) => _reviewedItemIds.contains(
+                          int.tryParse(i["id"].toString()) ?? -1,
+                        ),
+                      );
+
+                      if (reviewed) {
+                        return Row(
+                          children: [
+                            Icon(Icons.star, size: 18, color: AppColors.golden),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Reviewed",
+                              style: AppTextStyles.label.copyWith(
+                                color: AppColors.golden,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      return ElevatedButton(
+                        onPressed: () async {
+                          final firstItemId = shopItems.first["id"];
+                          final submitted = await showDialog<bool>(
+                            context: ctx,
+                            builder: (_) =>
+                                ShopReviewDialog(orderItemId: firstItemId),
+                          );
+                          if (submitted == true) {
+                            setState(() {
+                              _reviewedItemIds.add(
+                                int.tryParse(firstItemId.toString()) ?? -1,
+                              );
+                            });
+                          }
+                        },
+                        child: const Text("Rate Shop"),
+                      );
+                    },
+                  ),
+              ],
+
               const Divider(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -329,6 +344,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     final order = widget.order;
     final List items = order["items"] ?? [];
     final bool isRejected = order["payment_status"] == "rejected";
+    final int orderId = int.tryParse(order["id"].toString()) ?? 0;
 
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -424,7 +440,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     const SizedBox(height: 20),
                     Text("Items by Shop", style: AppTextStyles.heading3),
                     const SizedBox(height: 16),
-                    buildShopGroups(context, items),
+                    buildShopGroups(context, items, orderId),
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: AppDecorations.card,

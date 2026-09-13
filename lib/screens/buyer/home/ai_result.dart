@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ricemart_ai/core/services/admin/permission_service.dart';
 import '../../../routes/app_routes.dart';
 import '../../../core/utils/themes.dart';
 
@@ -62,12 +63,15 @@ class AIResultScreen extends StatelessWidget {
 
     // ✅ Search query for marketplace
     final String searchQuery = _cleanRiceType(riceType);
+    final bool isSeller = PermissionService.hasPermission(
+      'view seller dashboard',
+    );
     final bool canSearch =
         isRice &&
         riceType.isNotEmpty &&
         riceType.toLowerCase() != 'unknown' &&
-        riceType.toLowerCase() != 'none';
-
+        riceType.toLowerCase() != 'none' &&
+        !isSeller;
     return Scaffold(
       appBar: AppBar(title: const Text('Detection Result')),
 
