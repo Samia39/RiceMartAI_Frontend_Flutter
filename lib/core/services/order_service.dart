@@ -71,6 +71,29 @@ class OrderService {
   }
 
   // =========================
+  // CANCEL AN UNPAID CARD ORDER
+  // Called when Stripe payment-intent creation or the payment sheet
+  // fails right after checkout() created the order.
+  // =========================
+  Future<Map<String, dynamic>> cancelUnpaidOrder(int orderId) async {
+    try {
+      final token = box.read("token");
+
+      final response = await http.delete(
+        Uri.parse("$baseUrl/orders/$orderId/cancel-unpaid"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        },
+      );
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  // =========================
   // GET MY ORDERS
   // =========================
   Future<List> getMyOrders() async {

@@ -14,6 +14,7 @@ class RiceDetailScreen extends StatefulWidget {
 
 class _RiceDetailScreenState extends State<RiceDetailScreen> {
   int quantity = 1;
+  final quantityController = TextEditingController(text: "1");
 
   @override
   Widget build(BuildContext context) {
@@ -140,11 +141,16 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                     Row(
                       children: [
                         // MINUS BUTTON
+                        // MINUS BUTTON
                         IconButton(
                           onPressed: () {
-                            if (quantity > 1) {
+                            final int baseQty =
+                                int.tryParse(quantityController.text) ??
+                                quantity;
+                            if (baseQty > 1) {
                               setState(() {
-                                quantity--;
+                                quantity = baseQty - 1;
+                                quantityController.text = quantity.toString();
                               });
                             }
                           },
@@ -157,25 +163,78 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                         // QUANTITY BOX
                         Container(
+                          width: 70, // widened to fit 3 digits
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
+                            horizontal: 8,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
-                            quantity.toString(),
+                          child: TextField(
+                            controller: quantityController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
                             style: AppTextStyles.heading4,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            onSubmitted: (value) {
+                              final int stock =
+                                  int.tryParse(product["stock"].toString()) ??
+                                  0;
+                              int typed = int.tryParse(value) ?? quantity;
+                              if (typed < 1) typed = 1;
+                              if (typed > stock) {
+                                typed = stock;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Only $stock KG in stock"),
+                                  ),
+                                );
+                              }
+                              setState(() {
+                                quantity = typed;
+                                quantityController.text = quantity.toString();
+                              });
+                            },
+                            onTapOutside: (_) {
+                              FocusScope.of(context).unfocus();
+                              final int stock =
+                                  int.tryParse(product["stock"].toString()) ??
+                                  0;
+                              int typed =
+                                  int.tryParse(quantityController.text) ??
+                                  quantity;
+                              if (typed < 1) typed = 1;
+                              if (typed > stock) {
+                                typed = stock;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Only $stock KG in stock"),
+                                  ),
+                                );
+                              }
+                              setState(() {
+                                quantity = typed;
+                                quantityController.text = quantity.toString();
+                              });
+                            },
                           ),
                         ),
 
                         // PLUS BUTTON
                         IconButton(
                           onPressed: () {
+                            final int baseQty =
+                                int.tryParse(quantityController.text) ??
+                                quantity;
                             setState(() {
-                              quantity++;
+                              quantity = baseQty + 1;
+                              quantityController.text = quantity.toString();
                             });
                           },
                           icon: const Icon(
