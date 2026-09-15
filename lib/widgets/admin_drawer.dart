@@ -105,6 +105,17 @@ class AdminDrawer extends StatelessWidget {
                   },
                 ),
 
+                //categories
+                drawerItem(
+                  icon: Icons.category,
+                  title: "Manage Categories",
+                  onTap: () {
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.manageCategories);
+                    });
+                  },
+                ),
+
                 // USER MANAGEMENT
                 ExpansionTile(
                   leading: const Icon(

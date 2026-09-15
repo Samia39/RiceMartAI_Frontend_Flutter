@@ -18,13 +18,15 @@ class AllRiceScreen extends StatefulWidget {
 class _AllRiceScreenState extends State<AllRiceScreen> {
   List<Map<String, dynamic>> productList = [];
   List<Map<String, dynamic>> filteredProducts = [];
+  List<Map<String, dynamic>> categories = [];
+
   bool isLoading = true;
+  bool categoriesLoading = true;
+
   final searchController = TextEditingController();
 
-  // Prefer an explicit constructor param (bottom-nav tab usage); fall back
-  // to Get.arguments when reached via Get.toNamed(AppRoutes.allRice) with
-  // no constructor param supplied (e.g. from AIResultScreen's "Show in
-  // Marketplace" button).
+  int? selectedCategoryId;
+
   String? get _effectiveInitialQuery {
     if (widget.initialSearchQuery != null &&
         widget.initialSearchQuery!.isNotEmpty) {
@@ -41,6 +43,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   void initState() {
     super.initState();
     fetchProducts();
+    fetchCategories();
   }
 
   // =========================
@@ -58,24 +61,46 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
 
     if (initialQuery != null && initialQuery.isNotEmpty) {
       searchController.text = initialQuery;
-      searchProducts(initialQuery);
-    } else {
-      setState(() {
-        filteredProducts = data;
-      });
     }
+
+    applyFilters();
   }
 
   // =========================
-  // SEARCH PRODUCTS
+  // FETCH CATEGORIES (for the browse row)
   // =========================
-  void searchProducts(String value) {
+  Future<void> fetchCategories() async {
+    final data = await ProductService().fetchCategories();
+
+    if (!mounted) return;
+
+    setState(() {
+      categories = data;
+      categoriesLoading = false;
+    });
+  }
+
+  // =========================
+  // APPLY BOTH TEXT SEARCH + CATEGORY FILTER TOGETHER
+  // =========================
+  void applyFilters() {
+    final query = searchController.text.toLowerCase();
+
     final result = productList.where((product) {
       final name = product["name"].toString().toLowerCase();
-      final category =
+      final categoryName =
           product["rice_category"]?["name"].toString().toLowerCase() ?? "";
-      return name.contains(value.toLowerCase()) ||
-          category.contains(value.toLowerCase());
+      final categoryId = product["rice_category"]?["id"];
+
+      final matchesText =
+          query.isEmpty || name.contains(query) || categoryName.contains(query);
+
+      final matchesCategory =
+          selectedCategoryId == null ||
+          (categoryId != null &&
+              int.tryParse(categoryId.toString()) == selectedCategoryId);
+
+      return matchesText && matchesCategory;
     }).toList();
 
     setState(() {
@@ -83,12 +108,107 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
     });
   }
 
+  void searchProducts(String value) {
+    applyFilters();
+  }
+
+  void onCategoryTap(int categoryId) {
+    setState(() {
+      selectedCategoryId = selectedCategoryId == categoryId ? null : categoryId;
+    });
+    applyFilters();
+  }
+
+  // =========================
+  // BROWSE BY CATEGORY ROW
+  // =========================
+  Widget categoryBrowseRow() {
+    if (categoriesLoading) {
+      return const SizedBox(
+        height: 90,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      );
+    }
+
+    if (categories.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: categories.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final id = int.tryParse(category["id"].toString());
+          final isSelected = selectedCategoryId == id;
+          final imageUrl = category["image_url"];
+
+          return GestureDetector(
+            onTap: () {
+              if (id != null) onCategoryTap(id);
+            },
+            child: SizedBox(
+              width: 68,
+              child: Column(
+                children: [
+                  Container(
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.darkGreen
+                            : AppColors.darkGreen.withOpacity(0.15),
+                        width: isSelected ? 2.5 : 1,
+                      ),
+                      color: AppColors.cream.withOpacity(0.6),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: imageUrl != null
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.rice_bowl,
+                              color: AppColors.darkGreen,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.rice_bowl,
+                            color: AppColors.darkGreen,
+                          ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    category["name"] ?? "",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontSize: 10,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: isSelected ? AppColors.darkGreen : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   // =========================
   // PRODUCT CARD
   // =========================
-  // ✅ Design updated to match the Seller Dashboard ("My Products") card
-  // look instead of a plain white card — same AppDecorations.card style,
-  // and the image fills the whole top area (no white background feel).
   Widget productCard(Map<String, dynamic> product, double imageHeight) {
     final imageUrl = ProductService.getImageUrl(product);
 
@@ -109,7 +229,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ IMAGE — fills the full top area (no circle, no white bg)
             Container(
               height: imageHeight,
               width: double.infinity,
@@ -151,8 +270,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                       ),
                     ),
             ),
-
-            // CONTENT
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(6),
@@ -235,12 +352,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final initialQuery = _effectiveInitialQuery;
 
-    // Bound the card's own width instead of a fixed column count —
-    // this keeps cards small and consistent on both mobile and wide
-    // desktop/web windows, where a fixed crossAxisCount would otherwise
-    // stretch each cell (and its aspect-ratio-derived height) hugely.
     double maxCardWidth = 170;
     double childAspectRatio = 0.68;
     double imageHeight = 85;
@@ -255,71 +367,63 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
       decoration: AppDecorations.gradientBackground,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text("Rice Marketplace"),
-          bottom:
-              initialQuery != null &&
-                  initialQuery.isNotEmpty &&
-                  searchController.text.isNotEmpty
-              ? PreferredSize(
-                  preferredSize: const Size.fromHeight(36),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.golden.withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: AppColors.golden.withOpacity(0.60),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.auto_awesome,
-                                size: 13,
-                                color: AppColors.golden,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                "AI Filter: $initialQuery",
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.darkGreen,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              GestureDetector(
-                                onTap: () {
-                                  searchController.clear();
-                                  searchProducts('');
-                                },
-                                child: Icon(
-                                  Icons.close,
-                                  size: 13,
-                                  color: AppColors.darkGreen.withOpacity(0.60),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : null,
-        ),
+        appBar: AppBar(title: const Text("Rice Marketplace")),
         body: SafeArea(
           child: Column(
             children: [
+              const SizedBox(height: 8),
+
+              // BROWSE BY CATEGORY
+              categoryBrowseRow(),
+
+              // ACTIVE CATEGORY FILTER CHIP
+              if (selectedCategoryId != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.golden.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.golden.withOpacity(0.60),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Category: ${categories.firstWhere((c) => int.tryParse(c["id"].toString()) == selectedCategoryId)["name"]}",
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.darkGreen,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() => selectedCategoryId = null);
+                                applyFilters();
+                              },
+                              child: Icon(
+                                Icons.close,
+                                size: 13,
+                                color: AppColors.darkGreen.withOpacity(0.60),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               // SEARCH BAR
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -359,13 +463,15 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                           "No products found",
                           style: AppTextStyles.bodyLarge,
                         ),
-                        if (initialQuery != null)
+                        if (selectedCategoryId != null ||
+                            searchController.text.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: TextButton(
                               onPressed: () {
                                 searchController.clear();
-                                searchProducts('');
+                                setState(() => selectedCategoryId = null);
+                                applyFilters();
                               },
                               child: const Text("Show all products"),
                             ),
