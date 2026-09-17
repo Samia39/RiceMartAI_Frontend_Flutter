@@ -137,9 +137,17 @@ class _SellerPayoutsScreenState extends State<SellerPayoutsScreen>
             builder: (context) {
               num asNum(dynamic v) =>
                   v is num ? v : num.tryParse(v?.toString() ?? '') ?? 0;
+              final gross = asNum(payout["gross_amount"]);
+              final commission = asNum(payout["commission_amount"]);
               final net = asNum(payout["net_amount"]);
               final delivery = asNum(payout["delivery_charge"]);
               final total = net + delivery;
+              // Computed from this payout's own numbers, so it always
+              // reflects the % actually charged on this order — even
+              // after Super Admin changes the setting later.
+              final commissionPercent = gross > 0
+                  ? (commission / gross * 100)
+                  : 0;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +157,7 @@ class _SellerPayoutsScreenState extends State<SellerPayoutsScreen>
                     style: AppTextStyles.bodySmall,
                   ),
                   Text(
-                    "Commission (5%): Rs ${payout["commission_amount"]}",
+                    "Commission (${commissionPercent.toStringAsFixed(1)}%): Rs ${payout["commission_amount"]}",
                     style: AppTextStyles.bodySmall,
                   ),
                   Text(
