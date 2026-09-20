@@ -27,6 +27,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    final gmailRegex = RegExp(
+      r'^[A-Za-z0-9._%+\-]+@gmail\.com$',
+      caseSensitive: false,
+    );
+    if (!gmailRegex.hasMatch(email)) {
+      Get.snackbar("Error", "Only @gmail.com email addresses are allowed");
+      return;
+    }
+
     try {
       var response = await AuthService.register(name, email, password);
       Get.snackbar("Success", response['message'] ?? "OTP sent to your email");
@@ -98,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
-                        hintText: "Email",
+                        hintText: "Email (@gmail.com)",
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                     ),
