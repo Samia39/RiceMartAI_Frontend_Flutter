@@ -58,6 +58,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
+  Future<void> _clearAll() async {
+    if (notifications.isEmpty) return;
+
+    final confirm = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text("Clear all notifications?"),
+        content: const Text("This will clear all your notifications."),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text("Clear", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    final ok = await _service.clearAll();
+
+    if (!mounted) return;
+
+    if (ok) {
+      setState(() => notifications.clear());
+    } else {
+      Get.snackbar("Error", "Could not clear notifications. Try again.");
+    }
+  }
+
   // =========================
   // ROLE HELPER
   // FIX: login/loadUser save the key as 'roles' (plural, a LIST —
@@ -444,6 +477,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       appBar: AppBar(
         title: const Text("Notifications"),
         actions: [
+          if (notifications.isNotEmpty)
+            IconButton(
+              tooltip: "Clear all",
+              icon: const Icon(Icons.delete_sweep_rounded),
+              onPressed: _clearAll,
+            ),
           TextButton(
             onPressed: _markAllRead,
             child: Text(
