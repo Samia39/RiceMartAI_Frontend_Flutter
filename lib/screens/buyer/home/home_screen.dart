@@ -19,10 +19,25 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> productList = [];
   bool isLoading = true;
 
+  // ── NEW: storage listener ────────────────────────────────
+  final _box = GetStorage();
+  VoidCallback? _storageUnsub;
+
   @override
   void initState() {
     super.initState();
     fetchProducts();
+
+    // Rebuild whenever profile data (name, etc.) changes in storage
+    _storageUnsub = _box.listen(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _storageUnsub?.call();
+    super.dispose();
   }
 
   Future<void> fetchProducts() async {
@@ -36,8 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final box = GetStorage();
-    final userName = box.read("name") ?? "User";
+    final userName = _box.read("name") ?? "User";
 
     return Scaffold(
       body: Container(

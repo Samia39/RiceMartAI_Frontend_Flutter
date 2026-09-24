@@ -79,6 +79,14 @@ class ProfileService {
       email: email,
       password: password,
     );
+
+    // Keep the locally cached name/email in sync — HomeScreen,
+    // AppDrawer, SellerDrawer, SellerHomeScreen, and AdminDrawer
+    // all read these straight from GetStorage, not from the API.
+    await _box.write('name', name);
+    if (email != null && email.isNotEmpty) {
+      await _box.write('email', email);
+    }
   }
 
   // ── Clear session ────────────────────────────────────────

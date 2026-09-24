@@ -4,17 +4,36 @@ import 'package:get_storage/get_storage.dart';
 import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 
-class SellerHomeScreen extends StatelessWidget {
-  /// Callback to switch tabs in the parent SellerDashboardScreen.
-  /// Index 1 = Add Rice, Index 2 = My Shop
+class SellerHomeScreen extends StatefulWidget {
   final ValueChanged<int>? onTabChange;
 
   const SellerHomeScreen({super.key, this.onTabChange});
 
   @override
+  State<SellerHomeScreen> createState() => _SellerHomeScreenState();
+}
+
+class _SellerHomeScreenState extends State<SellerHomeScreen> {
+  final _box = GetStorage();
+  VoidCallback? _storageUnsub;
+
+  @override
+  void initState() {
+    super.initState();
+    _storageUnsub = _box.listen(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _storageUnsub?.call();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final box = GetStorage();
-    final userName = box.read("name") ?? "User";
+    final userName = _box.read("name") ?? "User";
 
     return Scaffold(
       body: Container(
@@ -114,7 +133,7 @@ class SellerHomeScreen extends StatelessWidget {
                   // ================= ADD PRODUCT BUTTON =================
                   // Tab index 1 = AddRiceScreen in SellerDashboardScreen
                   GestureDetector(
-                    onTap: () => onTabChange?.call(1),
+                    onTap: () => widget.onTabChange?.call(1),
                     child: featureCard(
                       icon: Icons.add_box_rounded,
                       title: "Add Product",
@@ -127,7 +146,7 @@ class SellerHomeScreen extends StatelessWidget {
                   // ================= MY SHOP BUTTON =================
                   // Tab index 2 = MyShopScreen in SellerDashboardScreen
                   GestureDetector(
-                    onTap: () => onTabChange?.call(2),
+                    onTap: () => widget.onTabChange?.call(2),
                     child: featureCard(
                       icon: Icons.storefront_rounded,
                       title: "My Shop",

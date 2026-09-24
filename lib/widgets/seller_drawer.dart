@@ -5,20 +5,37 @@ import 'package:get_storage/get_storage.dart';
 import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
 
-class SellerDrawer extends StatelessWidget {
-  // =========================
-  // TAB SWITCH CALLBACK
-  // =========================
+class SellerDrawer extends StatefulWidget {
   final Function(int) onTabSelected;
 
   const SellerDrawer({super.key, required this.onTabSelected});
 
   @override
-  Widget build(BuildContext context) {
-    final box = GetStorage();
+  State<SellerDrawer> createState() => _SellerDrawerState();
+}
 
-    final userName = box.read("name") ?? "Seller";
-    final userEmail = box.read("email") ?? "";
+class _SellerDrawerState extends State<SellerDrawer> {
+  final _box = GetStorage();
+  VoidCallback? _storageUnsub;
+
+  @override
+  void initState() {
+    super.initState();
+    _storageUnsub = _box.listen(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _storageUnsub?.call();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userName = _box.read("name") ?? "Seller";
+    final userEmail = _box.read("email") ?? "";
 
     return Drawer(
       backgroundColor: AppColors.cream,
@@ -57,7 +74,7 @@ class SellerDrawer extends StatelessWidget {
                   title: "Dashboard",
                   onTap: () {
                     Navigator.pop(context);
-                    onTabSelected(0);
+                    widget.onTabSelected(0);
                   },
                 ),
 
@@ -67,7 +84,7 @@ class SellerDrawer extends StatelessWidget {
                   title: "My Shop",
                   onTap: () {
                     Navigator.pop(context);
-                    onTabSelected(2);
+                    widget.onTabSelected(2);
                   },
                 ),
 
@@ -77,7 +94,7 @@ class SellerDrawer extends StatelessWidget {
                   title: "My Rice",
                   onTap: () {
                     Navigator.pop(context);
-                    onTabSelected(1);
+                    widget.onTabSelected(1);
                   },
                 ),
 
@@ -111,7 +128,7 @@ class SellerDrawer extends StatelessWidget {
                   title: "Orders",
                   onTap: () {
                     Navigator.pop(context);
-                    onTabSelected(4);
+                    widget.onTabSelected(4);
                   },
                 ),
                 // COMPLAINTS TAB
@@ -132,7 +149,7 @@ class SellerDrawer extends StatelessWidget {
                   title: "Profile",
                   onTap: () {
                     Navigator.pop(context);
-                    onTabSelected(5);
+                    widget.onTabSelected(5);
                   },
                 ),
 
@@ -161,7 +178,7 @@ class SellerDrawer extends StatelessWidget {
             title: "Logout",
             color: Colors.red,
             onTap: () {
-              box.erase();
+              _box.erase();
               Get.offAllNamed(AppRoutes.login);
             },
           ),
