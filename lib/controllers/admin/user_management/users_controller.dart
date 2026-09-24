@@ -19,6 +19,10 @@ class UsersController extends GetxController {
 
   RxString selectedRole = ''.obs;
 
+  // NEW: which chip is selected at the top of the Users screen ("All Users"
+  // or a specific role). Used only to filter the list shown to the admin.
+  RxString selectedRoleFilter = 'All Users'.obs;
+
   RxInt editingUserId = 0.obs;
 
   // =========================
