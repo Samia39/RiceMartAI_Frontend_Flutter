@@ -150,6 +150,12 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
       0,
       (sum, i) => sum + asNum(i["commission_amount"]),
     );
+    // Computed from this order's own numbers (not the current global
+    // setting) so old orders keep showing the % they were actually
+    // charged, even after Super Admin changes the setting later.
+    final commissionPercent = totalRiceGross > 0
+        ? (totalCommission / totalRiceGross * 100)
+        : 0;
     final totalNet = items.fold<num>(
       0,
       (sum, i) => sum + asNum(i["net_amount"]),
@@ -241,7 +247,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
                               "Rs ${totalRiceGross.toStringAsFixed(2)}",
                             ),
                             infoRow(
-                              "Commission (5%)",
+                              "Commission (${commissionPercent.toStringAsFixed(1)}%)",
                               "- Rs ${totalCommission.toStringAsFixed(2)}",
                             ),
                             infoRow(

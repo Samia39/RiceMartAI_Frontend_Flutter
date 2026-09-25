@@ -311,6 +311,20 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
                   hint: const Text("Select Rice Category"),
 
+                  // Shows just the name once collapsed, so the field
+                  // itself doesn't get taller than your other inputs.
+                  selectedItemBuilder: (context) {
+                    return categories.map((category) {
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          category["name"].toString(),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList();
+                  },
+
                   validator: (value) {
                     if (value == null) {
                       return "Please select a category";
@@ -320,9 +334,45 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
                   },
 
                   items: categories.map((category) {
+                    final imageUrl = category["image_url"];
+
                     return DropdownMenuItem<int>(
                       value: int.tryParse(category["id"].toString()),
-                      child: Text(category["name"].toString()),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 28,
+                            width: 28,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.cream.withOpacity(0.6),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: imageUrl != null
+                                ? Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.rice_bowl,
+                                      size: 16,
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.rice_bowl,
+                                    size: 16,
+                                    color: AppColors.darkGreen,
+                                  ),
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              category["name"].toString(),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }).toList(),
 
@@ -336,7 +386,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
       ],
     );
   }
-
   // =========================
   // IMAGE PICKER
   // =========================

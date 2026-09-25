@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:ricemart_ai/screens/admin_screens/categories/manage_categories_screen.dart';
 
 // Middleware
 import '../middleware/auth_middleware.dart';
@@ -458,6 +459,15 @@ class AppPages {
       name: AppRoutes.adminComplaintDetail,
       page: () => const AdminComplaintDetailScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('view complaints')],
+    ),
+
+    // =========================================================
+    // ADMIN CATEGORIES
+    // =========================================================
+    GetPage(
+      name: AppRoutes.manageCategories,
+      page: () => const ManageCategoriesScreen(),
+      middlewares: [AuthMiddleware(), PermissionMiddleware('view categories')],
     ),
 
     // =========================================================

@@ -89,4 +89,5 @@ class AppRoutes {
   static const adminComplaints = "/admin/complaints";
   static const adminComplaintDetail = "/admin/complaints/detail";
   static const adminPayouts = "/admin/payouts";
+  static const manageCategories = "/admin/manage-categories";
 }
