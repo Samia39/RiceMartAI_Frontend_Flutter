@@ -4,13 +4,6 @@ import '../../../core/utils/themes.dart';
 import 'package:get/get.dart';
 
 class CustomerComplaintDetailScreen extends StatefulWidget {
-  // Kept optional for backward compatibility with direct instantiation
-  // (e.g. notifications_screen.dart's Get.to(() => CustomerComplaintDetailScreen(
-  // complaintId: ...)) — not yet converted, pending the seller/admin pass
-  // since that file also branches to admin/seller complaint screens we
-  // haven't reviewed). When reached via
-  // Get.toNamed(AppRoutes.customerComplaintDetail, arguments: id) this is
-  // left null and we read Get.arguments instead.
   final int? complaintId;
 
   const CustomerComplaintDetailScreen({super.key, this.complaintId});

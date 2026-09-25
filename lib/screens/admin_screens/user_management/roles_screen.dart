@@ -189,6 +189,48 @@ class RolesScreen extends StatelessWidget {
     );
   }
 
+  // ---------------- Delete confirmation ----------------
+
+  void _confirmDelete(BuildContext context, dynamic roleId, String roleName) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFEDE6D3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: AppColors.borderGold, width: 1.2),
+          ),
+          title: Text("Delete Role", style: AppTextStyles.heading4),
+          content: Text(
+            "Are you sure you want to delete \"$roleName\"? This action cannot be undone.",
+            style: AppTextStyles.bodyMedium,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: AppColors.darkGreen),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                controller.deleteRole(roleId);
+              },
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // ---------------- Roles list (name only) ----------------
 
   Widget _listCard(BuildContext context) {
@@ -277,7 +319,11 @@ class RolesScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          controller.deleteRole(role['id']);
+                          _confirmDelete(
+                            context,
+                            role['id'],
+                            role['name'] ?? '',
+                          );
                         },
                         icon: const Icon(
                           Icons.delete,

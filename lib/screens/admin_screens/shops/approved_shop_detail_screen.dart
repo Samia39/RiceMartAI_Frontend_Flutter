@@ -10,11 +10,6 @@ import '../../../widgets/shop_reviews_section.dart';
 class ApprovedShopDetailScreen extends StatefulWidget {
   const ApprovedShopDetailScreen({super.key});
 
-  // Reached via:
-  // Get.toNamed(
-  //   AppRoutes.adminApprovedShopDetail,
-  //   arguments: shop,
-  // )
   Map<String, dynamic> get shop => Get.arguments as Map<String, dynamic>;
 
   @override
