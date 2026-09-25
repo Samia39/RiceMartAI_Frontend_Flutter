@@ -16,16 +16,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
   final TextEditingController _queryController = TextEditingController();
   bool _isLoading = false;
 
-  // Quick suggestion chips
-  final List<String> _suggestions = [
-    "Sella Rice",
-    "Basmati Rice",
-    "Biryani Rice",
-    "Brown Rice",
-    "Jasmine Rice",
-    "Parboiled Rice",
-  ];
-
   // =========================
   // SEARCH
   // =========================
@@ -144,44 +134,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
                     ),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 28),
-
-              // ── Quick Suggestions ──────────────────────────────
-              Text("Quick Suggestions", style: AppTextStyles.heading4),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: _suggestions.map((s) {
-                  return GestureDetector(
-                    onTap: () {
-                      _queryController.text = s;
-                      setState(() {});
-                      _search(s);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 9,
-                      ),
-                      decoration: AppDecorations.pill,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.grain,
-                            size: 14,
-                            color: AppColors.golden,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(s, style: AppTextStyles.label),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
               ),
 
               const SizedBox(height: 28),

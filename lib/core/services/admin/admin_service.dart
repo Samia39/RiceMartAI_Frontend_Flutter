@@ -77,9 +77,6 @@ class AdminService {
     var response = await request.send();
     var responseData = await response.stream.bytesToString();
 
-    print("STATUS CODE: ${response.statusCode}");
-    print("RESPONSE BODY: $responseData");
-
     return jsonDecode(responseData);
   }
 

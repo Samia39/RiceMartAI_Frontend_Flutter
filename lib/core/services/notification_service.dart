@@ -89,4 +89,21 @@ class NotificationService {
       return false;
     }
   }
+
+  // =========================
+  // CLEAR ALL
+  // =========================
+  Future<bool> clearAll() async {
+    try {
+      final response = await http.delete(
+        Uri.parse("$baseUrl/notifications/clear-all"),
+        headers: _headers,
+      );
+
+      final data = jsonDecode(response.body);
+      return data["success"] == true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

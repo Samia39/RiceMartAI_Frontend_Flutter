@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -14,9 +15,11 @@ class AdminShopsTab extends StatefulWidget {
 }
 
 class _AdminShopsTabState extends State<AdminShopsTab>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final TabController _tabController;
   Worker? _subTabWorker;
+  Timer? _pollTimer;
+  bool _refreshing = false;
 
   List<Map<String, dynamic>> _pending = [];
   List<Map<String, dynamic>> _approved = [];
@@ -30,6 +33,14 @@ class _AdminShopsTabState extends State<AdminShopsTab>
     _tabController = TabController(length: 3, vsync: this);
     _loadAll();
 
+    // Auto-refresh: quietly reload the lists every 20 seconds so new
+    // shop applications appear without logging out and in again.
+    WidgetsBinding.instance.addObserver(this);
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 20),
+      (_) => _loadAll(silent: true),
+    );
+
     // Sync with drawer-driven sub-tab selection.
     final shellController = Get.find<AdminShellController>();
     _tabController.index = shellController.shopsSubTabIndex.value;
@@ -40,15 +51,30 @@ class _AdminShopsTabState extends State<AdminShopsTab>
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _subTabWorker?.dispose();
     _tabController.dispose();
     super.dispose();
   }
 
+  // Refresh right away when the admin comes back to the app
+  // (from another app or the lock screen).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _loadAll(silent: true);
+  }
+
   String get _token => GetStorage().read("token") ?? "";
 
-  Future<void> _loadAll() async {
-    setState(() => _loading = true);
+  Future<void> _loadAll({bool silent = false}) async {
+    // Background refreshes skip if one is already running.
+    // Manual refreshes (pull-to-refresh, returning from a detail
+    // screen) always run so the admin never sees stale data.
+    if (silent && _refreshing) return;
+    _refreshing = true;
+
+    if (!silent) setState(() => _loading = true);
 
     try {
       final results = await Future.wait([
@@ -57,13 +83,17 @@ class _AdminShopsTabState extends State<AdminShopsTab>
         ShopService().fetchRejectedShops(token: _token),
       ]);
 
+      if (!mounted) return;
       setState(() {
         _pending = results[0];
         _approved = results[1];
         _rejected = results[2];
       });
+    } catch (e) {
+      debugPrint('Shops refresh failed: $e');
     } finally {
-      if (mounted) setState(() => _loading = false);
+      _refreshing = false;
+      if (mounted && !silent) setState(() => _loading = false);
     }
   }
 

@@ -112,7 +112,7 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
                         // AVAILABLE PERMISSIONS
                         // =========================
                         Expanded(
-                          flex: 2,
+                          flex: 3,
 
                           child: Container(
                             decoration: AppDecorations.card,
@@ -294,6 +294,7 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
                         // ASSIGNED PERMISSIONS
                         // =========================
                         Expanded(
+                          flex: 2,
                           child: Container(
                             decoration: AppDecorations.card,
 

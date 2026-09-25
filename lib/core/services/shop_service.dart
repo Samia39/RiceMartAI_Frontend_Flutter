@@ -373,9 +373,6 @@ class ShopService {
         body: jsonEncode({"reason": reason, "permanently_ban": permanentlyBan}),
       );
 
-      print("REMOVE SELLER STATUS: ${response.statusCode}");
-      print("REMOVE SELLER BODY: ${response.body}");
-
       final decoded = response.body.isNotEmpty
           ? jsonDecode(response.body)
           : null;

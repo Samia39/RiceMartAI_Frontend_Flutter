@@ -5,17 +5,37 @@ import 'package:get_storage/get_storage.dart';
 import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
   final Function(int) onTabSelected;
 
   const AppDrawer({super.key, required this.onTabSelected});
 
   @override
-  Widget build(BuildContext context) {
-    final box = GetStorage();
+  State<AppDrawer> createState() => _AppDrawerState();
+}
 
-    final userName = box.read("name") ?? "User";
-    final userEmail = box.read("email") ?? "";
+class _AppDrawerState extends State<AppDrawer> {
+  final _box = GetStorage();
+  VoidCallback? _storageUnsub;
+
+  @override
+  void initState() {
+    super.initState();
+    _storageUnsub = _box.listen(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _storageUnsub?.call();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userName = _box.read("name") ?? "User";
+    final userEmail = _box.read("email") ?? "";
 
     return Drawer(
       backgroundColor: AppColors.cream,
@@ -50,7 +70,7 @@ class AppDrawer extends StatelessWidget {
                 title: "Home",
                 onTap: () {
                   Navigator.pop(context);
-                  onTabSelected(0);
+                  widget.onTabSelected(0);
                 },
               ),
 
@@ -62,7 +82,7 @@ class AppDrawer extends StatelessWidget {
                 title: "Rice Marketplace",
                 onTap: () {
                   Navigator.pop(context);
-                  onTabSelected(1);
+                  widget.onTabSelected(1);
                 },
               ),
 
@@ -74,7 +94,7 @@ class AppDrawer extends StatelessWidget {
                 title: "Shops",
                 onTap: () {
                   Navigator.pop(context);
-                  onTabSelected(2);
+                  widget.onTabSelected(2);
                 },
               ),
 
@@ -98,7 +118,7 @@ class AppDrawer extends StatelessWidget {
                 title: "Profile",
                 onTap: () {
                   Navigator.pop(context);
-                  onTabSelected(5);
+                  widget.onTabSelected(5);
                 },
               ),
 
@@ -110,7 +130,7 @@ class AppDrawer extends StatelessWidget {
                 title: "My Orders",
                 onTap: () {
                   Navigator.pop(context);
-                  onTabSelected(3);
+                  widget.onTabSelected(3);
                 },
               ),
 
@@ -150,7 +170,7 @@ class AppDrawer extends StatelessWidget {
                 title: "Logout",
                 color: Colors.red,
                 onTap: () {
-                  box.erase();
+                  _box.erase();
                   Get.offAllNamed(AppRoutes.login);
                 },
               ),

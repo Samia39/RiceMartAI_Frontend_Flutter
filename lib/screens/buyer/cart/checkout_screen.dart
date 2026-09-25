@@ -20,6 +20,8 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
+  // change for strip
+  int? _pendingCardOrderId;
   // =========================
   // CONTROLLERS
   // =========================
@@ -118,6 +120,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   void dispose() {
+    // change for strip
+    if (_pendingCardOrderId != null) {
+      OrderService().cancelUnpaidOrder(_pendingCardOrderId!);
+    }
     nameController.dispose();
     phoneController.dispose();
     addressController.dispose();
@@ -329,6 +335,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // =========================
       if (paymentMethod == "card") {
         orderId = result["order"]?["id"] ?? result["order_id"];
+        // change for strip
+        _pendingCardOrderId = orderId;
 
         if (orderId == null) {
           setState(() => isLoading = false);
@@ -368,9 +376,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           await OrderService().cancelUnpaidOrder(orderId);
           setState(() => isLoading = false);
           Get.snackbar(
-            "Payment Cancelled",
-            e.error.localizedMessage ?? "Card payment was not completed",
+            "Order Not Placed",
+            "Order can't be placed. Card payment is not in production mode.",
             snackPosition: SnackPosition.TOP,
+            duration: const Duration(seconds: 4),
           );
           return;
         }
@@ -378,6 +387,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         // Payment sheet succeeded on Stripe's side. The order flips to
         // "paid" a moment later once Stripe's webhook reaches the backend
         // — not instantly here.
+        //=========================
+        // change for strip
+        _pendingCardOrderId = null;
         setState(() => isLoading = false);
 
         Get.find<CartService>().clearCart();

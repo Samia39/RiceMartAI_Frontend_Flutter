@@ -21,54 +21,109 @@ class AdminHomeShell extends StatefulWidget {
 class _AdminHomeShellState extends State<AdminHomeShell> {
   final AdminShellController _shellController = Get.put(AdminShellController());
 
-  final List<Widget> _tabs = const [
-    AdminDashboardTab(),
-    AdminShopsTab(),
-    AdminOrdersScreen(),
-    PaymentScreen(),
-  ];
+  late final List<_TabEntry> _visibleTabs;
 
-  // Titles shown in the persistent top bar per tab.
-  static const List<String> _titles = [
-    "Admin Dashboard",
-    "Shops",
-    "Orders",
-    "Payments",
-  ];
+  @override
+  void initState() {
+    super.initState();
 
-  static const List<_NavItemData> _navItems = [
-    _NavItemData(
-      icon: Icons.dashboard_outlined,
-      activeIcon: Icons.dashboard,
-      label: "Dashboard",
-    ),
-    _NavItemData(
-      icon: Icons.store_outlined,
-      activeIcon: Icons.store,
-      label: "Shops",
-    ),
-    _NavItemData(
-      icon: Icons.shopping_bag_outlined,
-      activeIcon: Icons.shopping_bag,
-      label: "Orders",
-    ),
-    _NavItemData(
-      icon: Icons.payments_outlined,
-      activeIcon: Icons.payments,
-      label: "Payments",
-    ),
-  ];
+    final allTabs = <_TabEntry>[
+      _TabEntry(
+        tab: AdminTab.dashboard,
+        permission: 'view admin dashboard',
+        title: "Admin Dashboard",
+        page: const AdminDashboardTab(),
+        nav: const _NavItemData(
+          icon: Icons.dashboard_outlined,
+          activeIcon: Icons.dashboard,
+          label: "Dashboard",
+        ),
+      ),
+      _TabEntry(
+        tab: AdminTab.shops,
+        permission: 'view all shops',
+        title: "Shops",
+        page: const AdminShopsTab(),
+        nav: const _NavItemData(
+          icon: Icons.store_outlined,
+          activeIcon: Icons.store,
+          label: "Shops",
+        ),
+      ),
+      _TabEntry(
+        tab: AdminTab.orders,
+        permission: 'view all orders',
+        title: "Orders",
+        page: const AdminOrdersScreen(),
+        nav: const _NavItemData(
+          icon: Icons.shopping_bag_outlined,
+          activeIcon: Icons.shopping_bag,
+          label: "Orders",
+        ),
+      ),
+      _TabEntry(
+        tab: AdminTab.payments,
+        permission: 'view all payments',
+        title: "Payments",
+        page: const PaymentScreen(),
+        nav: const _NavItemData(
+          icon: Icons.payments_outlined,
+          activeIcon: Icons.payments,
+          label: "Payments",
+        ),
+      ),
+    ];
+
+    _visibleTabs = allTabs
+        .where((tab) => PermissionService.hasPermission(tab.permission))
+        .toList();
+
+    // If the controller's currently-selected tab isn't one this admin can
+    // see (e.g. Drawer requested a tab with no permission, or a permission
+    // was revoked since last login), fall back to the first visible tab.
+    if (!_visibleTabs.any((t) => t.tab == _shellController.selectedTab.value)) {
+      if (_visibleTabs.isNotEmpty) {
+        _shellController.selectedTab.value = _visibleTabs.first.tab;
+      }
+    }
+  }
+
+  int get _selectedIndex {
+    final index = _visibleTabs.indexWhere(
+      (t) => t.tab == _shellController.selectedTab.value,
+    );
+    return index == -1 ? 0 : index;
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_visibleTabs.isEmpty) {
+      return Container(
+        decoration: AppDecorations.gradientBackground,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          drawer: const AdminDrawer(),
+          appBar: AppBar(title: const Text("Admin")),
+          body: const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                "You don't have any permissions assigned yet.\nPlease contact Super Admin.",
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       decoration: AppDecorations.gradientBackground,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        // Drawer now lives here, so it's reachable from every tab.
         drawer: const AdminDrawer(),
         appBar: AppBar(
-          title: Obx(() => Text(_titles[_shellController.selectedIndex.value])),
+          title: Obx(() => Text(_visibleTabs[_selectedIndex].title)),
           centerTitle: true,
           actions: [
             if (PermissionService.hasPermission('create sellers'))
@@ -78,12 +133,6 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
                 color: AppColors.darkGreen,
                 onTap: () => Get.toNamed(AppRoutes.addSeller),
               ),
-
-            // =========================
-            // NOTIFICATIONS — now wrapped in the same icon+label layout as
-            // Add Shop / Settings so all three sit at equal height with
-            // matching labels underneath, instead of the bell floating alone.
-            // =========================
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Column(
@@ -102,7 +151,6 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
                 ],
               ),
             ),
-
             if (PermissionService.hasPermission('manage settings'))
               _appBarAction(
                 icon: Icons.settings,
@@ -114,11 +162,11 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
         ),
         body: Obx(
           () => IndexedStack(
-            index: _shellController.selectedIndex.value,
-            children: _tabs,
+            index: _selectedIndex,
+            children: _visibleTabs.map((t) => t.page).toList(),
           ),
         ),
-        bottomNavigationBar: _buildBottomNav(),
+        bottomNavigationBar: _visibleTabs.length > 1 ? _buildBottomNav() : null,
       ),
     );
   }
@@ -182,14 +230,14 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
           child: Obx(
             () => Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(_navItems.length, (i) {
-                final item = _navItems[i];
-                final selected = _shellController.selectedIndex.value == i;
+              children: List.generate(_visibleTabs.length, (i) {
+                final entry = _visibleTabs[i];
+                final selected = _selectedIndex == i;
 
                 return _NavButton(
-                  item: item,
+                  item: entry.nav,
                   selected: selected,
-                  onTap: () => _shellController.selectedIndex.value = i,
+                  onTap: () => _shellController.selectedTab.value = entry.tab,
                 );
               }),
             ),
@@ -198,6 +246,22 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
       ),
     );
   }
+}
+
+class _TabEntry {
+  final AdminTab tab;
+  final String permission;
+  final String title;
+  final Widget page;
+  final _NavItemData nav;
+
+  const _TabEntry({
+    required this.tab,
+    required this.permission,
+    required this.title,
+    required this.page,
+    required this.nav,
+  });
 }
 
 class _NavItemData {

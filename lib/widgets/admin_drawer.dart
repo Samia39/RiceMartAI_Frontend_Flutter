@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:ricemart_ai/core/services/admin/permission_service.dart';
 import '../routes/app_routes.dart';
 import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
 import '../controllers/admin/admin_shell_controller.dart';
 
-class AdminDrawer extends StatelessWidget {
+class AdminDrawer extends StatefulWidget {
   const AdminDrawer({super.key});
 
-  // =========================
-  // SAFE NAVIGATION HELPER
-  // Closes the drawer first, then waits for the NEXT frame (i.e. after
-  // the drawer's close animation has actually started/settled) before
-  // pushing the new route. Doing Navigator.pop(context) and
-  // Get.toNamed()/Get.to() back-to-back in the same callback causes the
-  // Navigator transition lock to clash, which is what was making the
-  // drawer "stuck" until a hot restart.
-  // =========================
+  @override
+  State<AdminDrawer> createState() => _AdminDrawerState();
+}
+
+class _AdminDrawerState extends State<AdminDrawer> {
+  final _box = GetStorage();
+  VoidCallback? _storageUnsub;
+
+  @override
+  void initState() {
+    super.initState();
+    _storageUnsub = _box.listen(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _storageUnsub?.call();
+    super.dispose();
+  }
+
   void _navigate(BuildContext context, VoidCallback action) {
     Navigator.pop(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -27,9 +41,8 @@ class AdminDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = GetStorage();
-    final userName = box.read("name") ?? "Admin";
-    final userEmail = box.read("email") ?? "";
+    final userName = _box.read("name") ?? "Admin";
+    final userEmail = _box.read("email") ?? "";
 
     return Drawer(
       backgroundColor: AppColors.cream,
@@ -56,14 +69,17 @@ class AdminDrawer extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 // DASHBOARD
-                drawerItem(
-                  icon: Icons.dashboard,
-                  title: "Dashboard",
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.find<AdminShellController>().goToTab(0);
-                  },
-                ),
+                if (PermissionService.hasPermission('view admin dashboard'))
+                  drawerItem(
+                    icon: Icons.dashboard,
+                    title: "Dashboard",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Get.find<AdminShellController>().goToTab(
+                        AdminTab.dashboard,
+                      ); // was: goToTab(0)
+                    },
+                  ),
 
                 // PENDING SHOPS
                 drawerItem(
@@ -86,22 +102,38 @@ class AdminDrawer extends StatelessWidget {
                 ),
 
                 // ORDERS
-                drawerItem(
-                  icon: Icons.shopping_bag,
-                  title: "Orders",
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.find<AdminShellController>().goToTab(2);
-                  },
-                ),
-
+                if (PermissionService.hasPermission('view all orders'))
+                  drawerItem(
+                    icon: Icons.shopping_bag,
+                    title: "Orders",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Get.find<AdminShellController>().goToTab(
+                        AdminTab.orders,
+                      ); // was: goToTab(2)
+                    },
+                  ),
                 // PAYMENT APPROVALS
+                if (PermissionService.hasPermission('view all payments'))
+                  drawerItem(
+                    icon: Icons.pending_actions,
+                    title: "Payment Approvals",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Get.find<AdminShellController>().goToTab(
+                        AdminTab.payments,
+                      ); // was: goToTab(3)
+                    },
+                  ),
+
+                //categories
                 drawerItem(
-                  icon: Icons.pending_actions,
-                  title: "Payment Approvals",
+                  icon: Icons.category,
+                  title: "Manage Categories",
                   onTap: () {
-                    Navigator.pop(context);
-                    Get.find<AdminShellController>().goToTab(3);
+                    _navigate(context, () {
+                      Get.toNamed(AppRoutes.manageCategories);
+                    });
                   },
                 ),
 
@@ -269,7 +301,7 @@ class AdminDrawer extends StatelessWidget {
                 // SETTINGS → navigates to profile.dart
                 drawerItem(
                   icon: Icons.person,
-                  title: "profiles",
+                  title: "profile",
                   onTap: () {
                     _navigate(context, () {
                       Get.toNamed(AppRoutes.profile);

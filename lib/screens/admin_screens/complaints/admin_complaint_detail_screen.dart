@@ -29,14 +29,6 @@ String _categoryLabel(String category) {
   }
 }
 
-// FIX: this was previously an undefined `attachmentUrl(...)` call — the
-// file wouldn't compile as given. Using the same base-URL pattern already
-// used elsewhere in the admin screens (ApprovedShopDetailScreen,
-// PaymentScreen) for consistency.
-// const String _imageBaseUrl = "http://ricemart.sandbox.pk";
-
-// String _attachmentUrl(String path) => "$_imageBaseUrl/storage/$path";
-
 // ─────────────────────────────────────────────────────────
 // ZOOM VIEWER — opens full-screen pinch-to-zoom image
 // ─────────────────────────────────────────────────────────
@@ -472,45 +464,65 @@ class _AdminComplaintDetailScreenState
                   ),
 
                   // ── Reply box ──
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.cream.withOpacity(0.3),
-                      border: Border(
-                        top: BorderSide(
-                          color: AppColors.borderGold.withOpacity(0.4),
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _replyController,
-                            decoration: const InputDecoration(
-                              hintText: 'Type a reply...',
-                            ),
+                  if (_complaint!.status != 'resolved')
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.cream.withOpacity(0.3),
+                        border: Border(
+                          top: BorderSide(
+                            color: AppColors.borderGold.withOpacity(0.4),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        _sending
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : IconButton(
-                                icon: Icon(
-                                  Icons.send,
-                                  color: AppColors.darkGreen,
-                                ),
-                                onPressed: _sendReply,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _replyController,
+                              decoration: const InputDecoration(
+                                hintText: 'Type a reply...',
                               ),
-                      ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _sending
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : IconButton(
+                                  icon: Icon(
+                                    Icons.send,
+                                    color: AppColors.darkGreen,
+                                  ),
+                                  onPressed: _sendReply,
+                                ),
+                        ],
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 16,
+                            color: AppColors.success,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'This complaint has been resolved.',
+                            style: AppTextStyles.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                 ],
               ),
       ),
