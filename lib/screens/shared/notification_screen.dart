@@ -166,7 +166,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         if (_isAdmin) {
           if (Get.isRegistered<AdminShellController>()) {
             // Shell already alive — just switch its tab and pop back to it.
-            Get.find<AdminShellController>().goToTab(3);
+            Get.find<AdminShellController>().goToTab(
+              AdminTab.payments,
+            ); // was: goToTab(3)
             Get.until((route) => route.isFirst);
           } else {
             // Cold start — rebuild the shell, then set the tab once its
@@ -174,7 +176,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             await Get.offAllNamed(AppRoutes.adminDashboard);
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (Get.isRegistered<AdminShellController>()) {
-                Get.find<AdminShellController>().goToTab(3);
+                Get.find<AdminShellController>().goToTab(
+                  AdminTab.payments,
+                ); // was: goToTab(3)
               }
             });
           }

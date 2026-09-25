@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:ricemart_ai/core/services/admin/permission_service.dart';
 import '../routes/app_routes.dart';
 import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
@@ -68,14 +69,17 @@ class _AdminDrawerState extends State<AdminDrawer> {
               padding: EdgeInsets.zero,
               children: [
                 // DASHBOARD
-                drawerItem(
-                  icon: Icons.dashboard,
-                  title: "Dashboard",
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.find<AdminShellController>().goToTab(0);
-                  },
-                ),
+                if (PermissionService.hasPermission('view admin dashboard'))
+                  drawerItem(
+                    icon: Icons.dashboard,
+                    title: "Dashboard",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Get.find<AdminShellController>().goToTab(
+                        AdminTab.dashboard,
+                      ); // was: goToTab(0)
+                    },
+                  ),
 
                 // PENDING SHOPS
                 drawerItem(
@@ -98,24 +102,29 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 ),
 
                 // ORDERS
-                drawerItem(
-                  icon: Icons.shopping_bag,
-                  title: "Orders",
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.find<AdminShellController>().goToTab(2);
-                  },
-                ),
-
+                if (PermissionService.hasPermission('view all orders'))
+                  drawerItem(
+                    icon: Icons.shopping_bag,
+                    title: "Orders",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Get.find<AdminShellController>().goToTab(
+                        AdminTab.orders,
+                      ); // was: goToTab(2)
+                    },
+                  ),
                 // PAYMENT APPROVALS
-                drawerItem(
-                  icon: Icons.pending_actions,
-                  title: "Payment Approvals",
-                  onTap: () {
-                    Navigator.pop(context);
-                    Get.find<AdminShellController>().goToTab(3);
-                  },
-                ),
+                if (PermissionService.hasPermission('view all payments'))
+                  drawerItem(
+                    icon: Icons.pending_actions,
+                    title: "Payment Approvals",
+                    onTap: () {
+                      Navigator.pop(context);
+                      Get.find<AdminShellController>().goToTab(
+                        AdminTab.payments,
+                      ); // was: goToTab(3)
+                    },
+                  ),
 
                 //categories
                 drawerItem(

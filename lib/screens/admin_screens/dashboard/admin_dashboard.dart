@@ -142,7 +142,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
               child: NotificationBell(iconColor: Colors.white, size: 24),
             ),
 
-            if (PermissionService.hasPermission('view settings'))
+            if (PermissionService.hasPermission('manage settings'))
               _appBarAction(
                 icon: Icons.settings,
                 label: "Settings",

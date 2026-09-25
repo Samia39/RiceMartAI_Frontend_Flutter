@@ -1,10 +1,3 @@
-// Path: lib/screens/admin_screens/dashboard/admin_dashboard_tab.dart
-//
-// NAV REFACTOR: this screen no longer owns its own Scaffold/AppBar/
-// Drawer — those moved to AdminHomeShell so they stay visible on every
-// bottom-nav tab instead of disappearing on Shops/Orders/Payments.
-// This widget now returns only the body content.
-
 import 'package:flutter/material.dart';
 import '../../../core/utils/themes.dart';
 import '../../../core/services/admin/permission_service.dart';
