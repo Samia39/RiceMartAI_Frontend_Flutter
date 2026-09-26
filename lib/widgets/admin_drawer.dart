@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:ricemart_ai/core/services/admin/permission_service.dart';
+import 'package:ricemart_ai/core/services/cart_service.dart';
 import '../routes/app_routes.dart';
 import '../controllers/admin/user_management/permissions_controller.dart';
 import '../core/utils/themes.dart';
@@ -317,7 +318,28 @@ class _AdminDrawerState extends State<AdminDrawer> {
             title: "Logout",
             color: Colors.red,
             onTap: () {
-              GetStorage().erase();
+              CartService().switchUser(null);
+              GetStorage().remove('token');
+              GetStorage().remove('roles');
+              GetStorage().remove('permissions');
+              GetStorage().remove('has_shop');
+              GetStorage().remove('shop_status');
+              GetStorage().remove('shop_id');
+              GetStorage().remove('is_shop_approved');
+              GetStorage().remove('shop_approved');
+              GetStorage().remove('shop_name');
+              GetStorage().remove('owner_name');
+              GetStorage().remove('phone');
+              GetStorage().remove('city');
+              GetStorage().remove('address');
+              GetStorage().remove('description');
+              GetStorage().remove('cnic');
+              GetStorage().remove('cnic_image');
+              GetStorage().remove('cnic_back_image');
+              GetStorage().remove('name');
+              GetStorage().remove('email');
+              // do NOT call GetStorage().erase() — it would delete
+              // every other user's saved cart_<id> data too.
               Get.offAllNamed(AppRoutes.login);
             },
           ),

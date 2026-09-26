@@ -155,6 +155,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
     IconData? icon,
     int lines = 1,
     TextInputType keyboard = TextInputType.text,
+    bool isRequired = true,
   }) {
     return Container(
       decoration: AppDecorations.inputField,
@@ -162,12 +163,14 @@ class _EditShopScreenState extends State<EditShopScreen> {
         controller: controller,
         maxLines: lines,
         keyboardType: keyboard,
-        validator: (v) {
-          if (v == null || v.isEmpty) {
-            return "Required";
-          }
-          return null;
-        },
+        validator: isRequired
+            ? (v) {
+                if (v == null || v.trim().isEmpty) {
+                  return "Required";
+                }
+                return null;
+              }
+            : null,
         decoration: InputDecoration(
           hintText: hint,
           prefixIcon: icon != null
@@ -325,6 +328,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
                   hint: "Description",
                   icon: Icons.info,
                   lines: 4,
+                  isRequired: false,
                 ),
 
                 const SizedBox(height: 18),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ricemart_ai/core/services/cart_service.dart';
 import '../../../routes/app_routes.dart';
 import '../../../core/utils/themes.dart';
 import '../../../core/services/profile_service.dart';
@@ -142,6 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
       onConfirm: () {
+        CartService().switchUser(null);
         _service.clearSession();
         Get.offAllNamed(AppRoutes.login);
       },
@@ -237,6 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             backgroundColor: Colors.red.withOpacity(0.85),
                             colorText: Colors.white,
                           );
+                          CartService().switchUser(null);
                           _service.clearSession();
                           Get.offAllNamed(AppRoutes.login);
                         } catch (e) {

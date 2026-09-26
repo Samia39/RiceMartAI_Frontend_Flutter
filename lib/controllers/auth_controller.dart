@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ricemart_ai/core/services/cart_service.dart';
 import '../routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -45,6 +46,8 @@ class AuthController extends GetxController {
         box.write('shop_id', res['shop']?['id']);
         box.write('shop_status', res['shop_status'] ?? 'none');
         box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
+
+        CartService().switchUser(res['user']?['id']);
 
         redirectUser(res);
       } else {
@@ -145,6 +148,7 @@ class AuthController extends GetxController {
       box.write('shop_status', res['shop_status'] ?? 'none');
       box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
 
+      CartService().switchUser(res['user']?['id']);
       redirectUser(res);
     } catch (e) {
       await logout();
@@ -167,8 +171,30 @@ class AuthController extends GetxController {
     roles.clear();
     permissions.clear();
 
+    CartService().switchUser(null);
+
     final box = GetStorage();
-    box.erase();
+    box.remove('token');
+    box.remove('roles');
+    box.remove('permissions');
+    box.remove('has_shop');
+    box.remove('shop_status');
+    box.remove('shop_id');
+    box.remove('is_shop_approved');
+    box.remove('shop_approved');
+    box.remove('shop_name');
+    box.remove('owner_name');
+    box.remove('phone');
+    box.remove('city');
+    box.remove('address');
+    box.remove('description');
+    box.remove('cnic');
+    box.remove('cnic_image');
+    box.remove('cnic_back_image');
+    box.remove('name');
+    box.remove('email');
+    // do NOT call box.erase() — it would delete every other
+    // user's saved cart_<id> data too.
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');

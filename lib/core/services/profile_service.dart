@@ -91,7 +91,27 @@ class ProfileService {
 
   // ── Clear session ────────────────────────────────────────
   void clearSession() {
-    _box.erase();
+    _box.remove('token');
+    _box.remove('roles');
+    _box.remove('permissions');
+    _box.remove('has_shop');
+    _box.remove('shop_status');
+    _box.remove('shop_id');
+    _box.remove('is_shop_approved');
+    _box.remove('shop_approved');
+    _box.remove('shop_name');
+    _box.remove('owner_name');
+    _box.remove('phone');
+    _box.remove('city');
+    _box.remove('address');
+    _box.remove('description');
+    _box.remove('cnic');
+    _box.remove('cnic_image');
+    _box.remove('cnic_back_image');
+    _box.remove('name');
+    _box.remove('email');
+    // do NOT call _box.erase() — it would delete every other
+    // user's saved cart_<id> data too.
   }
 
   // ── Request account deletion OTP ─────────────────────────
