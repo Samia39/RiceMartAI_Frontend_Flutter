@@ -45,9 +45,6 @@ class _AppDrawerState extends State<AppDrawer> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // =========================
-              // HEADER
-              // =========================
               UserAccountsDrawerHeader(
                 decoration: const BoxDecoration(color: AppColors.darkGreen),
                 accountName: Text(userName),
@@ -136,9 +133,7 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
 
               // =========================
-              // COMPLAINTS PAGE
-              // Converted from Get.to(() => ...) to a named route so
-              // AuthMiddleware actually runs for it.
+              // COMPLAINTS
               // =========================
               drawerItem(
                 icon: Icons.report_problem,
@@ -151,8 +146,6 @@ class _AppDrawerState extends State<AppDrawer> {
 
               // =========================
               // NOTIFICATIONS
-              // Converted from Get.to(() => ...) to a named route so
-              // AuthMiddleware actually runs for it.
               // =========================
               drawerItem(
                 icon: Icons.notifications,

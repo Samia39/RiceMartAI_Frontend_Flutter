@@ -33,15 +33,12 @@ class _AdminShopsTabState extends State<AdminShopsTab>
     _tabController = TabController(length: 3, vsync: this);
     _loadAll();
 
-    // Auto-refresh: quietly reload the lists every 20 seconds so new
-    // shop applications appear without logging out and in again.
     WidgetsBinding.instance.addObserver(this);
     _pollTimer = Timer.periodic(
       const Duration(seconds: 20),
       (_) => _loadAll(silent: true),
     );
 
-    // Sync with drawer-driven sub-tab selection.
     final shellController = Get.find<AdminShellController>();
     _tabController.index = shellController.shopsSubTabIndex.value;
     _subTabWorker = ever<int>(shellController.shopsSubTabIndex, (index) {

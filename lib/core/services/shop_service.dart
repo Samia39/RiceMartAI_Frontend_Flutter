@@ -200,9 +200,6 @@ class ShopService {
         Uri.parse("$baseUrl/shops/$shopId"),
       );
 
-      // Laravel doesn't parse multipart bodies on native PUT requests,
-      // so we POST with a _method override, which Laravel's built-in
-      // method-spoofing middleware reads and treats as PUT.
       request.fields['_method'] = 'PUT';
 
       request.headers.addAll({

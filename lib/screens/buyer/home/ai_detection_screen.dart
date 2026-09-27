@@ -32,7 +32,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
   final ImagePicker picker = ImagePicker();
 
-  // Desktop check
   bool get _isDesktop =>
       !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 

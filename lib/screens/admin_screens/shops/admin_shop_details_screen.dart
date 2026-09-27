@@ -191,7 +191,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // CNIC — FRONT
+                      // CNIC FRONT
                       _sectionTitle("CNIC Document (Front)"),
 
                       _cnicTile(
@@ -202,7 +202,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // CNIC — BACK
+                      // CNIC BACK
                       _sectionTitle("CNIC Document (Back)"),
 
                       _cnicTile(
@@ -213,7 +213,7 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 30),
 
-                      // ACTIONS (hidden when read-only)
+                      // ACTIONS
                       if (!readOnly) ...[
                         Row(
                           children: [
@@ -611,9 +611,7 @@ class ShopDetailsScreen extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 //  FULL-SCREEN CNIC VIEWER
-// ─────────────────────────────────────────────────────────────────────────────
 class _CnicFullScreenViewer extends StatelessWidget {
   final String imageUrl;
   final String heroTag;

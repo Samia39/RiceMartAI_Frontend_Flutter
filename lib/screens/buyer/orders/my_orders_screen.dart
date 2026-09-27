@@ -63,8 +63,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
         appBar: AppBar(
           title: const Text("My Orders"),
-          automaticallyImplyLeading:
-              false, // no back arrow — this is a bottom-nav tab now
+          automaticallyImplyLeading: false,
           bottom: TabBar(
             controller: tabController,
             tabs: const [

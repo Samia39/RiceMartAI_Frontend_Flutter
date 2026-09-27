@@ -22,7 +22,6 @@ class AuthController extends GetxController {
 
     try {
       final res = await AuthService.login(email, password);
-      //debugPrint("LOGIN RESPONSE: $res");
 
       if (res['token'] != null) {
         token.value = res['token'];
@@ -39,10 +38,9 @@ class AuthController extends GetxController {
         box.write('permissions', res['permissions']);
         box.write('has_shop', res['has_shop']);
         box.write('shop_status', res['shop_status']);
-        box.write('name', res['user']?['name'] ?? ''); // ✅ safe null check
-        box.write('email', res['user']?['email'] ?? ''); // ✅ save email too
+        box.write('name', res['user']?['name'] ?? '');
+        box.write('email', res['user']?['email'] ?? '');
 
-        // ✅ SAVE SHOP INFO — this was missing, causing "No approved shop found"
         box.write('shop_id', res['shop']?['id']);
         box.write('shop_status', res['shop_status'] ?? 'none');
         box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
@@ -113,7 +111,7 @@ class AuthController extends GetxController {
   }
 
   // ======================
-  // LOAD USER (AUTO LOGIN)
+  // LOAD USER
   // ======================
   Future<void> loadUser() async {
     try {
@@ -135,15 +133,8 @@ class AuthController extends GetxController {
       box.write('permissions', res['permissions']);
       box.write('has_shop', res['has_shop']);
       box.write('shop_status', res['shop_status']);
-      box.write(
-        'name',
-        res['user']?['name'] ?? '',
-      ); // ✅ refresh name on app restart
-      box.write(
-        'email',
-        res['user']?['email'] ?? '',
-      ); // ✅ refresh email on app restart
-      // ✅ SAVE SHOP INFO — was missing here too (needed on app restart)
+      box.write('name', res['user']?['name'] ?? '');
+      box.write('email', res['user']?['email'] ?? '');
       box.write('shop_id', res['shop']?['id']);
       box.write('shop_status', res['shop_status'] ?? 'none');
       box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
@@ -166,7 +157,6 @@ class AuthController extends GetxController {
   // LOGOUT
   // ======================
   Future<void> logout() async {
-    // Grab the token BEFORE clearing anything, so we can revoke it server-side.
     final box = GetStorage();
     final currentToken = token.value.isNotEmpty
         ? token.value
@@ -179,14 +169,10 @@ class AuthController extends GetxController {
 
     CartService().switchUser(null);
 
-    // Revoke the token on the backend too (best-effort — don't block
-    // logout if there's no internet or the token's already gone).
     if (currentToken != null && currentToken.isNotEmpty) {
       try {
         await AuthService.logout(currentToken);
-      } catch (e) {
-        // ignore — proceed with local logout regardless
-      }
+      } catch (e) {}
     }
 
     box.remove('token');
@@ -208,8 +194,6 @@ class AuthController extends GetxController {
     box.remove('cnic_back_image');
     box.remove('name');
     box.remove('email');
-    // do NOT call box.erase() — it would delete every other
-    // user's saved cart_<id> data too.
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
@@ -225,17 +209,11 @@ class AuthController extends GetxController {
     final hasShop = data['has_shop'] == true;
     final shopStatus = (data['shop_status'] ?? 'none').toString();
 
-    // Admins are never gated by shop status.
     if (roles.contains('admin') || roles.contains('super_admin')) {
       Get.offAllNamed(AppRoutes.adminDashboard);
       return;
     }
 
-    // Anyone with a shop that's still pending or was rejected gets
-    // routed to the status screen instead of their normal dashboard.
-    // (A correction request doesn't change the DB status — the shop
-    // stays "pending" — so this same branch covers that case too;
-    // ShopStatusScreen itself checks correction_reason to pick the card.)
     if (hasShop && shopStatus == 'pending') {
       Get.offAllNamed(AppRoutes.shopStatus, arguments: data['shop']);
       return;

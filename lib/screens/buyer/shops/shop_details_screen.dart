@@ -48,7 +48,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       argShop = Map<String, dynamic>.from(args);
     }
 
-    // DEBUG
     debugPrint("=== SHOP DETAILS INIT DEBUG ===");
     debugPrint("Get.arguments = $args");
     debugPrint("Get.parameters = ${Get.parameters}");
@@ -310,7 +309,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                         final product = productList[index];
                         final imageUrl = ProductService.getImageUrl(product);
 
-                        //  Whole card is now clickable goes to product details
                         return GestureDetector(
                           onTap: () async {
                             final result = await Get.toNamed(

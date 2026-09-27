@@ -166,7 +166,7 @@ class ProductService {
   }
 
   // =========================
-  // Helper Build full image URL from stored path
+  // image URL from stored path
   // =========================
   static String? getImageUrl(Map<String, dynamic> product) {
     final raw = product["image"];

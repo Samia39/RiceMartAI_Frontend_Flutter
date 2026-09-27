@@ -51,7 +51,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
             : int.tryParse(shop["id"].toString());
       });
 
-      // SAVE ALSO IN STORAGE
       box.write("shop_id", shop["id"]);
       box.write("shop_name", shop["shop_name"]);
       box.write("owner_name", shop["owner_name"]);

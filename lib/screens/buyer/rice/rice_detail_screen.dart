@@ -33,7 +33,7 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // =========================
-              // ✅ PRODUCT IMAGE
+              // PRODUCT IMAGE
               // =========================
               Container(
                 height: 280,
@@ -163,7 +163,7 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                         // QUANTITY BOX
                         Container(
-                          width: 70, // widened to fit 3 digits
+                          width: 70,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,

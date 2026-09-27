@@ -521,7 +521,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
   }
 }
 
-// Extension for AppTextStyles to allow copyWith on const styles
 extension TextStyleExtension on TextStyle {
   TextStyle copyWith({Color? color, FontWeight? fontWeight}) {
     return TextStyle(

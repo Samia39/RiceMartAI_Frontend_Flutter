@@ -105,7 +105,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
                     ),
                   ),
 
-                  // EMPTY
                   if (filteredShops.isEmpty)
                     const Expanded(child: Center(child: Text("No shops found")))
                   // SHOPS LIST
@@ -120,7 +119,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
                           final shop = filteredShops[index];
 
                           return GestureDetector(
-                            // change to fix the error of reload shop
                             onTap: () {
                               Get.toNamed(
                                 "${AppRoutes.shopDetails}?id=${shop["id"]}",
@@ -178,7 +176,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
                                     ),
                                   ),
 
-                                  // ✅ Arrow to make it obvious the card is tappable
                                   const SizedBox(width: 8),
                                   Icon(
                                     Icons.arrow_forward_ios_rounded,

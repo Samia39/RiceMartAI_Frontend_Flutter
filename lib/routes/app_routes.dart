@@ -24,8 +24,6 @@ class AppRoutes {
   static const airecommendationresult = "/ai-recommendation-result";
   static const profile = "/profile";
 
-  // Newly converted from Navigator.push/Get.to to named routes so
-  // middleware (AuthMiddleware etc.) actually runs for them.
   static const aiDetection = "/ai-detection";
   static const allRice = "/all-rice";
   static const notifications = "/notifications";

@@ -72,8 +72,6 @@ class OrderService {
 
   // =========================
   // CANCEL AN UNPAID CARD ORDER
-  // Called when Stripe payment-intent creation or the payment sheet
-  // fails right after checkout() created the order.
   // =========================
   Future<Map<String, dynamic>> cancelUnpaidOrder(int orderId) async {
     try {
@@ -325,7 +323,7 @@ class OrderService {
   }
 
   //=========================
-  // customer now confirm whole order for all items in an order
+  // customer confirm whole order for all items in an order
   //=========================
 
   Future<Map<String, dynamic>> confirmShopReceived(

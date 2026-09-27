@@ -19,7 +19,7 @@ class ShopStatusScreen extends StatefulWidget {
 class _ShopStatusScreenState extends State<ShopStatusScreen> {
   Map<String, dynamic>? shop;
   bool loading = true;
-  bool _shopGone = false; // true when admin rejected/removed the shop
+  bool _shopGone = false;
 
   @override
   void initState() {
@@ -56,14 +56,11 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       box.write("cnic_image", shop!["cnic_image"]);
       box.write("cnic_back_image", shop!["cnic_back_image"]);
     } else {
-      // /my-shop failed. Most likely the admin rejected the shop and the
-      // backend no longer returns it. Confirm with /me before deciding.
       try {
         final me = await AuthService.me(token);
         if (!mounted) return;
 
         if (me['user'] == null) {
-          // Not a valid answer (network/server problem) — don't guess.
           setState(() => loading = false);
           Get.snackbar(
             'Could not refresh',
@@ -100,10 +97,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
     return roles.contains('seller');
   }
 
-  // Pending or correction-requested shops lock the screen — applies to
-  // both a brand-new applicant and an existing seller re-submitting an
-  // edit. Rejected/approved always have their own way forward (a button),
-  // so they don't need to be forced to stay.
   bool get _mustStayHere =>
       !_shopGone && (_status == "pending" || _hasCorrection);
 
@@ -117,21 +110,14 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
   }
 
   void _continueToSellerDashboard() {
-    // Role hasn't changed (still 'seller') — this shop update is just
-    // awaiting re-approval, so the seller keeps full dashboard access
-    // while it's reviewed. No storage to clear, no reload needed.
     Get.offAllNamed(AppRoutes.sellerDashboard);
   }
 
-  // Refreshes cached roles/permissions (customer -> seller) via the
-  // same AuthController.loadUser() used at app startup, then navigates
-  // to the seller dashboard now that the fresh role is in storage.
   Future<void> _goToSellerDashboard() async {
     try {
       final box = GetStorage();
       final token = box.read('token') ?? '';
 
-      // Fresh roles/permissions straight from the backend
       final res = await AuthService.me(token);
 
       final freshRoles = List<String>.from(res['roles'] ?? []);
@@ -146,7 +132,7 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
         return;
       }
 
-      // Same keys loadUser() saves
+      // loadUser() saves
       box.write('roles', freshRoles);
       box.write('permissions', freshPerms);
       box.write('has_shop', res['has_shop']);
@@ -154,7 +140,7 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       box.write('shop_id', res['shop']?['id']);
       box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
 
-      // Keep the in-memory controller in sync too
+      // controller
       if (Get.isRegistered<AuthController>()) {
         final c = Get.find<AuthController>();
         c.roles.value = freshRoles;
@@ -169,9 +155,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
     }
   }
 
-  // Converted from Navigator.push(MaterialPageRoute(...)) to a named
-  // route so AuthMiddleware/PermissionMiddleware('update own shop')
-  // actually run for it.
   Future<void> _editAndResubmit() async {
     await Get.toNamed(AppRoutes.editShop);
     if (mounted) _refresh();
@@ -288,7 +271,7 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
 
   Widget _approvedCard() {
     if (_isExistingSeller) {
-      // Re-approval after an edit — role never changed, just send them back.
+      // Re-approval after an edit
       return _statusCard(
         icon: Icons.celebration,
         iconColor: AppColors.success,
@@ -305,7 +288,7 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       );
     }
 
-    // First-time approval — customer becomes a seller.
+    // First-time approval customer becomes a seller.
     return _statusCard(
       icon: Icons.celebration,
       iconColor: AppColors.success,

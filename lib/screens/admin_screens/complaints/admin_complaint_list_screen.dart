@@ -236,7 +236,7 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
                                                   const SizedBox(height: 5),
                                                   Row(
                                                     children: [
-                                                      // ── Role badge ──
+                                                      // Role badge
                                                       Container(
                                                         padding:
                                                             const EdgeInsets.symmetric(

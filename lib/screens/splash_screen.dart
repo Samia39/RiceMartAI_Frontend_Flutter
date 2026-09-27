@@ -25,11 +25,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       setState(() {
-        dotCount = (dotCount + 1) % 4; // 0 → 3 dots loop
+        dotCount = (dotCount + 1) % 4;
       });
     });
 
-    // NAVIGATION AFTER 3 SEC
     Future.delayed(const Duration(seconds: 3), () async {
       var token = box.read('token');
 
@@ -39,9 +38,6 @@ class _SplashScreenState extends State<SplashScreen> {
       }
 
       await authController.loadUser();
-
-      // Navigation now happens inside loadUser() -> redirectUser(),
-      // which knows about shop_status as well as roles.
     });
   }
 
@@ -54,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: AppDecorations.gradientBackground, // use theme gradient
+      decoration: AppDecorations.gradientBackground,
 
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -85,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
               const SizedBox(height: 40),
 
-              //  Loading text with animation
+              // Loading text
               Text(
                 "Loading${"." * dotCount}",
                 style: AppTextStyles.bodyLarge.copyWith(
@@ -95,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
               const SizedBox(height: 10),
 
-              // Progress bar
+              //  Progress bar
               SizedBox(width: 200, child: const LinearProgressIndicator()),
             ],
           ),

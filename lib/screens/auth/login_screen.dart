@@ -5,7 +5,6 @@ import '../../controllers/auth_controller.dart';
 import '../../core/utils/themes.dart';
 import '../../routes/app_routes.dart';
 
-// ...
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -24,7 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Responsive values
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 

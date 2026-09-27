@@ -130,7 +130,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
   }
 
   // ---------------------------------------------------------
-  // Reusable Input Field
+  // Input Field
   // ---------------------------------------------------------
   Widget inputField({
     required TextEditingController controller,
@@ -144,7 +144,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Field label
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 6),
           child: RichText(
@@ -440,7 +439,7 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
-                              // Description - OPTIONAL
+                              // Description optional
                               inputField(
                                 controller: _descController,
                                 hint: "Description",

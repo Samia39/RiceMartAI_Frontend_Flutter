@@ -32,11 +32,9 @@ class _EditShopScreenState extends State<EditShopScreen> {
 
   int? shopId;
 
-  // Existing images already on the server (shown until replaced)
   String? existingFrontImagePath;
   String? existingBackImagePath;
 
-  // Newly picked replacement images (only sent if the seller picks new ones)
   Uint8List? newCnicFrontImage;
   Uint8List? newCnicBackImage;
 
@@ -182,7 +180,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
   }
 
   // =========================
-  // CNIC IMAGE TILE (shows existing image, or new pick preview)
+  // CNIC IMAGE TILE
   // =========================
   Widget cnicImageTile({
     required String label,

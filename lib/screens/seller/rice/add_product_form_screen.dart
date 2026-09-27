@@ -11,7 +11,6 @@ import '../../../core/utils/themes.dart';
 class AddProductFormScreen extends StatefulWidget {
   const AddProductFormScreen({super.key});
 
-  // Reached via Get.toNamed(AppRoutes.sellerAddProductForm, arguments: shopId)
   int get shopId => Get.arguments as int;
 
   @override
@@ -36,10 +35,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
   String? selectedImageName;
 
   String? imageError;
-
-  // =========================
-  // INIT
-  // =========================
 
   @override
   void initState() {
@@ -311,8 +306,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
                   hint: const Text("Select Rice Category"),
 
-                  // Shows just the name once collapsed, so the field
-                  // itself doesn't get taller than your other inputs.
                   selectedItemBuilder: (context) {
                     return categories.map((category) {
                       return Align(

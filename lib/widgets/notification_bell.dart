@@ -4,15 +4,10 @@ import 'package:get/get.dart';
 import '/core/services/notification_service.dart';
 import '/routes/app_routes.dart';
 
-/// Drop this anywhere (an AppBar's actions, a title Row, etc.).
-/// It polls the unread count every 30s while mounted, shows a red badge,
-/// and opens NotificationsScreen on tap (refreshing the badge on return).
 class NotificationBell extends StatefulWidget {
   final Color iconColor;
   final double size;
 
-  /// Optional override if you want custom navigation instead of the
-  /// default named-route push to NotificationsScreen.
   final VoidCallback? onTap;
 
   const NotificationBell({
@@ -36,8 +31,6 @@ class _NotificationBellState extends State<NotificationBell> {
     super.initState();
     _loadUnreadCount();
 
-    // Keeps the badge current while the screen is open, without needing
-    // a websocket/push setup.
     _timer = Timer.periodic(
       const Duration(seconds: 30),
       (_) => _loadUnreadCount(),
@@ -61,11 +54,8 @@ class _NotificationBellState extends State<NotificationBell> {
       return;
     }
 
-    // Converted from Navigator.push(MaterialPageRoute(...)) to the named
-    // route so AuthMiddleware actually runs for it.
     await Get.toNamed(AppRoutes.notifications);
 
-    // Refresh badge in case items were read/marked-all on that screen.
     _loadUnreadCount();
   }
 

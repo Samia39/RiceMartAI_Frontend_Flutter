@@ -55,7 +55,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
     );
 
     if (result["category"] == null) {
-      // revert on failure
       setState(() => category["status"] = !value);
       Get.snackbar("Error", "Could not update status");
     }
