@@ -95,9 +95,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                       onTap: () async {
                         final picker = ImagePicker();
                         final picked = await picker.pickImage(
-                          source: ImageSource.gallery,
-                          imageQuality: 75,
-                          maxWidth: 1000,
+                          source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800,
                         );
 
                         if (picked != null) {

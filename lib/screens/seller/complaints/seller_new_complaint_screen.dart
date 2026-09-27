@@ -45,8 +45,7 @@ class _SellerNewComplaintScreenState extends State<SellerNewComplaintScreen> {
     final picker = ImagePicker();
 
     final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
+      source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800,
     );
 
     if (picked != null) {

@@ -56,7 +56,7 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
 
   Future<void> pickProof() async {
     final picker = ImagePicker();
-    final file = await picker.pickImage(source: ImageSource.gallery);
+    final file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800);
     if (file == null) return;
 
     final bytes = await file.readAsBytes();

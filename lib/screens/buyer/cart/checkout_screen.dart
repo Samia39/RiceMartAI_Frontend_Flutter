@@ -209,7 +209,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       final picker = ImagePicker();
 
-      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+      final XFile? file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800);
 
       if (file != null) {
         paymentImageBytes = await file.readAsBytes();
@@ -432,18 +432,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         }
 
         // change for strip
+        await OrderService().cancelUnpaidOrder(orderId);
         _pendingCardOrderId = null;
         setState(() => isLoading = false);
 
-        Get.find<CartService>().clearCart();
-
         Get.snackbar(
-          "Success",
-          "Payment submitted — confirming your order...",
+          "Test Environment",
+          "This is a test Stripe environment. Orders cannot be placed and will be available in the future.",
           snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 5),
         );
-
-        Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
         return;
       }
 

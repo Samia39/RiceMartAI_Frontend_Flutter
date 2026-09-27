@@ -144,8 +144,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
   Future<void> _takePhotoImagePicker() async {
     try {
       final XFile? image = await picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
+        source: ImageSource.camera, imageQuality: 50, maxWidth: 800, maxHeight: 800,
       );
       if (image != null) {
         setState(() {
@@ -171,8 +170,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
     try {
       final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
+        source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800,
       );
       if (image != null) {
         setState(() {

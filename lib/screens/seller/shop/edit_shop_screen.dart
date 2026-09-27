@@ -71,7 +71,7 @@ class _EditShopScreenState extends State<EditShopScreen> {
   // PICK REPLACEMENT CNIC IMAGE
   // =========================
   Future<void> pickCnic(bool isFront) async {
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? file = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800);
 
     if (file != null) {
       final bytes = await file.readAsBytes();

@@ -36,12 +36,12 @@ class AddSellerController extends GetxController {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> pickFrontImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800);
     if (picked != null) cnicFrontImage.value = picked;
   }
 
   Future<void> pickBackImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 50, maxWidth: 800, maxHeight: 800);
     if (picked != null) cnicBackImage.value = picked;
   }
 
