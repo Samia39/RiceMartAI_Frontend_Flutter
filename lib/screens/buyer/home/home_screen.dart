@@ -19,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> productList = [];
   bool isLoading = true;
 
-  // ── NEW: storage listener ────────────────────────────────
   final _box = GetStorage();
   VoidCallback? _storageUnsub;
 
@@ -28,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     fetchProducts();
 
-    // Rebuild whenever profile data (name, etc.) changes in storage
     _storageUnsub = _box.listen(() {
       if (mounted) setState(() {});
     });
@@ -43,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchProducts() async {
     final data = await ProductService().fetchAllProducts();
     setState(() {
-      // only take first 15
       productList = data.take(15).toList();
       isLoading = false;
     });
@@ -100,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 35),
 
-                  // ================= FEATURES TITLE =================
+                  // ================= FEATURES TITLE ==================
                   Text(
                     "Features",
                     style: AppTextStyles.heading3.copyWith(

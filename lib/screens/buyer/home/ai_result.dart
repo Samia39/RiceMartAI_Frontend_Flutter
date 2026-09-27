@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ricemart_ai/core/services/admin/permission_service.dart';
@@ -6,9 +5,6 @@ import '../../../routes/app_routes.dart';
 import '../../../core/utils/themes.dart';
 
 class AIResultScreen extends StatelessWidget {
-  // Kept as an optional constructor param for backward compatibility with
-  // any direct instantiation; when reached via Get.toNamed(AppRoutes.airesult)
-  // it's left null and we read Get.arguments instead.
   final Map<String, dynamic>? resultOverride;
 
   const AIResultScreen({super.key, this.resultOverride});
@@ -42,12 +38,8 @@ class AIResultScreen extends StatelessWidget {
     }
   }
 
-  // ✅ Clean rice type for search
-  // "Basmati Rice" → "Basmati", "Long Grain" → "Long Grain"
   String _cleanRiceType(String riceType) {
-    return riceType
-        .replaceAll(RegExp(r'\s*[Rr]ice\s*$'), '') // remove trailing "Rice"
-        .trim();
+    return riceType.replaceAll(RegExp(r'\s*[Rr]ice\s*$'), '').trim();
   }
 
   @override
@@ -61,7 +53,6 @@ class AIResultScreen extends StatelessWidget {
     final String reasoning = result['reasoning'] ?? '';
     final String recommendation = result['recommendation'] ?? '';
 
-    // ✅ Search query for marketplace
     final String searchQuery = _cleanRiceType(riceType);
     final bool isSeller = PermissionService.hasPermission(
       'view seller dashboard',
@@ -87,7 +78,7 @@ class AIResultScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ══════════════ HEADER CARD ══════════════
+                // HEADER CARD
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -129,7 +120,7 @@ class AIResultScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // ══════════════ RICE TYPE + QUALITY ══════════════
+                // RICE TYPE + QUALITY
                 if (isRice) ...[
                   Row(
                     children: [
@@ -154,7 +145,7 @@ class AIResultScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  // ✅ ══════════════ SHOP THIS RICE BUTTON ══════════════
+                  // SHOP THIS RICE BUTTON
                   if (canSearch)
                     Container(
                       width: double.infinity,
@@ -239,7 +230,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // ══════════════ OBSERVATIONS ══════════════
+                // OBSERVATIONS
                 if (observations.isNotEmpty) ...[
                   _sectionCard(
                     title: 'Observations',
@@ -249,7 +240,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // ══════════════ DEFECTS ══════════════
+                // DEFECTS
                 if (defects.isNotEmpty) ...[
                   _sectionCard(
                     title: 'Defects Found',
@@ -261,7 +252,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // ══════════════ REASONING ══════════════
+                // REASONING
                 if (reasoning.isNotEmpty) ...[
                   Container(
                     width: double.infinity,
@@ -289,7 +280,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
 
-                // ══════════════ RECOMMENDATION ══════════════
+                //RECOMMENDATION
                 if (recommendation.isNotEmpty) ...[
                   Container(
                     width: double.infinity,
@@ -344,7 +335,7 @@ class AIResultScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
 
-                // ══════════════ SCAN AGAIN ══════════════
+                // SCAN AGAIN
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -363,8 +354,6 @@ class AIResultScreen extends StatelessWidget {
       ),
     );
   }
-
-  // ══════════════ HELPERS ══════════════
 
   Widget _infoTile(
     String label,

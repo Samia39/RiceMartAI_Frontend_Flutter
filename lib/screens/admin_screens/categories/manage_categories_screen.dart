@@ -46,7 +46,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
   Future<void> toggleStatus(Map<String, dynamic> category, bool value) async {
     final token = GetStorage().read("token") ?? "";
 
-    // optimistic UI update
     setState(() => category["status"] = value);
 
     final result = await CategoryService().updateStatus(
@@ -262,7 +261,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
       clipBehavior: Clip.antiAlias,
       child: Row(
         children: [
-          // THUMBNAIL
           Container(
             height: 70,
             width: 70,

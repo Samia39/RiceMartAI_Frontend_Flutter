@@ -16,16 +16,10 @@ class ShopDetailsScreen extends StatefulWidget {
 }
 
 class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
-  // ✅ Shop data now lives in local state instead of being read directly
-  // from Get.arguments each build — this lets us REPLACE it once we
-  // recover the shop from the URL id after a web refresh.
   Map<String, dynamic> _shop = {};
 
-  // ✅ True while we're trying to recover the shop from the URL id
-  // (only happens when Get.arguments was lost, e.g. web page refresh).
   bool isResolvingShop = false;
 
-  // ✅ Null-safe id extraction; handles int, String, or missing id.
   int? _extractId(Map<String, dynamic> map) {
     final id = map["id"];
     if (id is int) return id;
@@ -46,8 +40,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
   }
 
   Future<void> _initShop() async {
-    // 1. Try normal in-memory navigation arguments first (fast path —
-    // this is what happens on every regular in-app tap).
     final args = Get.arguments;
     Map<String, dynamic> argShop = {};
     if (args is Map<String, dynamic>) {
@@ -56,7 +48,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       argShop = Map<String, dynamic>.from(args);
     }
 
-    // 🔍 DEBUG
+    // DEBUG
     debugPrint("=== SHOP DETAILS INIT DEBUG ===");
     debugPrint("Get.arguments = $args");
     debugPrint("Get.parameters = ${Get.parameters}");
@@ -68,8 +60,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       return;
     }
 
-    // 2. Arguments were empty/lost (e.g. web page refresh). Fall back to
-    // the shop id carried in the URL itself, e.g. #/shop-details?id=12
+    // Arguments were empty/lost
     final idFromUrl = Get.parameters['id'];
     final parsedId = idFromUrl != null ? int.tryParse(idFromUrl) : null;
 
@@ -77,7 +68,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
     debugPrint("parsedId = $parsedId");
 
     if (parsedId == null) {
-      // No id anywhere — genuinely nothing to show.
       setState(() => isLoading = false);
       return;
     }
@@ -154,8 +144,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Still resolving the shop from the URL id — show a loading state
-    // instead of immediately showing "not found".
     if (isResolvingShop) {
       return Container(
         decoration: AppDecorations.gradientBackground,
@@ -167,9 +155,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       );
     }
 
-    // ✅ Guard: if we truly have no shop id (no arguments AND no URL id,
-    // or the URL id didn't match any shop), show a friendly fallback
-    // instead of letting the rest of the widget tree crash on nulls.
     if (shopId == null) {
       return Container(
         decoration: AppDecorations.gradientBackground,
@@ -216,13 +201,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(title: Text(_shop["shop_name"] ?? "")),
-        // =========================
-        // ✅ RESPONSIVE BODY
-        // Content is centered and width-capped on large screens.
-        // Product grid uses SliverGridDelegateWithMaxCrossAxisExtent so
-        // column count adjusts automatically to screen width, while
-        // mainAxisExtent keeps card height fixed.
-        // =========================
+
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Center(
@@ -331,7 +310,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                         final product = productList[index];
                         final imageUrl = ProductService.getImageUrl(product);
 
-                        // ✅ Whole card is now clickable -> goes to product details
+                        //  Whole card is now clickable goes to product details
                         return GestureDetector(
                           onTap: () async {
                             final result = await Get.toNamed(
@@ -348,7 +327,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ✅ PRODUCT IMAGE
+                                // PRODUCT IMAGE
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(14),
                                   child: Container(
@@ -391,7 +370,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                 ),
                                 const SizedBox(height: 8),
 
-                                // ✅ PRICE + ADD TO CART
+                                // PRICE + ADD TO CART
                                 Row(
                                   children: [
                                     Expanded(
@@ -460,8 +439,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
                   // =========================
                   // SHOP REVIEWS
-                  // Visible to any customer viewing this shop, so they
-                  // can see what past buyers said before purchasing.
                   // =========================
                   Text("Customer Reviews", style: AppTextStyles.heading3),
                   const SizedBox(height: 14),

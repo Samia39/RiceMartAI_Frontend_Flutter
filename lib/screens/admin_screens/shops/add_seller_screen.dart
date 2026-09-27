@@ -149,9 +149,6 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
 
                             const SizedBox(height: 16),
 
-                            // =========================
-                            // CNIC — FRONT
-                            // =========================
                             Text(
                               "CNIC Document (Front)",
                               style: AppTextStyles.label,
@@ -164,9 +161,6 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
 
                             const SizedBox(height: 16),
 
-                            // =========================
-                            // CNIC — BACK
-                            // =========================
                             Text(
                               "CNIC Document (Back)",
                               style: AppTextStyles.label,

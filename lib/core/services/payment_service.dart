@@ -9,9 +9,7 @@ class PaymentService {
   final String baseUrl = BaseUrl.url;
 
   // =========================
-  // GET PAYMENT SETTINGS (EasyPaisa / JazzCash numbers)
-  // Used on the checkout screen so the admin can update these
-  // numbers from the backend without an app update.
+  // Get EasyPaisa / JazzCash numbers
   // =========================
   Future<Map<String, dynamic>?> getPaymentSettings() async {
     try {
@@ -38,7 +36,7 @@ class PaymentService {
   }
 
   // =========================
-  // ADMIN UPDATE PAYMENT SETTINGS
+  // Admin update payment settings
   // =========================
   Future<Map<String, dynamic>> adminUpdatePaymentSettings({
     required String easypaisaNumber,
@@ -71,7 +69,7 @@ class PaymentService {
   }
 
   // =========================
-  // GET ADMIN PAYMENTS
+  // Get admin paymnets
   // =========================
   Future<List> getAdminPayments() async {
     try {
@@ -98,7 +96,7 @@ class PaymentService {
   }
 
   // =========================
-  // UPDATE PAYMENT STATUS
+  // Update payment status by admin
   // =========================
   Future<Map<String, dynamic>> updatePaymentStatus({
     required int paymentId,
@@ -128,9 +126,7 @@ class PaymentService {
   }
 
   // =========================
-  // CREATE STRIPE PAYMENT INTENT
-  // Called from the checkout screen when the user picks "Card".
-  // Returns the clientSecret needed to open Stripe's payment sheet.
+  // Create payment intenet for card
   // =========================
   Future<Map<String, dynamic>> createStripePaymentIntent({
     required int orderId,

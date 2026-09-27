@@ -12,13 +12,13 @@ String attachmentUrl(String path) {
 }
 
 // =========================
-// MODELS (kept in this file — no separate models folder)
+// Single complaint meassage
 // =========================
 
 class ComplaintMessage {
   final int id;
   final int senderId;
-  final String senderRole; // 'complainant' | 'super_admin'
+  final String senderRole;
   final String message;
   final String? attachmentPath;
   final String createdAt;
@@ -46,13 +46,16 @@ class ComplaintMessage {
   }
 }
 
+// =========================
+// A complaint filed by a user
+// =========================
 class Complaint {
   final int id;
   final int userId;
-  final String role; // 'customer' | 'seller'
+  final String role;
   final String category;
   final String subject;
-  final String status; // 'open' | 'in_progress' | 'resolved'
+  final String status;
   final String createdAt;
   final String? userName;
   final String? userEmail;
@@ -98,12 +101,6 @@ class Complaint {
 class ComplaintService {
   final box = GetStorage();
   final String baseUrl = BaseUrl.url;
-
-  // Every GET/PATCH response goes through this before we touch it, so a
-  // non-200 or non-JSON reply (an HTML error page, an empty body, a
-  // dropped connection) never throws an uncaught exception into a screen
-  // that's awaiting us without a try/catch — that's what was leaving
-  // "My Complaints" stuck on its loading spinner forever.
   dynamic _safeDecode(http.Response response) {
     if (response.body.isEmpty) {
       throw Exception(
@@ -122,7 +119,7 @@ class ComplaintService {
     }
   }
 
-  // CREATE COMPLAINT (with optional attachment)
+  // Create a new complaint
   Future<Map<String, dynamic>> createComplaint({
     required String category,
     required String subject,
@@ -179,7 +176,7 @@ class ComplaintService {
     }
   }
 
-  // MY COMPLAINTS (customer/seller)
+  // My complaints for seller and customer
   Future<List<Complaint>> getMyComplaints() async {
     try {
       final token = box.read("token");
@@ -203,7 +200,7 @@ class ComplaintService {
     }
   }
 
-  // ALL COMPLAINTS (super admin)
+  // All complients for admin dashboard
   Future<List<Complaint>> getAllComplaints({String? status}) async {
     try {
       final token = box.read("token");
@@ -231,7 +228,7 @@ class ComplaintService {
     }
   }
 
-  // COMPLAINT DETAIL (thread)
+  // Complient details
   Future<Complaint> getComplaintDetail(int id) async {
     final token = box.read("token");
 
@@ -246,7 +243,7 @@ class ComplaintService {
     throw Exception("Complaint not found");
   }
 
-  // ADD MESSAGE (reply — complainant or super admin)
+  // add message reply the complient
   Future<Map<String, dynamic>> addMessage({
     required int complaintId,
     required String message,
@@ -303,7 +300,7 @@ class ComplaintService {
     }
   }
 
-  // UPDATE STATUS (super admin)
+  // Update status of complaint by superadmin
   Future<Map<String, dynamic>> updateStatus({
     required int complaintId,
     required String status,
@@ -330,7 +327,7 @@ class ComplaintService {
     }
   }
 
-  // EMERGENCY CONTACT (settings)
+  // Emergency contact details
   Future<Map<String, String>> getEmergencyContact() async {
     try {
       final token = box.read("token");

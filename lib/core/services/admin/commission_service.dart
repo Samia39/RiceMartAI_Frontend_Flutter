@@ -7,6 +7,7 @@ class CommissionService {
   final box = GetStorage();
   final String baseUrl = BaseUrl.url;
 
+  // get the commission percentage to apply to orders.
   Future<double?> getCurrentCommission() async {
     final token = box.read("token");
     final response = await http.get(
@@ -20,6 +21,7 @@ class CommissionService {
     return null;
   }
 
+  // history of past commission changes at admin screen
   Future<List> getCommissionHistory() async {
     final token = box.read("token");
     final response = await http.get(
@@ -30,6 +32,7 @@ class CommissionService {
     return data["success"] == true ? data["history"] : [];
   }
 
+  // Sends a new commission percentage to the backend to update
   Future<Map<String, dynamic>> updateCommission(double percentage) async {
     final token = box.read("token");
     final response = await http.post(

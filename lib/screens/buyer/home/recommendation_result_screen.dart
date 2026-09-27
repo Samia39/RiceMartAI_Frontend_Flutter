@@ -6,9 +6,6 @@ import '../../../core/utils/themes.dart';
 import '../../../routes/app_routes.dart';
 
 class AiRecommendationResultScreen extends StatelessWidget {
-  // Kept as optional overrides for backward compatibility with direct
-  // instantiation; when reached via Get.toNamed(AppRoutes.airecommendationresult)
-  // these are left null and we read Get.arguments instead.
   final String? queryOverride;
   final Map<String, dynamic>? resultOverride;
 
@@ -44,7 +41,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Query Badge ────────────────────────────────────
+              // Query Badge
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -81,7 +78,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 18),
 
-              // ── Rice Overview Card ─────────────────────────────
+              // Rice Overview Card
               if (aiData["overview"] != null)
                 _sectionCard(
                   icon: Icons.info_outline,
@@ -94,7 +91,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // ── Rice Type & Origin ─────────────────────────────
+              // Rice Type & Origin
               if (aiData["rice_type"] != null || aiData["origin"] != null)
                 _sectionCard(
                   icon: Icons.grain,
@@ -115,7 +112,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // ── Best Uses ──────────────────────────────────────
+              // Best Uses
               if (aiData["best_uses"] != null)
                 _sectionCard(
                   icon: Icons.restaurant_menu,
@@ -128,7 +125,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // ── Nutritional Info ───────────────────────────────
+              // Nutritional Info
               if (aiData["nutrition"] != null)
                 _sectionCard(
                   icon: Icons.health_and_safety_outlined,
@@ -141,7 +138,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // ── Recipe ─────────────────────────────────────────
+              // Recipe
               if (aiData["recipe"] != null)
                 _sectionCard(
                   icon: Icons.menu_book_outlined,
@@ -182,7 +179,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // ── Storage Tips ───────────────────────────────────
+              // Storage Tips
               if (aiData["storage_tips"] != null)
                 _sectionCard(
                   icon: Icons.inventory_2_outlined,
@@ -195,7 +192,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // ── Available Products ─────────────────────────────
+              // Available Products
               if (!isSeller) ...[
                 Row(
                   children: [

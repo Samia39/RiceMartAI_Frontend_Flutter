@@ -30,7 +30,7 @@ String _categoryLabel(String category) {
 }
 
 // ─────────────────────────────────────────────────────────
-// ZOOM VIEWER — opens full-screen pinch-to-zoom image
+// ZOOM VIEWER
 // ─────────────────────────────────────────────────────────
 void _showZoomableImage(BuildContext context, String imageUrl) {
   Navigator.of(context).push(
@@ -104,7 +104,7 @@ class _ZoomableImagePage extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────
-// ATTACHMENT THUMBNAIL — tappable image inside chat bubble
+// image inside chat bubble
 // ─────────────────────────────────────────────────────────
 class _AttachmentThumbnail extends StatelessWidget {
   final String imageUrl;
@@ -174,13 +174,10 @@ class _AttachmentThumbnail extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────
+// =========================
 // MAIN SCREEN
-// ─────────────────────────────────────────────────────────
+// =========================
 class AdminComplaintDetailScreen extends StatefulWidget {
-  // Kept optional for backward compatibility with direct instantiation
-  // (notifications_screen.dart's admin branch is being converted to the
-  // named route in this same pass, but kept nullable here defensively).
   final int? complaintId;
 
   const AdminComplaintDetailScreen({super.key, this.complaintId});
@@ -463,7 +460,7 @@ class _AdminComplaintDetailScreenState
                     ),
                   ),
 
-                  // ── Reply box ──
+                  // Reply box
                   if (_complaint!.status != 'resolved')
                     Container(
                       padding: const EdgeInsets.all(12),

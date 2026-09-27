@@ -9,8 +9,6 @@ class ShopService {
 
   // =========================
   // CREATE SHOP
-  // (multipart — required so the CNIC front/back images actually
-  // reach the backend; a plain JSON POST can't carry files)
   // =========================
   Future<Map<String, dynamic>> createShop({
     required String token,
@@ -154,7 +152,7 @@ class ShopService {
   }
 
   // =========================
-  // ADMIN REQUEST CORRECTION
+  // Admin request Correction
   // =========================
   Future<Map<String, dynamic>> requestCorrection({
     required String token,
@@ -180,8 +178,6 @@ class ShopService {
 
   // =========================
   // UPDATE SHOP
-  // (multipart — CNIC images are optional here; only attached if the
-  // seller actually picks a replacement while resubmitting)
   // =========================
   Future<Map<String, dynamic>> updateShop({
     required String token,
@@ -251,9 +247,8 @@ class ShopService {
     }
   }
 
-  // DELETE SHOP
   // =========================
-  // SELLER — REQUEST SHOP DELETION (SEND OTP)
+  // SELLER Request shop deletion OTP
   // =========================
   Future<Map<String, dynamic>> requestShopDeletion({
     required String token,
@@ -275,7 +270,7 @@ class ShopService {
   }
 
   // =========================
-  // SELLER — CONFIRM SHOP DELETION (VERIFY OTP)
+  // SELLER CONFIRM SHOP DELETION VERIFY OTP
   // =========================
   Future<Map<String, dynamic>> confirmShopDeletion({
     required String token,
@@ -354,7 +349,7 @@ class ShopService {
   }
 
   // =========================
-  // ADMIN — PERMANENTLY REMOVE SELLER
+  // Admin parmenetly remove seller
   // =========================
   Future<Map<String, dynamic>> removeSeller({
     required String token,
@@ -392,7 +387,7 @@ class ShopService {
   }
 
   // =========================
-  // ADMIN — FETCH REMOVED SHOPS (record)
+  // Admin fetch remove shops
   // =========================
   Future<List<Map<String, dynamic>>> fetchRemovedShops({
     required String token,
@@ -410,10 +405,7 @@ class ShopService {
   }
 
   // =========================
-  // FETCH SINGLE SHOP BY ID
-  // Reuses the existing approved-shops endpoint (no backend changes
-  // needed) and finds the matching shop. Used to recover shop details
-  // after a web page refresh wipes Get.arguments.
+  // Fetch signle shop by ID
   // =========================
   Future<Map<String, dynamic>?> fetchShopById(int shopId) async {
     final shops = await fetchApprovedShops();

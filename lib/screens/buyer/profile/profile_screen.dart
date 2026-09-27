@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ricemart_ai/core/services/cart_service.dart';
+import 'package:ricemart_ai/controllers/auth_controller.dart';
 import '../../../routes/app_routes.dart';
 import '../../../core/utils/themes.dart';
 import '../../../core/services/profile_service.dart';
@@ -13,28 +13,27 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // ── Service ──────────────────────────────────────────────
+  // Service
   final _service = ProfileService();
 
-  // ── User data ────────────────────────────────────────────
+  // User data
   String _name = '';
   String _email = '';
   String _role = '';
   bool _isVerified = false;
   bool _hasShop = false;
 
-  // ── UI state ─────────────────────────────────────────────
+  // UI state
   bool _loadingProfile = true;
   bool _savingProfile = false;
   bool _showEditForm = false;
   bool _obscurePassword = true;
 
-  // ── Edit form controllers ────────────────────────────────
+  // Edit form controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // ─────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
@@ -49,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  // ── Fetch profile ────────────────────────────────────────
+  // Fetch profile
   Future<void> _fetchProfile() async {
     if (_service.token.isEmpty) {
       Get.offAllNamed(AppRoutes.login);
@@ -83,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // ── Save profile ─────────────────────────────────────────
+  // Save profile
   Future<void> _saveProfile() async {
     final newName = _nameController.text.trim();
     final newEmail = _emailController.text.trim();
@@ -133,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // ── Logout ───────────────────────────────────────────────
+  // Logout
   void _logout() {
     Get.defaultDialog(
       title: "Logout",
@@ -142,15 +141,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       textCancel: "Cancel",
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
-      onConfirm: () {
-        CartService().switchUser(null);
-        _service.clearSession();
-        Get.offAllNamed(AppRoutes.login);
+      onConfirm: () async {
+        await Get.find<AuthController>().logout();
       },
     );
   }
 
-  // ── Step 1: Request deletion OTP ─────────────────────────
+  // Step 1: Request deletion OTP
   Future<void> _requestAccountDeletion() async {
     final confirmed = await Get.defaultDialog<bool>(
       title: "Delete Account",
@@ -180,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // ── Step 2: OTP dialog + confirm deletion ─────────────────
+  // Step 2: OTP dialog + confirm deletion
   void _showOtpDeletionDialog() {
     final otpController = TextEditingController();
 
@@ -239,9 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             backgroundColor: Colors.red.withOpacity(0.85),
                             colorText: Colors.white,
                           );
-                          CartService().switchUser(null);
-                          _service.clearSession();
-                          Get.offAllNamed(AppRoutes.login);
+                          await Get.find<AuthController>().logout();
                         } catch (e) {
                           setDialogState(() => isDeleting = false);
                           _showError(
@@ -268,7 +263,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Helper ───────────────────────────────────────────────
   void _showError(String msg) {
     Get.snackbar(
       "Error",
@@ -278,7 +272,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -306,7 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Profile card ─────────────────────────────────────────
+  // Profile card
   Widget _buildProfileCard() {
     return Container(
       width: double.infinity,
@@ -369,7 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Edit profile section ─────────────────────────────────
+  // Edit profile section
   Widget _buildEditSection() {
     return Container(
       decoration: AppDecorations.card,
@@ -416,7 +409,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Email — only if not verified
+                // Email only if not verified
                 if (!_isVerified) ...[
                   Container(
                     decoration: AppDecorations.inputField,
@@ -492,14 +485,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Action buttons ───────────────────────────────────────
+  // Action buttons
   Widget _buildActionButtons() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 10),
 
-        // Become Seller — customer with no shop
         if (_role.toLowerCase() == 'customer' && !_hasShop) ...[
           SizedBox(
             height: 55,

@@ -58,8 +58,6 @@ class _AdminShopsTabState extends State<AdminShopsTab>
     super.dispose();
   }
 
-  // Refresh right away when the admin comes back to the app
-  // (from another app or the lock screen).
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) _loadAll(silent: true);
@@ -68,9 +66,6 @@ class _AdminShopsTabState extends State<AdminShopsTab>
   String get _token => GetStorage().read("token") ?? "";
 
   Future<void> _loadAll({bool silent = false}) async {
-    // Background refreshes skip if one is already running.
-    // Manual refreshes (pull-to-refresh, returning from a detail
-    // screen) always run so the admin never sees stale data.
     if (silent && _refreshing) return;
     _refreshing = true;
 
@@ -121,10 +116,6 @@ class _AdminShopsTabState extends State<AdminShopsTab>
 
   @override
   Widget build(BuildContext context) {
-    // NAV REFACTOR: previously this was a full Scaffold with its own
-    // AppBar(bottom: TabBar(...)). That's removed — the shared shell
-    // now provides the app bar/drawer, and this sub-tab bar (Pending/
-    // Approved/Rejected) is just the first item in the body Column.
     return Column(
       children: [
         Material(

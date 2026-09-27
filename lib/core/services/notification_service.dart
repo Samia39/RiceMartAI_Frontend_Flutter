@@ -13,7 +13,7 @@ class NotificationService {
   };
 
   // =========================
-  // FETCH NOTIFICATIONS (paginated list -> we just take the "data" page)
+  // Fetch notifications
   // =========================
   Future<List<Map<String, dynamic>>> fetchNotifications() async {
     try {
@@ -35,7 +35,7 @@ class NotificationService {
   }
 
   // =========================
-  // UNREAD COUNT (for the bell badge)
+  // Unread notifications count
   // =========================
   Future<int> fetchUnreadCount() async {
     try {
@@ -57,7 +57,7 @@ class NotificationService {
   }
 
   // =========================
-  // MARK ONE AS READ
+  // Mark one notification as a read
   // =========================
   Future<bool> markAsRead(int id) async {
     try {
@@ -74,7 +74,7 @@ class NotificationService {
   }
 
   // =========================
-  // MARK ALL AS READ
+  // Mark all as read
   // =========================
   Future<bool> markAllAsRead() async {
     try {
@@ -91,7 +91,7 @@ class NotificationService {
   }
 
   // =========================
-  // CLEAR ALL
+  // Clear all notifications
   // =========================
   Future<bool> clearAll() async {
     try {

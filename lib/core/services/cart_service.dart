@@ -2,17 +2,11 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class CartService extends GetxController {
-  // =========================
-  // SINGLETON SETUP
-  // =========================
   static final CartService _instance = CartService._internal();
   factory CartService() => _instance;
 
   CartService._internal();
 
-  // =========================
-  // STORAGE
-  // =========================
   final GetStorage box = GetStorage();
   int? _currentUserId;
   final RxList cart = [].obs;
@@ -47,17 +41,10 @@ class CartService extends GetxController {
   // =========================
   // ADD TO CART
   // =========================
-  /// Adds [rice] to the cart with the given [quantity], clamped to
-  /// available stock.
-  /// Returns:
-  ///   "added"  -> added/updated normally
-  ///   "capped" -> quantity was reduced to fit available stock
-  ///   "maxed"  -> already at (or requested at) max stock, nothing added
   String addToCart({
     required Map<String, dynamic> rice,
     required int quantity,
   }) {
-    // Safe parse: never throws even if "stock" is missing/malformed.
     final int stock = int.tryParse(rice["stock"]?.toString() ?? "") ?? 0;
 
     final int existingIndex = cart.indexWhere(
@@ -65,7 +52,6 @@ class CartService extends GetxController {
     );
 
     if (existingIndex != -1) {
-      // Item already in cart — bump its quantity.
       final int currentQty =
           int.tryParse(cart[existingIndex]["quantity"]?.toString() ?? "") ?? 0;
 
@@ -77,12 +63,12 @@ class CartService extends GetxController {
       final int newQty = requestedTotal > stock ? stock : requestedTotal;
 
       cart[existingIndex]["quantity"] = newQty;
-      cart.refresh(); // needed since we mutated a nested map in place
+      cart.refresh();
       _persist();
 
       return requestedTotal > stock ? "capped" : "added";
     } else {
-      // New item — add a fresh entry.
+      // New item  add a fresh entry.
       final int newQty = quantity > stock ? stock : quantity;
 
       if (newQty <= 0) {
@@ -110,8 +96,7 @@ class CartService extends GetxController {
   // =========================
   // UPDATE QUANTITY
   // =========================
-  /// Updates the quantity for [riceId], clamped between 1 and stock.
-  /// Returns the actual (clamped) quantity that was set.
+
   int updateQuantity({required int riceId, required int quantity}) {
     final int index = cart.indexWhere((item) => item["id"] == riceId);
 
@@ -133,14 +118,12 @@ class CartService extends GetxController {
   }
 
   // =========================
-  // TOTAL PRICE (subtotal only, no delivery)
+  // TOTAL PRICE
   // =========================
   double totalPrice() {
     double total = 0;
 
     for (var item in cart) {
-      // tryParse instead of parse: a missing/bad "price" field
-      // becomes 0 instead of crashing the whole checkout screen.
       final double price =
           double.tryParse(item["price"]?.toString() ?? "") ?? 0;
       final int qty = int.tryParse(item["quantity"]?.toString() ?? "") ?? 0;

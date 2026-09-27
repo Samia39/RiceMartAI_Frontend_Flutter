@@ -23,7 +23,7 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
   Map<String, dynamic>? paymentSettings;
   bool loadingSettings = true;
   bool isSubmitting = false;
-  bool confirmStep = false; // false = form, true = "are you sure" step
+  bool confirmStep = false;
   String? errorText;
 
   Uint8List? proofBytes;
@@ -125,9 +125,6 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
     if (!mounted) return;
 
     if (result["success"] == true) {
-      // Close the dialog FIRST — the parent shows the snackbar and
-      // refreshes once the overlay is clean, so it's never hidden
-      // behind the (now-closed) dialog barrier.
       Get.back(
         result: {
           "success": true,
@@ -135,10 +132,9 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
         },
       );
     } else {
-      // Still inside the dialog: show it inline, not as a snackbar.
       setState(() {
         isSubmitting = false;
-        confirmStep = false; // let them see/edit the form again
+        confirmStep = false;
         errorText =
             result["message"]?.toString() ??
             "Payment failed. Please try again.";

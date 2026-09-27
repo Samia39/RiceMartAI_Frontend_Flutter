@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:ricemart_ai/controllers/auth_controller.dart';
 
 import '../core/utils/themes.dart';
 import '../routes/app_routes.dart';
@@ -177,9 +178,8 @@ class _SellerDrawerState extends State<SellerDrawer> {
             icon: Icons.logout,
             title: "Logout",
             color: Colors.red,
-            onTap: () {
-              _box.erase();
-              Get.offAllNamed(AppRoutes.login);
+            onTap: () async {
+              await Get.find<AuthController>().logout();
             },
           ),
 

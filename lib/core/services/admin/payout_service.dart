@@ -7,6 +7,7 @@ class PayoutService {
   final box = GetStorage();
   final String baseUrl = BaseUrl.url;
 
+  // admin get list of all payouts
   Future<List> getPayouts() async {
     final token = box.read("token");
 
@@ -20,6 +21,7 @@ class PayoutService {
     return [];
   }
 
+  // admin mark a payout as paid with image upload
   Future<Map<String, dynamic>> payPayout({
     required int payoutId,
     required String payoutMethod,
@@ -78,7 +80,6 @@ class PayoutService {
   }
 
   // Seller see their payouts
-
   Future<List> getSellerPayouts() async {
     final token = box.read("token");
 

@@ -9,7 +9,7 @@ class UsersScreen extends StatelessWidget {
 
   final controller = Get.put(UsersController());
 
-  // ---------------- Role -> color mapping (kept high-contrast & readable) ----------------
+  // Role
 
   Color _roleColor(String role) {
     switch (role.toLowerCase()) {
@@ -27,7 +27,7 @@ class UsersScreen extends StatelessWidget {
     }
   }
 
-  // ---------------- Count of users matching a filter option ----------------
+  // Count of users
 
   int _countFor(String role) {
     if (role == "All Users") return controller.users.length;
@@ -40,15 +40,13 @@ class UsersScreen extends StatelessWidget {
     }).length;
   }
 
-  // ---------------- Add / Edit form (shown inside a dialog) ----------------
+  // Add / Edit form
 
   Widget _formCard(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 24),
       decoration: BoxDecoration(
-        // Solid, on-theme cream card (no see-through) with a gold edge,
-        // matching the rest of the app instead of a plain white sheet.
         color: const Color(0xFFEDE6D3),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.borderGold, width: 1.4),
@@ -258,12 +256,10 @@ class UsersScreen extends StatelessWidget {
     );
   }
 
-  // ---------------- Role filter chips (with live counts) ----------------
+  // Role filter
 
   Widget _roleFilters() {
     return Obx(() {
-      // "All Users" plus every role coming from the controller, so the
-      // chips automatically match whatever roles exist in the database.
       final roleOptions = ["All Users", ...controller.roles];
       final selected = controller.selectedRoleFilter.value;
 
@@ -341,7 +337,7 @@ class UsersScreen extends StatelessWidget {
     });
   }
 
-  // ---------------- Delete confirmation ----------------
+  // Delete confirmation
 
   void _confirmDelete(BuildContext context, dynamic userId, String userName) {
     showDialog(
@@ -383,7 +379,7 @@ class UsersScreen extends StatelessWidget {
     );
   }
 
-  // ---------------- User list ----------------
+  // User list
 
   Widget _listCard(BuildContext context) {
     return Obx(() {

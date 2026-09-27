@@ -5,14 +5,12 @@ import '../constants/app_icons.dart';
 class AuthService {
   static const baseUrl = BaseUrl.url;
 
-  // Common headers used on every request so Laravel always treats us as an
-  // API client and returns JSON (never a redirect) on validation errors.
   static const Map<String, String> _jsonHeaders = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   };
 
-  // ── Safe JSON decode with debug visibility ───────────────
+  // Safe JSON decode with debug visibility
   static dynamic _safeDecode(http.Response response) {
     if (response.body.isEmpty) {
       throw Exception(
@@ -22,7 +20,6 @@ class AuthService {
     try {
       return jsonDecode(response.body);
     } catch (e) {
-      // Check the browser console for the real body while debugging
       print(
         '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
       );
@@ -32,7 +29,7 @@ class AuthService {
     }
   }
 
-  // LOGIN
+  // Login
   static Future<Map<String, dynamic>> login(
     String email,
     String password,
@@ -52,7 +49,7 @@ class AuthService {
     }
   }
 
-  // REGISTER
+  // Register
   static Future<Map<String, dynamic>> register(
     String name,
     String email,
@@ -73,6 +70,7 @@ class AuthService {
     }
   }
 
+  // verify OTP
   static Future<Map<String, dynamic>> verifyOtp(
     String email,
     String otp,
@@ -92,6 +90,7 @@ class AuthService {
     }
   }
 
+  // Requests a new OTP to be sent
   static Future<Map<String, dynamic>> resendOtp(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/resend-otp'),
@@ -108,7 +107,7 @@ class AuthService {
     }
   }
 
-  // ME (VERY IMPORTANT)
+  // ME fetch the profile of login user
   static Future<Map<String, dynamic>> me(String token) async {
     final response = await http.get(
       Uri.parse('$baseUrl/me'),
@@ -126,7 +125,7 @@ class AuthService {
     }
   }
 
-  // FORGOT PASSWORD - sends OTP
+  // forget password  sends OTP
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/forgot-password'),
@@ -143,7 +142,7 @@ class AuthService {
     }
   }
 
-  // RESET PASSWORD - verifies OTP and updates password
+  // Reset Password verifies OTP and update password
   static Future<Map<String, dynamic>> resetPassword(
     String email,
     String otp,
@@ -164,7 +163,7 @@ class AuthService {
     }
   }
 
-  // UPDATE PROFILE - edit name, and optionally email/password
+  // Update Profile
   static Future<Map<String, dynamic>> updateProfile(
     String token, {
     required String name,
@@ -202,7 +201,7 @@ class AuthService {
     }
   }
 
-  // LOGOUT - revokes the token on the server too, not just locally
+  // Logout
   static Future<void> logout(String token) async {
     final response = await http.post(
       Uri.parse('$baseUrl/logout'),

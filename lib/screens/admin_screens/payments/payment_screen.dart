@@ -154,9 +154,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  // =========================
-  // "Label: value" ROW
-  // =========================
   Widget infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -232,7 +229,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   // =========================
   // BUILDS ONE TAB'S LIST (Pending / Approved / Rejected)
-  // Same card UI as before, just fed a filtered list now.
   // =========================
   Widget buildPaymentList(List paymentsList) {
     if (paymentsList.isEmpty) {
@@ -514,7 +510,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 }
 
 // =========================
-// FULL SCREEN ZOOMABLE IMAGE VIEWER
+//  ZOOMABLE IMAGE VIEWER
 // =========================
 class _FullScreenImageViewer extends StatelessWidget {
   final String imageUrl;

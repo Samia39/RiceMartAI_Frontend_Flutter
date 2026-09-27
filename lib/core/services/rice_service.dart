@@ -81,7 +81,7 @@ class RiceService {
   }
 
   // =========================
-  // FETCH ALL RICE
+  // Fetch all rice
   // =========================
   Future<List<Map<String, dynamic>>> fetchAllRice() async {
     final response = await http.get(

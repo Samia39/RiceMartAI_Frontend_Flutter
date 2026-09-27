@@ -9,7 +9,7 @@ class ProductService {
   final String baseUrl = BaseUrl.url;
 
   // =========================
-  // FETCH ACTIVE CATEGORIES
+  // Fetch active rice categories
   // =========================
   Future<List<Map<String, dynamic>>> fetchCategories() async {
     final response = await http.get(
@@ -25,7 +25,7 @@ class ProductService {
   }
 
   // =========================
-  // ADD PRODUCT (with optional image bytes — web + mobile safe)
+  // Add rice
   // =========================
   Future<Map<String, dynamic>> addProduct({
     required String token,
@@ -73,7 +73,7 @@ class ProductService {
   }
 
   // =========================
-  // FETCH SHOP PRODUCTS
+  // Fetch shop products
   // =========================
   Future<List<Map<String, dynamic>>> fetchShopProducts({
     required int shopId,
@@ -91,7 +91,7 @@ class ProductService {
   }
 
   // =========================
-  // FETCH ALL PRODUCTS
+  // Fetch all products
   // =========================
   Future<List<Map<String, dynamic>>> fetchAllProducts() async {
     final response = await http.get(
@@ -107,7 +107,7 @@ class ProductService {
   }
 
   // =========================
-  // DELETE PRODUCT
+  // Delete product
   // =========================
   Future deleteProduct({required String token, required int productId}) async {
     final response = await http.delete(
@@ -119,7 +119,7 @@ class ProductService {
   }
 
   // =========================
-  // UPDATE PRODUCT (with optional new image bytes)
+  // Update product
   // =========================
   Future updateProduct({
     required String token,
@@ -129,8 +129,6 @@ class ProductService {
     Uint8List? imageBytes,
     String? imageName,
   }) async {
-    // ✅ Using POST + _method=PUT so multipart file upload works
-    // (Laravel doesn't parse multipart bodies on native PUT requests)
     final uri = Uri.parse("$baseUrl/products/$productId");
     final request = http.MultipartRequest("POST", uri);
 
@@ -168,7 +166,7 @@ class ProductService {
   }
 
   // =========================
-  // HELPER: Build full image URL from stored path
+  // Helper Build full image URL from stored path
   // =========================
   static String? getImageUrl(Map<String, dynamic> product) {
     final raw = product["image"];
@@ -178,9 +176,6 @@ class ProductService {
     if (str.startsWith("http://") || str.startsWith("https://")) {
       return str;
     }
-
-    // ✅ Strip trailing "/api" (or any trailing path) from baseUrl
-    // so we get just the host, e.g. "http://ricemart.sandbox.pk"
     final host = BaseUrl.url.replaceAll(RegExp(r'/api/?$'), '');
 
     return "$host/storage/$str";

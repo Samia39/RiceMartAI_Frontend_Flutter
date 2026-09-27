@@ -12,16 +12,9 @@ class AssignPermissionScreen extends StatefulWidget {
 }
 
 class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
-  // =========================
-  // FIND CONTROLLER
-  // =========================
-
   final PermissionsController controller = Get.find<PermissionsController>();
 
-  // =========================
-  // SEARCH
-  // =========================
-
+  // search for permission by name
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
@@ -29,11 +22,9 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
   void initState() {
     super.initState();
 
-    // RESET SCREEN STATE
     controller.selectedRoleId.value = null;
     controller.selectedPermissions.clear();
 
-    // LOAD DATA
     controller.loadRoles();
     controller.loadPermissions();
   }
@@ -56,9 +47,6 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
         decoration: AppDecorations.gradientBackground,
         child: GetBuilder<PermissionsController>(
           builder: (controller) {
-            // =========================
-            // FILTERED PERMISSIONS
-            // =========================
             final List filteredPermissions = _searchQuery.isEmpty
                 ? controller.permissions
                 : controller.permissions
@@ -74,9 +62,7 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
 
               child: Column(
                 children: [
-                  // =========================
                   // ROLE DROPDOWN
-                  // =========================
                   DropdownButtonFormField<int>(
                     value: controller.selectedRoleId.value,
 
@@ -102,9 +88,6 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
 
                   const SizedBox(height: 20),
 
-                  // =========================
-                  // CONTENT
-                  // =========================
                   Expanded(
                     child: Column(
                       children: [

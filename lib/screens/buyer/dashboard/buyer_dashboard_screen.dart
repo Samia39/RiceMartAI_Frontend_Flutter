@@ -64,11 +64,11 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
 
       const ShopsScreen(),
 
-      const MyOrdersScreen(), // NEW — index 3
+      const MyOrdersScreen(),
 
-      ConversationsScreen(), // now index 4
+      ConversationsScreen(),
 
-      const ProfileScreen(), // now index 5
+      const ProfileScreen(),
     ];
     return Container(
       decoration: AppDecorations.gradientBackground,
@@ -81,9 +81,7 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           title: const Text("Marketplace"),
 
           actions: [
-            // =========================
             // NOTIFICATIONS
-            // =========================
             const NotificationBell(iconColor: Colors.white, size: 24),
 
             // CART ICON

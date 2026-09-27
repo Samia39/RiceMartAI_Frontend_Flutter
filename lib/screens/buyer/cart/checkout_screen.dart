@@ -22,68 +22,125 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   // change for strip
   int? _pendingCardOrderId;
-  // =========================
-  // CONTROLLERS
-  // =========================
+
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
-  // =========================
-  // CITY / DELIVERY
-  // =========================
+
   final CityService _cityService = CityService();
-  List _cities = []; // [{id, name, code, delivery_charge}]
+  List _cities = [];
   int? selectedCityId;
   bool loadingCities = true;
   final addressController = TextEditingController();
   final transactionIdController = TextEditingController();
 
-  // =========================
-  // PAYMENT METHOD
-  // =========================
   String paymentMethod = "easypaisa";
 
-  // =========================
-  // PAYMENT SETTINGS (EasyPaisa / JazzCash numbers, admin-managed)
-  // =========================
+  // payment setting EasyPaisa / JazzCash numbers, admin-managed
+
   Map<String, dynamic>? paymentSettings;
   bool loadingPaymentSettings = true;
 
-  // =========================
-  // IMAGE (WEB)
-  // =========================
   Uint8List? paymentImageBytes;
   String? paymentFileName;
 
-  // =========================
-  // CART
-  // =========================
   List cart = [];
 
-  int get distinctShopCount {
-    final ids = cart
-        .map((item) => item["shop"]?["id"] ?? item["shop_id"])
-        .where((id) => id != null)
-        .toSet();
-    return ids.isEmpty ? 0 : ids.length;
-  }
-
-  // =========================
-  // DELIVERY CHARGE
-  // =========================
-  double get perShopCharge {
+  double get deliveryCharge {
     if (selectedCityId == null) return 0;
     final city = _cities.firstWhere(
       (c) => c['id'] == selectedCityId,
       orElse: () => null,
     );
     if (city == null) return 0;
-    return double.tryParse(city['delivery_charge'].toString()) ?? 0;
+
+    final base = double.tryParse(city['delivery_charge'].toString()) ?? 0;
+    final extraPercent = double.tryParse(city['extra_percent'].toString()) ?? 0;
+    final perKgExtra = base * (extraPercent / 100);
+
+    final Map<dynamic, double> shopWeights = {};
+    for (final item in cart) {
+      final shopId = item["shop"]?["id"] ?? item["shop_id"];
+      if (shopId == null) continue;
+      final qty = (item["quantity"] as num).toDouble();
+      shopWeights[shopId] = (shopWeights[shopId] ?? 0) + qty;
+    }
+
+    double total = 0;
+    for (final weight in shopWeights.values) {
+      final extraKg = weight > 1 ? weight - 1 : 0;
+      total += base + (perKgExtra * extraKg);
+    }
+    return total;
   }
 
-  double get deliveryCharge => perShopCharge * distinctShopCount;
+  Map<String, double> get shopDeliveryBreakdown {
+    if (selectedCityId == null) return {};
+    final city = _cities.firstWhere(
+      (c) => c['id'] == selectedCityId,
+      orElse: () => null,
+    );
+    if (city == null) return {};
+
+    final base = double.tryParse(city['delivery_charge'].toString()) ?? 0;
+    final extraPercent = double.tryParse(city['extra_percent'].toString()) ?? 0;
+    final perKgExtra = base * (extraPercent / 100);
+
+    final Map<String, double> shopWeights = {};
+    final Map<String, String> shopNames = {};
+
+    for (final item in cart) {
+      final shopId = (item["shop"]?["id"] ?? item["shop_id"])?.toString();
+      if (shopId == null) continue;
+      final qty = (item["quantity"] as num).toDouble();
+      shopWeights[shopId] = (shopWeights[shopId] ?? 0) + qty;
+      shopNames[shopId] = item["shop"]?["shop_name"] ?? "Shop";
+    }
+
+    final Map<String, double> breakdown = {};
+    shopWeights.forEach((shopId, weight) {
+      final extraKg = weight > 1 ? weight - 1 : 0;
+      final charge = base + (perKgExtra * extraKg);
+      breakdown[shopNames[shopId] ?? "Shop"] = charge;
+    });
+
+    return breakdown;
+  }
+
+  List<Map<String, dynamic>> get groupedByShop {
+    final Map<String, List> shopItems = {};
+    final Map<String, String> shopNames = {};
+
+    for (final item in cart) {
+      final shopId = (item["shop"]?["id"] ?? item["shop_id"])?.toString();
+      if (shopId == null) continue;
+      shopItems.putIfAbsent(shopId, () => []).add(item);
+      shopNames[shopId] = item["shop"]?["shop_name"] ?? "Shop";
+    }
+
+    final breakdown = shopDeliveryBreakdown;
+
+    return shopItems.entries.map((entry) {
+      final items = entry.value;
+      final shopName = shopNames[entry.key] ?? "Shop";
+      final shopSubtotal = items.fold<double>(0, (sum, item) {
+        final price = double.tryParse(item["price"].toString()) ?? 0;
+        final qty = double.tryParse(item["quantity"].toString()) ?? 0;
+        return sum + (price * qty);
+      });
+      final shopDelivery = breakdown[shopName] ?? 0;
+
+      return {
+        "shopName": shopName,
+        "items": items,
+        "subtotal": shopSubtotal,
+        "delivery": shopDelivery,
+        "shopTotal": shopSubtotal + shopDelivery,
+      };
+    }).toList();
+  }
 
   // =========================
-  // SUBTOTAL (cart items only, no delivery)
+  // SUBTOTAL
   // =========================
   double get subtotal => Get.find<CartService>().totalPrice();
 
@@ -133,8 +190,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   // =========================
   // LOAD PAYMENT SETTINGS
-  // (EasyPaisa/JazzCash numbers are admin-managed on the backend,
-  // not hardcoded, so they can be changed without an app update)
   // =========================
   Future<void> _loadPaymentSettings() async {
     final settings = await PaymentService().getPaymentSettings();
@@ -211,9 +266,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // =========================
   Future<void> placeOrder() async {
     int? orderId;
-    // =========================
-    // BASIC VALIDATION
-    // =========================
+
     if (nameController.text.trim().isEmpty ||
         phoneController.text.trim().isEmpty ||
         selectedCityId == null ||
@@ -229,7 +282,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // =========================
-    // TRANSACTION ID REQUIRED (manual methods only)
+    // TRANSACTION ID REQUIRED
     // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         transactionIdController.text.trim().isEmpty) {
@@ -242,7 +295,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // =========================
-    // SCREENSHOT REQUIRED (manual methods only)
+    // SCREENSHOT REQUIRED
     // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         paymentImageBytes == null) {
@@ -299,12 +352,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
 
     try {
-      // =========================
-      // 1. CREATE THE ORDER (same for all payment methods)
-      // For "card", no transactionId/screenshot is sent — the order and
-      // its Payment row are created with status "pending", then Stripe
-      // takes over.
-      // =========================
       final result = await OrderService().checkout(
         customerName: nameController.text.trim(),
         phone: phoneController.text.trim(),
@@ -331,7 +378,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
 
       // =========================
-      // 2. IF CARD — open Stripe's payment sheet using the new order's id
+      // 2. IF CARD open Stripe's payment sheet using the new order's id
       // =========================
       if (paymentMethod == "card") {
         orderId = result["order"]?["id"] ?? result["order_id"];
@@ -384,10 +431,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           return;
         }
 
-        // Payment sheet succeeded on Stripe's side. The order flips to
-        // "paid" a moment later once Stripe's webhook reaches the backend
-        // — not instantly here.
-        //=========================
         // change for strip
         _pendingCardOrderId = null;
         setState(() => isLoading = false);
@@ -405,7 +448,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
 
       // =========================
-      // 3. EASYPAISA / JAZZCASH — same as before
+      // EASYPAISA / JAZZCASH
       // =========================
       setState(() => isLoading = false);
 
@@ -419,9 +462,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
     } catch (e) {
-      // Order may have already been created for "card" before this failure
-      // hit (e.g. a network drop mid-payment). Clean it up so a retry with
-      // a different payment method doesn't leave a duplicate order behind.
       if (paymentMethod == "card" && orderId != null) {
         await OrderService().cancelUnpaidOrder(orderId);
       }
@@ -435,8 +475,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   // =========================
-  // SEND PAYMENT TO — dynamic number/account name per method,
-  // pulled from the admin-managed payment settings.
+  // SEND PAYMENT TO  dynamic number/account name per method
   // =========================
   Widget _sendPaymentToSection() {
     if (loadingPaymentSettings) {
@@ -501,7 +540,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             final isWide = constraints.maxWidth > 700;
 
             // =========================
-            // 1. FORM FIELDS (name, phone, city, address)
+            // FORM FIELDS (name, phone, city, address)
             // =========================
             final formFields = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -565,7 +604,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // 2. ORDER SUMMARY (items + totals only — button lives separately)
+            // ORDER SUMMARY
             // =========================
             final orderSummaryCard = Container(
               padding: const EdgeInsets.all(16),
@@ -577,47 +616,100 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                   const SizedBox(height: 15),
 
-                  ...cart.map((item) {
+                  ...groupedByShop.map((shop) {
+                    final items = shop["items"] as List;
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.overlayLight,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.borderGold.withOpacity(0.4),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              shop["shopName"],
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...items.map((item) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item["name"] ?? "",
+                                        style: AppTextStyles.bodySmall,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      "x${item["quantity"]}  Rs ${item["price"]}",
+                                      style: AppTextStyles.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                            const Divider(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  item["name"] ?? "",
-                                  style: AppTextStyles.heading4,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                  "Subtotal",
+                                  style: AppTextStyles.bodySmall,
                                 ),
                                 Text(
-                                  "Shop: ${item["shop"]?["shop_name"] ?? "-"}",
+                                  "Rs ${(shop["subtotal"] as double).toStringAsFixed(0)}",
                                   style: AppTextStyles.bodySmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                "x${item["quantity"]}",
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Rs ${item["price"]}",
-                                style: AppTextStyles.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Delivery",
+                                  style: AppTextStyles.bodySmall,
+                                ),
+                                Text(
+                                  "Rs ${(shop["delivery"] as double).toStringAsFixed(0)}",
+                                  style: AppTextStyles.bodySmall,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Shop Total",
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Text(
+                                  "Rs ${(shop["shopTotal"] as double).toStringAsFixed(0)}",
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }),
@@ -634,13 +726,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 6),
-
+                  const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Delivery", style: AppTextStyles.bodyMedium),
+                      Text("Total Delivery", style: AppTextStyles.bodyMedium),
                       Text(
                         "Rs ${deliveryCharge.toStringAsFixed(0)}",
                         style: AppTextStyles.bodyMedium,
@@ -665,7 +755,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // 3. PAYMENT METHOD SECTION
+            // PAYMENT METHOD SECTION
             // =========================
             final paymentMethodSection = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -796,7 +886,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // 4. PLACE ORDER BUTTON
+            // PLACE ORDER BUTTON
             // =========================
             final placeOrderButton = SizedBox(
               height: 55,

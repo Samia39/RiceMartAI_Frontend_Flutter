@@ -178,8 +178,7 @@ class _CustomerComplaintListScreenState
                               ),
                             ),
                           ),
-                          // Converted from Navigator.push(MaterialPageRoute(...))
-                          // to a named route so AuthMiddleware runs for it.
+
                           onTap: () async {
                             await Get.toNamed(
                               AppRoutes.customerComplaintDetail,
@@ -195,8 +194,6 @@ class _CustomerComplaintListScreenState
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        // Converted from Navigator.push(MaterialPageRoute(...)) to a named
-        // route so AuthMiddleware runs for it.
         onPressed: () async {
           await Get.toNamed(AppRoutes.customerNewComplaint);
           _loadData();

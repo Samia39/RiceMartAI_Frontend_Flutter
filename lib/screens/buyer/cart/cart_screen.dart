@@ -6,9 +6,6 @@ import 'package:get/get.dart';
 import '../../../routes/app_routes.dart';
 
 class CartScreen extends StatefulWidget {
-  // =========================
-  // CALLBACK FOR CART BADGE
-  // =========================
   final VoidCallback? onCartUpdated;
 
   const CartScreen({super.key, this.onCartUpdated});
@@ -28,9 +25,8 @@ class _CartScreenState extends State<CartScreen> {
     loadCart();
   }
 
-  // =========================
   // LOAD CART
-  // =========================
+
   void loadCart() {
     cart = Get.find<CartService>().getCart();
     total = Get.find<CartService>().totalPrice();
@@ -52,7 +48,6 @@ class _CartScreenState extends State<CartScreen> {
 
   // =========================
   // INCREASE QUANTITY
-  // Stops at available stock instead of going over it.
   // =========================
   void increaseQuantity(int index) {
     final int stock = int.tryParse(cart[index]["stock"].toString()) ?? 0;
@@ -122,8 +117,7 @@ class _CartScreenState extends State<CartScreen> {
     );
 
     cart[index]["quantity"] = newQty;
-    quantityControllers[cart[index]["id"]]?.text = newQty
-        .toString(); // ADD THIS
+    quantityControllers[cart[index]["id"]]?.text = newQty.toString();
 
     loadCart();
     widget.onCartUpdated?.call();
@@ -286,9 +280,6 @@ class _CartScreenState extends State<CartScreen> {
                   );
 
                   if (!isWide) {
-                    // =========================
-                    // NARROW LAYOUT (unchanged behavior)
-                    // =========================
                     return Column(
                       children: [
                         Expanded(child: itemsList),
@@ -297,9 +288,6 @@ class _CartScreenState extends State<CartScreen> {
                     );
                   }
 
-                  // =========================
-                  // WIDE LAYOUT: items on the left, sticky total on the right
-                  // =========================
                   return Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1100),

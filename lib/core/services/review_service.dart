@@ -45,7 +45,8 @@ class ReviewService {
   }
 
   // =========================
-  // GET SHOP REVIEWS (seller: own shop, admin: any shop)
+  // Get shop reviews
+  // seller own shop, admin all shop
   // =========================
   Future<Map<String, dynamic>> getShopReviews(int shopId) async {
     final token = box.read("token");
