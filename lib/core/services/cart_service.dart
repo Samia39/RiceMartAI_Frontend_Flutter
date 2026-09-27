@@ -1,45 +1,32 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-/// Manages the shopping cart for the whole app.
-///
-/// IMPORTANT: This is a singleton. `CartService()` always returns the
-/// SAME instance (see the factory constructor below), so every screen
-/// that calls `CartService()` is reading/writing the same cart —
-/// instead of each call creating its own throwaway copy.
 class CartService extends GetxController {
   // =========================
   // SINGLETON SETUP
   // =========================
-  // Holds the one and only instance of CartService.
   static final CartService _instance = CartService._internal();
-
-  // Every `CartService()` call returns `_instance` instead of
-  // building a new object.
   factory CartService() => _instance;
 
-  // Private constructor — runs only once, the first time CartService
-  // is ever referenced. Loads whatever was saved on disk immediately,
-  // so we don't have to rely on GetX's onInit() lifecycle at all.
-  CartService._internal() {
-    _loadCartFromStorage();
-  }
+  CartService._internal();
 
   // =========================
   // STORAGE
   // =========================
   final GetStorage box = GetStorage();
-
-  // Reactive cart list — any Obx()/GetX() widget watching this
-  // rebuilds automatically when items are added/removed/changed.
+  int? _currentUserId;
   final RxList cart = [].obs;
 
-  /// Loads the persisted cart from GetStorage into memory.
-  /// Wrapped in try/catch so corrupted or unexpected storage data
-  /// can't crash the app on startup.
-  void _loadCartFromStorage() {
+  void switchUser(int? userId) {
+    _currentUserId = userId;
+
+    if (userId == null) {
+      cart.value = [];
+      return;
+    }
+
     try {
-      final stored = box.read("cart");
+      final stored = box.read("cart_$userId");
       if (stored is List) {
         cart.value = List<Map<String, dynamic>>.from(
           stored.map((e) => Map<String, dynamic>.from(e as Map)),
@@ -48,19 +35,8 @@ class CartService extends GetxController {
         cart.value = [];
       }
     } catch (e) {
-      // If anything about the stored data is malformed, just start
-      // with an empty cart instead of crashing.
       cart.value = [];
     }
-  }
-
-  /// Also kept for safety: if CartService is ever registered through
-  /// Get.put() somewhere (e.g. in bindings), this will re-sync the
-  /// cart too. Harmless to run twice — it just reloads the same data.
-  @override
-  void onInit() {
-    super.onInit();
-    _loadCartFromStorage();
   }
 
   // =========================
@@ -180,13 +156,16 @@ class CartService extends GetxController {
   // =========================
   void clearCart() {
     cart.clear();
-    box.remove("cart");
+    if (_currentUserId != null) {
+      box.remove("cart_$_currentUserId");
+    }
   }
 
   // =========================
   // PERSIST TO STORAGE
   // =========================
   void _persist() {
-    box.write("cart", cart.toList());
+    if (_currentUserId == null) return;
+    box.write("cart_$_currentUserId", cart.toList());
   }
 }
