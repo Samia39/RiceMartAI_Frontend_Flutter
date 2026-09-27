@@ -137,7 +137,7 @@ class CityService {
   }
 
   // =========================
-  // GET CITIES WITH DELIVERY CHARGES (public, for checkout)
+  // GET CITIES WITH DELIVERY CHARGES
   // =========================
   Future<List> getCitiesWithCharges() async {
     try {

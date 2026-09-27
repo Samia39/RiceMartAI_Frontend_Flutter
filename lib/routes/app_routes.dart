@@ -44,8 +44,6 @@ class AppRoutes {
   static const shopStatus = "/shop-status";
   static const addProduct = "/add-product";
 
-  // Newly converted from Navigator.push/Get.to to named routes so
-  // middleware actually runs for them.
   static const sellerAddProductForm = "/seller/add-product-form";
   static const sellerPayoutDetails = "/seller/payout-details";
   static const sellerPayouts = "/seller/payouts";
@@ -79,8 +77,6 @@ class AppRoutes {
   static const conversation = "/conversation";
   static const airesult = "/airesult";
 
-  // Newly converted from Navigator.push/Get.to to named routes so
-  // middleware actually runs for them.
   static const adminOrderDetail = "/admin/order-detail";
   static const adminShopVerification = "/admin/shop-verification";
   static const adminApprovedShopDetail = "/admin/approved-shop-detail";

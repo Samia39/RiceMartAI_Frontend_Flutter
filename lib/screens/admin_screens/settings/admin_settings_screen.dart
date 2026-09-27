@@ -113,7 +113,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   Widget _buildCommissionSection() {
     if (!_canManageCommission) {
-      return const SizedBox.shrink(); // regular admin never sees this section
+      return const SizedBox.shrink();
     }
 
     if (_loadingCommission) {

@@ -26,7 +26,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
   bool isLoading = false;
   String? imageSourceLabel;
 
-  // ── Camera (mobile only) ──
+  // Camera
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _cameraOpen = false;
@@ -34,7 +34,7 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
 
   final ImagePicker picker = ImagePicker();
 
-  // ── Desktop check ──
+  // Desktop check
   bool get _isDesktop =>
       !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 
@@ -219,9 +219,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     );
   }
 
-  // NOTE (flagged, not fixed yet per your request): TestService.uploadImage
-  // posts to the backend's /test-image endpoint, which currently has no
-  // auth or permission middleware at all. Revisit when you're ready.
   Future<void> sendImage() async {
     if (selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(

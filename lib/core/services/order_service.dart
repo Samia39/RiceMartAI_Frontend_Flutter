@@ -8,7 +8,7 @@ class OrderService {
   final String baseUrl = BaseUrl.url;
 
   // =========================
-  // CHECKOUT API CALL
+  // Checkout an order
   // =========================
   Future<Map<String, dynamic>> checkout({
     required String customerName,
@@ -94,7 +94,7 @@ class OrderService {
   }
 
   // =========================
-  // GET MY ORDERS
+  // Get my orders for buyer
   // =========================
   Future<List> getMyOrders() async {
     final token = box.read("token");
@@ -114,7 +114,7 @@ class OrderService {
   }
 
   // =========================
-  // GET SELLER ORDERS
+  // Get seller orders
   // =========================
   Future<List> fetchSellerOrders() async {
     final token = box.read("token");
@@ -135,7 +135,7 @@ class OrderService {
   }
 
   // =========================
-  // UPDATE ITEM STATUS
+  // Update order status
   // =========================
   Future<Map<String, dynamic>> updateItemStatus({
     required int itemId,
@@ -160,7 +160,9 @@ class OrderService {
     return data;
   }
 
+  //===========================
   // order detail screen
+  //===========================
   Future<Map<String, dynamic>> getOrderDetails(int orderId) async {
     final token = box.read("token");
 
@@ -180,7 +182,9 @@ class OrderService {
     throw Exception("Order not found");
   }
 
-  // Active Orders
+  //============================
+  // Active orders
+  //============================
   Future<List> getActiveOrders() async {
     final token = box.read("token");
 
@@ -198,7 +202,9 @@ class OrderService {
     return [];
   }
 
-  // Order History
+  //===========================
+  //History orders
+  //===========================
   Future<List> getOrderHistory() async {
     final token = box.read("token");
 
@@ -217,7 +223,7 @@ class OrderService {
   }
 
   // =========================
-  // CUSTOMER CONFIRMS RECEIPT
+  // Customer confirm receive
   // =========================
   Future<Map<String, dynamic>> confirmReceived(int itemId) async {
     final token = box.read("token");
@@ -231,7 +237,7 @@ class OrderService {
   }
 
   // =========================
-  // ADMIN ALL ORDERS
+  // Admin All Orders
   // =========================
   Future<List> getAdminOrders() async {
     final token = box.read("token");
@@ -251,7 +257,7 @@ class OrderService {
   }
 
   // =========================
-  // ADMIN ORDER HISTORY
+  // Admin order history
   // =========================
 
   Future<List> getAdminOrderHistory() async {
@@ -272,7 +278,7 @@ class OrderService {
   }
 
   // =========================
-  // ADMIN UPDATE ITEM STATUS
+  // Admin can update orders status
   // =========================
   Future<Map<String, dynamic>> adminUpdateItemStatus({
     required int itemId,

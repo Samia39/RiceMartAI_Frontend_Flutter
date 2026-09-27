@@ -21,9 +21,6 @@ class RoleMiddleware extends GetMiddleware {
     final hasRole = roles.any((role) => rolesAllowed.contains(role));
 
     if (!hasRole) {
-      // Go to a neutral page, not another role-gated route — redirecting
-      // to a specific dashboard here risks a redirect loop for any user
-      // whose role doesn't match that dashboard either.
       return const RouteSettings(name: AppRoutes.accessDenied);
     }
 

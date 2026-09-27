@@ -44,10 +44,6 @@ class _CityScreenState extends State<CityScreen> {
 
     final cities = await _cityService.getCities();
 
-    // The backend returns cities ordered alphabetically by name, but we
-    // want them shown in the order they were actually added to the
-    // database. Sorting by "id" (ascending) restores that insertion order
-    // since IDs are auto-incremented as new cities are created.
     final sortedCities = List.from(cities)
       ..sort((a, b) {
         final idA = a['id'] ?? 0;
@@ -219,7 +215,7 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  // ── Add / Edit form card ───────────────────────────────────
+  //  Add / Edit form card
   Widget _buildFormCard() {
     return Container(
       width: double.infinity,
@@ -305,7 +301,7 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  // ── Search field ────────────────────────────────────────────
+  //  Search field
   Widget _buildSearchField() {
     return Container(
       decoration: AppDecorations.inputField,
@@ -323,8 +319,6 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  // Shows how many cities are currently in the (filtered) list,
-  // e.g. "1 city" / "3 cities".
   Widget _buildCountRow() {
     final count = _filteredCities.length;
     return Padding(
@@ -336,10 +330,7 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  // ── City list ────────────────────────────────────────────────
-  // Renders each city as its OWN card (instead of one big container with
-  // dividers) and separates them with a SizedBox, so cards never look
-  // merged together — matches the spacing seen on the web screen.
+  // City list
   Widget _buildCityList() {
     if (_filteredCities.isEmpty) {
       return Container(
@@ -357,8 +348,6 @@ class _CityScreenState extends State<CityScreen> {
         final isLast = index == _filteredCities.length - 1;
 
         return Padding(
-          // No bottom padding on the last card so the list doesn't end
-          // with extra empty space.
           padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
           child: _buildCityCard(city, index),
         );
@@ -366,9 +355,7 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  // A single city row, wrapped in the theme's standard card decoration
-  // (rounded corners + gold border + soft shadow), same style used by
-  // the Add/Edit form card above.
+  // A single city row
   Widget _buildCityCard(Map city, int index) {
     return Container(
       width: double.infinity,
@@ -376,7 +363,6 @@ class _CityScreenState extends State<CityScreen> {
       decoration: AppDecorations.card,
       child: Row(
         children: [
-          // Sequence number badge (1, 2, 3...) reflecting DB insertion order.
           Container(
             width: 28,
             height: 28,
@@ -395,7 +381,7 @@ class _CityScreenState extends State<CityScreen> {
           ),
           const SizedBox(width: 12),
 
-          // City name + code (code only shown if it exists).
+          // City name + code
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,14 +407,14 @@ class _CityScreenState extends State<CityScreen> {
             ),
           ),
 
-          // Edit button — loads this city into the form above.
+          // Edit button
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(Icons.edit_outlined, size: 19, color: AppColors.info),
             onPressed: () => _startEdit(city),
           ),
 
-          // Delete button — asks for confirmation first.
+          // Delete button
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(Icons.delete_outline, size: 19, color: AppColors.error),

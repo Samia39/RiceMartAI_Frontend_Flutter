@@ -90,7 +90,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
   }
 
   // =========================
-  // CNIC THUMBNAIL
+  // CNIC
   // =========================
 
   Widget _cnicThumb(String label, String url) {

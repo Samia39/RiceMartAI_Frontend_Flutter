@@ -15,8 +15,7 @@ class ChatService {
   };
 
   // =============================================
-  // Start or get existing conversation with shop
-  // Returns { conversation_id, shop_id }
+  // Start conversation with shop
   // =============================================
   Future<Map<String, dynamic>> startConversation({required int shopId}) async {
     final response = await http.post(

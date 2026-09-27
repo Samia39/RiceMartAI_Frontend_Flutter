@@ -6,8 +6,6 @@ import '../../../core/utils/themes.dart';
 class AdminOrderDetailsScreen extends StatefulWidget {
   const AdminOrderDetailsScreen({super.key});
 
-  // Reached via Get.toNamed(AppRoutes.adminOrderDetail,
-  // arguments: {"order": o, "isHistory": isHistory})
   Map get _args => Get.arguments as Map;
   Map get order => _args["order"] as Map;
   bool get isHistory => _args["isHistory"] as bool? ?? false;

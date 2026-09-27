@@ -154,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // LOGIN LINK
+                  // LOGIN
                   GestureDetector(
                     onTap: () => Get.offNamed('/login'),
                     child: Text(

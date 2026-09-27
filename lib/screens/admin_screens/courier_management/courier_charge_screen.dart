@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/admin/courier_charge_service.dart';
-// ignore: depend_on_referenced_packages
+
 import 'package:ricemart_ai/core/utils/themes.dart';
 
 class CourierChargeScreen extends StatefulWidget {
@@ -17,26 +17,17 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
   final TextEditingController _chargeController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
-  // Full list of courier charges (as returned by the backend) and the
-  // subset currently visible after the search filter is applied.
   List _charges = [];
   List _filteredCharges = [];
 
-  // Cities that don't already have a courier charge assigned — these are
-  // the only ones normally allowed to be picked from the dropdown.
   List _availableCities = [];
 
   bool _isLoading = true;
   bool _isSaving = false;
 
-  // When editing, holds the id of the charge being edited (null = add mode).
   int? _editingChargeId;
   int? _selectedCityId;
 
-  // When we start editing a charge, its city is stored here. That city
-  // already has a charge (itself), so it won't be in `_availableCities` —
-  // we need to inject it back into the dropdown manually so it still shows
-  // as selected while editing.
   Map? _editingCityData;
 
   @override
@@ -53,8 +44,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     super.dispose();
   }
 
-  // Loads both the courier charges list and the list of cities that are
-  // still available to be assigned a charge (used for the dropdown).
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
 
@@ -89,9 +78,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     });
   }
 
-  // Cities available for selection in the dropdown: the "available" cities
-  // from the backend, plus (while editing) the city already assigned to
-  // the charge being edited, so it doesn't disappear from the list.
+  // Cities available for selection in the dropdown
   List get _dropdownCities {
     final list = List<Map>.from(_availableCities);
     if (_editingCityData != null &&
@@ -374,7 +361,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     );
   }
 
-  // ── Search field ────────────────────────────────────────────
+  // Search field
   Widget _buildSearchField() {
     return Container(
       decoration: AppDecorations.inputField,
@@ -392,8 +379,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     );
   }
 
-  // Shows how many charges are currently in the (filtered) list,
-  // e.g. "1 charge" / "4 charges".
+  // Shows how many charges are currently in the filtered list
   Widget _buildCountRow() {
     final count = _filteredCharges.length;
     return Padding(
@@ -405,9 +391,8 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     );
   }
 
-  // ── Courier charge list ─────────────────────────────────────
-  // Each entry is its own card (proper spacing between them) instead of
-  // one merged container with dividers.
+  // Courier charge list
+
   Widget _buildChargeList() {
     if (_filteredCharges.isEmpty) {
       return Container(

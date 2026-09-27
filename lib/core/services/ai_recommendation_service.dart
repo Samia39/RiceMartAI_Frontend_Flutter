@@ -24,14 +24,12 @@ class AiRecommendationService {
       final decoded = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // Controller returns: { "ai": {...}, "products": [...] }
         return {
           "ai": decoded["ai"] ?? {},
           "products": decoded["products"] ?? [],
         };
       }
 
-      // Controller returns: { "error": "..." } on failure
       return {
         "error": decoded["error"] ?? "Server error: ${response.statusCode}",
       };
@@ -62,8 +60,7 @@ class AiRecommendationService {
 }
 
 // =========================================================
-// MODEL: AI Rice Info
-// Matches the JSON structure returned by the controller
+// AI Rice Info
 // =========================================================
 class AiRiceInfo {
   final String overview;
@@ -107,7 +104,7 @@ class AiRiceInfo {
 }
 
 // =========================================================
-// MODEL: Recipe (nested inside AiRiceInfo)
+// Recipe
 // =========================================================
 class RiceRecipe {
   final String name;
@@ -130,8 +127,7 @@ class RiceRecipe {
 }
 
 // =========================================================
-// MODEL: Matched Product
-// Matches the product map built in the controller
+// Matched Product
 // =========================================================
 class MatchedProduct {
   final int id;

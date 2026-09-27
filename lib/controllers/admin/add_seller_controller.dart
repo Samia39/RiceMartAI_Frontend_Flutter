@@ -103,10 +103,6 @@ class AddSellerController extends GetxController {
           "Seller account created — approved and ready to log in",
           snackPosition: SnackPosition.TOP,
         );
-
-        // FIX: pehle Get.back() poori screen band kar deta tha. Ab isi
-        // screen pe rehte hain aur form clear kar dete hain taake agla
-        // seller foran add kiya ja sake.
         clearFields();
       } else {
         Get.snackbar(

@@ -183,9 +183,6 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // NAV REFACTOR: removed the local DefaultTabController+Scaffold+
-    // AppBar(bottom: TabBar(...)). The Active/History sub-tab bar now
-    // sits at the top of the body instead of in an AppBar.
     return DefaultTabController(
       length: 2,
       child: Column(

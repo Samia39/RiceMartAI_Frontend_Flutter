@@ -10,7 +10,7 @@ class CategoryService {
   final String baseUrl = BaseUrl.url;
 
   // =========================
-  // FETCH ALL CATEGORIES (admin — active + inactive)
+  // Fetch categories
   // =========================
   Future<List<Map<String, dynamic>>> fetchAllCategories() async {
     final response = await http.get(
@@ -26,7 +26,7 @@ class CategoryService {
   }
 
   // =========================
-  // CREATE CATEGORY
+  // Create a new category
   // =========================
   Future<Map<String, dynamic>> createCategory({
     required String token,
@@ -68,7 +68,7 @@ class CategoryService {
   }
 
   // =========================
-  // UPDATE CATEGORY (name and/or image)
+  // Update category
   // =========================
   Future<Map<String, dynamic>> updateCategory({
     required String token,
@@ -115,7 +115,7 @@ class CategoryService {
   }
 
   // =========================
-  // TOGGLE STATUS
+  // Toggle status of a category
   // =========================
   Future<Map<String, dynamic>> updateStatus({
     required String token,

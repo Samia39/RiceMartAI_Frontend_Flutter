@@ -42,11 +42,6 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
     }
   }
 
-  // Reads an int out of `data[key]` whether the backend sent it as a
-  // real number or (like Laravel's decimal sum()) as a string —
-  // avoids a runtime type crash that was silently triggering the
-  // "Couldn't load dashboard stats" error banner even on a
-  // successful, well-formed response.
   int _asInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;
@@ -80,8 +75,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
           _approvedShops = _asInt(data['approved_shops']);
           _rejectedShops = _asInt(data['rejected_shops']);
           _totalOrders = _asInt(data['total_orders']);
-          // total_revenue comes back as a STRING from the backend
-          // (e.g. "19548.00") — this was the actual bug.
+
           _totalRevenue = _asNum(data['total_revenue']);
           _activeProducts = _asInt(data['active_products']);
           _pendingPayments = _asInt(data['pending_payments']);
@@ -134,8 +128,7 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
               ),
 
             // =========================
-            // NOTIFICATIONS — real bell, placed right next to Add Shop.
-            // Replaces the old dead-end icon (see file header note).
+            // NOTIFICATIONS
             // =========================
             Padding(
               padding: const EdgeInsets.only(right: 12),

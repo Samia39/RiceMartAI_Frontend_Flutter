@@ -29,7 +29,7 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
   final ComplaintService _service = ComplaintService();
   List<Complaint> _all = [];
   bool _loading = true;
-  String _filter = 'all'; // all | open | in_progress | resolved
+  String _filter = 'all';
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
     }
   }
 
-  // Role badge colors — seller vs customer, so admin can tell at a glance
+  // Role badge colors seller vs customer for admin
   Color _roleColor(String role) =>
       role == 'seller' ? AppColors.golden : AppColors.lightGreen;
 
@@ -193,10 +193,6 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
                                     child: InkWell(
                                       borderRadius: BorderRadius.circular(16),
                                       onTap: () async {
-                                        // Converted from Navigator.push(MaterialPageRoute(...))
-                                        // to the named route so
-                                        // AuthMiddleware/PermissionMiddleware
-                                        // ('view complaints') run for it.
                                         await Get.toNamed(
                                           AppRoutes.adminComplaintDetail,
                                           arguments: c.id,

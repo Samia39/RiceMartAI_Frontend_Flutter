@@ -32,7 +32,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     email = args?['email'] ?? '';
     startTimer();
 
-    // Auto-focus first box when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(focusNodes[0]);
     });
@@ -115,14 +114,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           keyboardType: TextInputType.number,
           maxLength: 1,
 
-          // FIX 1: explicit style so text is always visible
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             color: AppColors.darkGreen,
           ),
 
-          // FIX 2: fully override theme decoration — no fill conflict
           decoration: const InputDecoration(
             counterText: '',
             border: InputBorder.none,
@@ -133,7 +130,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             contentPadding: EdgeInsets.symmetric(vertical: 14),
           ),
 
-          // FIX 3: select all text on tap so re-typing replaces old digit
           onTap: () {
             otpControllers[index].selection = TextSelection(
               baseOffset: 0,
@@ -143,15 +139,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
           onChanged: (value) {
             if (value.isNotEmpty) {
-              // digit typed — move to next box
               if (index < 5) {
                 FocusScope.of(context).requestFocus(focusNodes[index + 1]);
               } else {
-                // last box — close keyboard
                 FocusScope.of(context).unfocus();
               }
             } else {
-              // digit deleted (backspace) — go back to previous box
               if (index > 0) {
                 FocusScope.of(context).requestFocus(focusNodes[index - 1]);
               }

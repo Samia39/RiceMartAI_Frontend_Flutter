@@ -7,8 +7,6 @@ import '../../../core/utils/themes.dart';
 class ShopDetailsScreen extends StatelessWidget {
   const ShopDetailsScreen({super.key});
 
-  // Reached via Get.toNamed(AppRoutes.adminShopVerification,
-  // arguments: {'shop': shop, 'readOnly': bool}).
   Map get _args => Get.arguments as Map;
   Map<String, dynamic> get shop => Map<String, dynamic>.from(_args['shop']);
   bool get readOnly => _args['readOnly'] == true;
@@ -489,7 +487,6 @@ class ShopDetailsScreen extends StatelessWidget {
                           );
 
                           if (result["success"] == true) {
-                            // Refresh the list this screen was opened from.
                             Get.back(result: true);
                           }
                         },

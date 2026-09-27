@@ -78,9 +78,6 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
         .where((tab) => PermissionService.hasPermission(tab.permission))
         .toList();
 
-    // If the controller's currently-selected tab isn't one this admin can
-    // see (e.g. Drawer requested a tab with no permission, or a permission
-    // was revoked since last login), fall back to the first visible tab.
     if (!_visibleTabs.any((t) => t.tab == _shellController.selectedTab.value)) {
       if (_visibleTabs.isNotEmpty) {
         _shellController.selectedTab.value = _visibleTabs.first.tab;

@@ -29,8 +29,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         .map<int>((item) => int.tryParse(item["id"].toString()) ?? -1)
         .toSet();
 
-    // A shop counts as "confirmed" only if ALL its items in this
-    // order are confirmed.
     final Map<int, List> byShop = {};
     for (final item in items) {
       final shopId = int.tryParse(item["shop"]?["id"].toString() ?? '') ?? 0;
@@ -224,7 +222,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               }),
 
               // =========================
-              // CONFIRM RECEIVED — once per shop, not per item
+              // CONFIRM RECEIVED per shop
               // =========================
               if (allDelivered && !rejected) ...[
                 const SizedBox(height: 10),
@@ -272,9 +270,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
                 const SizedBox(height: 8),
 
-                // Rating still keyed off the first item for now — see
-                // note below about needing the ShopReview files to make
-                // this properly one-review-per-shop on the backend too.
                 if (confirmed)
                   Builder(
                     builder: (ctx) {

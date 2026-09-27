@@ -22,41 +22,27 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   // change for strip
   int? _pendingCardOrderId;
-  // =========================
-  // CONTROLLERS
-  // =========================
+
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
-  // =========================
-  // CITY / DELIVERY
-  // =========================
+
   final CityService _cityService = CityService();
-  List _cities = []; // [{id, name, code, delivery_charge}]
+  List _cities = [];
   int? selectedCityId;
   bool loadingCities = true;
   final addressController = TextEditingController();
   final transactionIdController = TextEditingController();
 
-  // =========================
-  // PAYMENT METHOD
-  // =========================
   String paymentMethod = "easypaisa";
 
-  // =========================
-  // PAYMENT SETTINGS (EasyPaisa / JazzCash numbers, admin-managed)
-  // =========================
+  // payment setting EasyPaisa / JazzCash numbers, admin-managed
+
   Map<String, dynamic>? paymentSettings;
   bool loadingPaymentSettings = true;
 
-  // =========================
-  // IMAGE (WEB)
-  // =========================
   Uint8List? paymentImageBytes;
   String? paymentFileName;
 
-  // =========================
-  // CART
-  // =========================
   List cart = [];
 
   int get distinctShopCount {
@@ -83,7 +69,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double get deliveryCharge => perShopCharge * distinctShopCount;
 
   // =========================
-  // SUBTOTAL (cart items only, no delivery)
+  // SUBTOTAL
   // =========================
   double get subtotal => Get.find<CartService>().totalPrice();
 
@@ -133,8 +119,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   // =========================
   // LOAD PAYMENT SETTINGS
-  // (EasyPaisa/JazzCash numbers are admin-managed on the backend,
-  // not hardcoded, so they can be changed without an app update)
   // =========================
   Future<void> _loadPaymentSettings() async {
     final settings = await PaymentService().getPaymentSettings();
@@ -211,9 +195,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // =========================
   Future<void> placeOrder() async {
     int? orderId;
-    // =========================
-    // BASIC VALIDATION
-    // =========================
+
     if (nameController.text.trim().isEmpty ||
         phoneController.text.trim().isEmpty ||
         selectedCityId == null ||
@@ -229,7 +211,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // =========================
-    // TRANSACTION ID REQUIRED (manual methods only)
+    // TRANSACTION ID REQUIRED
     // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         transactionIdController.text.trim().isEmpty) {
@@ -242,7 +224,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // =========================
-    // SCREENSHOT REQUIRED (manual methods only)
+    // SCREENSHOT REQUIRED
     // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         paymentImageBytes == null) {
@@ -299,12 +281,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
 
     try {
-      // =========================
-      // 1. CREATE THE ORDER (same for all payment methods)
-      // For "card", no transactionId/screenshot is sent — the order and
-      // its Payment row are created with status "pending", then Stripe
-      // takes over.
-      // =========================
       final result = await OrderService().checkout(
         customerName: nameController.text.trim(),
         phone: phoneController.text.trim(),
@@ -331,7 +307,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
 
       // =========================
-      // 2. IF CARD — open Stripe's payment sheet using the new order's id
+      // 2. IF CARD open Stripe's payment sheet using the new order's id
       // =========================
       if (paymentMethod == "card") {
         orderId = result["order"]?["id"] ?? result["order_id"];
@@ -384,10 +360,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           return;
         }
 
-        // Payment sheet succeeded on Stripe's side. The order flips to
-        // "paid" a moment later once Stripe's webhook reaches the backend
-        // — not instantly here.
-        //=========================
         // change for strip
         _pendingCardOrderId = null;
         setState(() => isLoading = false);
@@ -405,7 +377,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
 
       // =========================
-      // 3. EASYPAISA / JAZZCASH — same as before
+      // EASYPAISA / JAZZCASH
       // =========================
       setState(() => isLoading = false);
 
@@ -419,9 +391,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
     } catch (e) {
-      // Order may have already been created for "card" before this failure
-      // hit (e.g. a network drop mid-payment). Clean it up so a retry with
-      // a different payment method doesn't leave a duplicate order behind.
       if (paymentMethod == "card" && orderId != null) {
         await OrderService().cancelUnpaidOrder(orderId);
       }
@@ -435,8 +404,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   // =========================
-  // SEND PAYMENT TO — dynamic number/account name per method,
-  // pulled from the admin-managed payment settings.
+  // SEND PAYMENT TO  dynamic number/account name per method
   // =========================
   Widget _sendPaymentToSection() {
     if (loadingPaymentSettings) {
@@ -501,7 +469,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             final isWide = constraints.maxWidth > 700;
 
             // =========================
-            // 1. FORM FIELDS (name, phone, city, address)
+            // FORM FIELDS (name, phone, city, address)
             // =========================
             final formFields = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -565,7 +533,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // 2. ORDER SUMMARY (items + totals only — button lives separately)
+            // ORDER SUMMARY
             // =========================
             final orderSummaryCard = Container(
               padding: const EdgeInsets.all(16),
@@ -665,7 +633,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // 3. PAYMENT METHOD SECTION
+            // PAYMENT METHOD SECTION
             // =========================
             final paymentMethodSection = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -796,7 +764,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             );
 
             // =========================
-            // 4. PLACE ORDER BUTTON
+            // PLACE ORDER BUTTON
             // =========================
             final placeOrderButton = SizedBox(
               height: 55,

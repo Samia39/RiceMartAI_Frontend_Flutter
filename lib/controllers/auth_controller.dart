@@ -166,6 +166,12 @@ class AuthController extends GetxController {
   // LOGOUT
   // ======================
   Future<void> logout() async {
+    // Grab the token BEFORE clearing anything, so we can revoke it server-side.
+    final box = GetStorage();
+    final currentToken = token.value.isNotEmpty
+        ? token.value
+        : (box.read('token') as String?);
+
     token.value = '';
     user.clear();
     roles.clear();
@@ -173,7 +179,16 @@ class AuthController extends GetxController {
 
     CartService().switchUser(null);
 
-    final box = GetStorage();
+    // Revoke the token on the backend too (best-effort — don't block
+    // logout if there's no internet or the token's already gone).
+    if (currentToken != null && currentToken.isNotEmpty) {
+      try {
+        await AuthService.logout(currentToken);
+      } catch (e) {
+        // ignore — proceed with local logout regardless
+      }
+    }
+
     box.remove('token');
     box.remove('roles');
     box.remove('permissions');

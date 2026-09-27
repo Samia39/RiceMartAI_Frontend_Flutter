@@ -8,7 +8,7 @@ class ProfileService {
 
   String get token => _box.read('token') ?? '';
 
-  // ── Safe JSON decode with debug visibility ───────────────
+  // Safe JSON decode with debug visibility
   dynamic _safeDecode(http.Response response) {
     if (response.body.isEmpty) {
       throw Exception(
@@ -18,7 +18,6 @@ class ProfileService {
     try {
       return jsonDecode(response.body);
     } catch (e) {
-      // Check the browser console for the real body while debugging
       print(
         '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
       );
@@ -28,7 +27,7 @@ class ProfileService {
     }
   }
 
-  // ── Parse role from list ─────────────────────────────────
+  //Parse role from list
   String parseRole(dynamic apiRoles) {
     if (apiRoles != null && apiRoles is List && apiRoles.isNotEmpty) {
       final first = apiRoles[0];
@@ -44,7 +43,7 @@ class ProfileService {
     return 'customer';
   }
 
-  // ── Fetch authenticated user ─────────────────────────────
+  //Fetch authenticated user
   Future<Map<String, dynamic>> fetchProfile() async {
     final data = await AuthService.me(token);
     final user = data['user'] ?? data;
@@ -67,7 +66,7 @@ class ProfileService {
     };
   }
 
-  // ── Update profile ───────────────────────────────────────
+  // Update profile
   Future<void> updateProfile({
     required String name,
     String? email,
@@ -80,41 +79,13 @@ class ProfileService {
       password: password,
     );
 
-    // Keep the locally cached name/email in sync — HomeScreen,
-    // AppDrawer, SellerDrawer, SellerHomeScreen, and AdminDrawer
-    // all read these straight from GetStorage, not from the API.
     await _box.write('name', name);
     if (email != null && email.isNotEmpty) {
       await _box.write('email', email);
     }
   }
 
-  // ── Clear session ────────────────────────────────────────
-  void clearSession() {
-    _box.remove('token');
-    _box.remove('roles');
-    _box.remove('permissions');
-    _box.remove('has_shop');
-    _box.remove('shop_status');
-    _box.remove('shop_id');
-    _box.remove('is_shop_approved');
-    _box.remove('shop_approved');
-    _box.remove('shop_name');
-    _box.remove('owner_name');
-    _box.remove('phone');
-    _box.remove('city');
-    _box.remove('address');
-    _box.remove('description');
-    _box.remove('cnic');
-    _box.remove('cnic_image');
-    _box.remove('cnic_back_image');
-    _box.remove('name');
-    _box.remove('email');
-    // do NOT call _box.erase() — it would delete every other
-    // user's saved cart_<id> data too.
-  }
-
-  // ── Request account deletion OTP ─────────────────────────
+  // Request account deletion OTP
   Future<void> requestAccountDeletion() async {
     final response = await http.post(
       Uri.parse('${AuthService.baseUrl}/delete-account/request'),
@@ -132,7 +103,7 @@ class ProfileService {
     }
   }
 
-  // ── Confirm account deletion with OTP ────────────────────
+  // Confirm account deletion with OTP
   Future<void> confirmAccountDeletion(String otp) async {
     final response = await http.post(
       Uri.parse('${AuthService.baseUrl}/delete-account/confirm'),

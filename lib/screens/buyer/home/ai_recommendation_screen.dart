@@ -16,9 +16,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
   final TextEditingController _queryController = TextEditingController();
   bool _isLoading = false;
 
-  // =========================
-  // SEARCH
-  // =========================
   Future<void> _search(String query) async {
     if (query.trim().isEmpty) {
       Get.snackbar("Error", "Please enter a rice type or dish name");
@@ -69,7 +66,7 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ── Search Field ───────────────────────────────────
+              // Search Field
               Container(
                 decoration: AppDecorations.card,
                 padding: const EdgeInsets.all(16),
@@ -108,7 +105,7 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
 
                     const SizedBox(height: 14),
 
-                    // ── Search Button ──────────────────────────
+                    // Search Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -138,7 +135,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
 
               const SizedBox(height: 28),
 
-              // ── How it works ───────────────────────────────────
               Text("How It Works", style: AppTextStyles.heading4),
               const SizedBox(height: 12),
               _howItWorksStep(
@@ -170,9 +166,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
     );
   }
 
-  // =========================
-  // HOW IT WORKS STEP WIDGET
-  // =========================
   Widget _howItWorksStep({
     required IconData icon,
     required String title,

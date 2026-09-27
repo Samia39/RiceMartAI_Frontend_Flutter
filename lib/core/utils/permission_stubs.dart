@@ -1,8 +1,3 @@
-// Stub file for web platform — permission_handler is not supported on web.
-// This file is used via conditional import:
-//   import 'package:permission_handler/permission_handler.dart'
-//       if (dart.library.html) 'package:frontend/core/utils/permission_stub.dart';
-
 class Permission {
   static final camera = _PermissionStub();
 }

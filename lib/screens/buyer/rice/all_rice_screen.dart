@@ -67,7 +67,7 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
   }
 
   // =========================
-  // FETCH CATEGORIES (for the browse row)
+  // FETCH CATEGORIES for buyer
   // =========================
   Future<void> fetchCategories() async {
     final data = await ProductService().fetchCategories();

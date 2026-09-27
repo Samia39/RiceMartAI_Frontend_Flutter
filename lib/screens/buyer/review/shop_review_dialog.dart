@@ -41,8 +41,6 @@ class _ShopReviewDialogState extends State<ShopReviewDialog> {
         SnackBar(content: Text(result["message"] ?? "Review submitted")),
       );
     } else {
-      // Stay open, show the reason inline (e.g. "You already reviewed
-      // this shop for this order") instead of silently doing nothing.
       setState(() => errorText = result["message"]);
     }
   }

@@ -67,7 +67,6 @@ class _AdminPaymentSettingsScreenState
 
   // =========================
   // EXTRACT LARAVEL VALIDATION ERRORS
-  // (same pattern as checkout screen, for consistency)
   // =========================
   String _extractErrorMessage(Map<String, dynamic> result) {
     final errors = result["errors"];

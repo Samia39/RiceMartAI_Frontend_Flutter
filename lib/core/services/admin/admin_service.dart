@@ -158,7 +158,7 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // for user mangenment module
+  // for users
 
   // =========================
   // CREATE USER
@@ -216,7 +216,7 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // for user management module
+  // for roles
   // =========================
   // GET ROLES
   // =========================
@@ -271,6 +271,7 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
+  // For Permissions
   // =========================
   // GET PERMISSIONS
   // =========================
@@ -319,9 +320,7 @@ class AdminService {
 
   Future<Map<String, dynamic>> getAdminDashboardStats() async {
     final response = await http.get(
-      Uri.parse(
-        "$baseUrl/admin/dashboard",
-      ), // ⚠️ confirm this matches routes/api.php
+      Uri.parse("$baseUrl/admin/dashboard"),
       headers: headers,
     );
 
