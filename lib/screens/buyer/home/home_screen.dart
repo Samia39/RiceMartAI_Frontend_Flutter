@@ -146,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      // SEE ALL BUTTON
                       GestureDetector(
                         onTap: () {
                           widget.onSeeAllProducts?.call();
@@ -231,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                           height: 100,
                                           width: double.infinity,
 
-                                          // SAME AS ALL PRODUCTS
                                           color: AppColors.cream.withOpacity(
                                             0.5,
                                           ),

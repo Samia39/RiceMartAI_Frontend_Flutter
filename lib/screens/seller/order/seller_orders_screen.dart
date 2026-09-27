@@ -107,9 +107,6 @@ class _SellerOrdersScreenState extends State<SellerOrdersScreen>
 
     return GestureDetector(
       onTap: () async {
-        // Converted from Get.to(() => SellerOrderDetailScreen(item: item))
-        // to a named route so AuthMiddleware/PermissionMiddleware
-        // actually run for it.
         await Get.toNamed(AppRoutes.sellerOrderDetail, arguments: order);
         fetchOrders();
       },

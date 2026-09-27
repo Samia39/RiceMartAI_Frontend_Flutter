@@ -62,8 +62,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
 
           // =========================
           // SCROLLABLE NAV ITEMS
-          // (was a flat Column + Spacer(), which overflowed on
-          // shorter screens — this scrolls instead)
           // =========================
           Expanded(
             child: ListView(
@@ -100,8 +98,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                 ),
 
                 // PAYOUT DETAILS
-                // Converted from Get.to(() => ...) to a named route so
-                // AuthMiddleware/PermissionMiddleware actually run for it.
                 drawerItem(
                   icon: Icons.account_balance_wallet_outlined,
                   title: "Payout Details",
@@ -111,9 +107,7 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // PAYOUTS TAB (where the shop sees their payouts from admin)
-                // Converted from Get.to(() => ...) to a named route so
-                // AuthMiddleware/PermissionMiddleware actually run for it.
+                // PAYOUTS TAB
                 drawerItem(
                   icon: Icons.receipt_long,
                   title: "My Payouts",
@@ -132,9 +126,8 @@ class _SellerDrawerState extends State<SellerDrawer> {
                     widget.onTabSelected(4);
                   },
                 ),
+
                 // COMPLAINTS TAB
-                // Converted from Get.to(() => ...) to a named route so
-                // AuthMiddleware actually runs for it.
                 drawerItem(
                   icon: Icons.report_problem,
                   title: "Complaints",
@@ -155,8 +148,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                 ),
 
                 // NOTIFICATIONS
-                // Converted from Get.to(() => ...) to a named route so
-                // AuthMiddleware actually runs for it.
                 drawerItem(
                   icon: Icons.notifications,
                   title: "Notifications",
@@ -171,9 +162,7 @@ class _SellerDrawerState extends State<SellerDrawer> {
 
           const Divider(height: 1),
 
-          // =========================
-          // LOGOUT — pinned at the bottom, always visible
-          // =========================
+          // LOGOUT
           drawerItem(
             icon: Icons.logout,
             title: "Logout",
@@ -189,9 +178,8 @@ class _SellerDrawerState extends State<SellerDrawer> {
     );
   }
 
-  // =========================
   // DRAWER ITEM
-  // =========================
+
   Widget drawerItem({
     required IconData icon,
     required String title,

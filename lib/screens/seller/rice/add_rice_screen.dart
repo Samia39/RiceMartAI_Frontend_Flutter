@@ -210,9 +210,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
   // =========================
   // GO TO ADD PRODUCT FORM
-  // Converted from Navigator.push(MaterialPageRoute(...)) to a named
-  // route so AuthMiddleware/PermissionMiddleware actually run for it.
-  // shopId is passed via Get.arguments.
   // =========================
   Future<void> openAddProductForm() async {
     if (shopId == null) {
@@ -245,7 +242,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // =========================
-          // TOP: ICON / IMAGE
+          // IMAGE
           // =========================
           Container(
             width: double.infinity,
@@ -304,7 +301,7 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
           const Divider(height: 1),
 
           // =========================
-          // FOOTER: EDIT | DELETE
+          //  EDIT | DELETE
           // =========================
           IntrinsicHeight(
             child: Row(
@@ -370,9 +367,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     );
   }
 
-  // =========================
-  // INIT
-  // =========================
   @override
   void initState() {
     super.initState();

@@ -194,8 +194,6 @@ class AIResultScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
 
-                          // ✅ The main button — now a named route so it
-                          // gets AuthMiddleware like the rest of the app.
                           SizedBox(
                             width: double.infinity,
                             height: 48,

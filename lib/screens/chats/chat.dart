@@ -108,7 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
       decoration: AppDecorations.gradientBackground,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: true, // ← FIX 1
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,14 +151,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
             ),
 
-            // INPUT BAR
             Container(
               padding: EdgeInsets.only(
                 left: 16,
                 right: 8,
                 top: 8,
-                bottom:
-                    MediaQuery.of(context).viewPadding.bottom + 8, // ← FIX 2
+                bottom: MediaQuery.of(context).viewPadding.bottom + 8,
               ),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,

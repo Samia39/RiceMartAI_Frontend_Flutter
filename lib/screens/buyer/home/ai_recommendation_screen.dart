@@ -57,7 +57,7 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Search Label ───────────────────────────────────
+              // Search Label
               Text("What are you looking for?", style: AppTextStyles.heading3),
               const SizedBox(height: 6),
               Text(

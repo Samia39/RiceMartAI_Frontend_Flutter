@@ -17,9 +17,6 @@ void main() async {
   Get.put(CartService());
   Get.put(AuthController(), permanent: true);
 
-  // Initialize Stripe only on native platforms.
-  // flutter_stripe is causing Platform._operatingSystem
-  // when initialized on Flutter Web.
   if (!kIsWeb) {
     Stripe.publishableKey =
         "pk_test_51U7HrHQ8RiNpzmf2FmvcBjKae5hJ4CF5fM7tBUVSHp4djWo5Nk2WcVwJhc1XyNgZVJq95f0elTmYlPEDINfmW1Qo001oGGzNee";

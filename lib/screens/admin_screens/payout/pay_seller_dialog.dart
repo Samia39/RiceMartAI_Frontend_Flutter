@@ -73,7 +73,7 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
     });
   }
 
-  // Step 1: validate, then switch this same dialog into a confirm view.
+  // Step 1: validate
   void goToConfirmStep() {
     if (isSubmitting) return;
 
@@ -105,7 +105,7 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
     });
   }
 
-  // Step 2: actually send it.
+  // Step 2: send it.
   Future<void> submit() async {
     if (isSubmitting) return;
 

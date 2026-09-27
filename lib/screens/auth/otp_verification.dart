@@ -201,7 +201,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   const SizedBox(height: 10),
 
-                  // Subtitle — shows the email
+                  // Subtitle shows the email
                   Text(
                     "We sent a 6-digit code to",
                     textAlign: TextAlign.center,

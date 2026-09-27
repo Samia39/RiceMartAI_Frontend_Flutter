@@ -243,8 +243,7 @@ class _SellerComplaintListScreenState extends State<SellerComplaintListScreen> {
                           borderRadius: BorderRadius.circular(16),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
-                            // Converted from Navigator.push(MaterialPageRoute(...))
-                            // to a named route so AuthMiddleware runs for it.
+
                             onTap: () async {
                               await Get.toNamed(
                                 AppRoutes.sellerComplaintDetail,
@@ -339,8 +338,6 @@ class _SellerComplaintListScreenState extends State<SellerComplaintListScreen> {
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        // Converted from Navigator.push(MaterialPageRoute(...)) to a
-        // named route so AuthMiddleware/PermissionMiddleware run for it.
         onPressed: () async {
           await Get.toNamed(AppRoutes.sellerNewComplaint);
           _loadData();

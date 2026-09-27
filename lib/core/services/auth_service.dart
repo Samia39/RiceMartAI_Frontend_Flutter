@@ -10,7 +10,6 @@ class AuthService {
     'Accept': 'application/json',
   };
 
-  // Safe JSON decode with debug visibility
   static dynamic _safeDecode(http.Response response) {
     if (response.body.isEmpty) {
       throw Exception(

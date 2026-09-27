@@ -472,8 +472,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
 
     // =========================
-    // 3 TABS: Pending / Approved / Rejected
-    // Same pattern as AdminOrdersScreen's Active/History tabs.
+    // TABS: Pending / Approved / Rejected
     // =========================
     return DefaultTabController(
       length: 3,

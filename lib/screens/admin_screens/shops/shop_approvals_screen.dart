@@ -88,9 +88,6 @@ class _ShopApprovalsScreenState extends State<ShopApprovalsScreen> {
 
                           ElevatedButton(
                             onPressed: () async {
-                              // Converted from Navigator.push(MaterialPageRoute(...))
-                              // to the same named route AdminShopsTab now uses,
-                              // so AuthMiddleware/PermissionMiddleware run here too.
                               final result = await Get.toNamed(
                                 AppRoutes.adminShopVerification,
                                 arguments: {"shop": shop, "readOnly": false},

@@ -51,7 +51,6 @@ class PermissionsController extends GetxController {
     try {
       final data = await _service.getRolePermissions(roleId);
 
-      // convert to int list safely
       selectedPermissions.value = List<int>.from(data.map((e) => e['id']));
       update();
     } catch (e) {

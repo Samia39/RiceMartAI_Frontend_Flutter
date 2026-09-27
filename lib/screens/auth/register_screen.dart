@@ -47,7 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ─── Responsive values ───────────────────────────────
+    // Responsive values
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -55,7 +55,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final verticalSpacing = screenHeight * 0.018;
     final buttonHeight = screenHeight * 0.062;
     final titleFontSize = screenWidth < 400 ? 18.0 : 20.0;
-    // ─────────────────────────────────────────────────────
 
     return Container(
       decoration: AppDecorations.gradientBackground,

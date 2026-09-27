@@ -293,14 +293,11 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
             ),
             const SizedBox(height: 16),
 
-            // City label (matches the "City" label seen above the
-            // dropdown on the web screen).
+            // City label
             Text('City', style: AppTextStyles.label),
             const SizedBox(height: 6),
 
-            // City dropdown — picks from `_dropdownCities`, which is the
-            // list of cities without a charge yet (plus the current city
-            // when editing).
+            // City dropdown
             DropdownButtonFormField<int>(
               initialValue: _selectedCityId,
               isExpanded: true,
@@ -357,8 +354,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
                 prefixIcon: Icon(Icons.percent),
               ),
               validator: (value) {
-                if (value == null || value.trim().isEmpty)
-                  return null; // optional, defaults to 0
+                if (value == null || value.trim().isEmpty) return null;
                 final parsed = num.tryParse(value.trim());
                 if (parsed == null || parsed < 0)
                   return 'Enter a valid percentage';

@@ -22,7 +22,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     super.initState();
     fetchConversations();
 
-    // Poll every 5 seconds for new conversations / unread counts
+    // Poll every 5 seconds for new conversations unread counts
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       fetchConversations(silent: true);
     });
@@ -99,7 +99,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                       decoration: AppDecorations.card,
                       child: Row(
                         children: [
-                          // Avatar circle
                           CircleAvatar(
                             backgroundColor: AppColors.darkGreen.withOpacity(
                               0.15,

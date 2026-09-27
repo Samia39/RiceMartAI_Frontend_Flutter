@@ -131,7 +131,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                   const SizedBox(height: 18),
 
                   // ================= ADD PRODUCT BUTTON =================
-                  // Tab index 1 = AddRiceScreen in SellerDashboardScreen
                   GestureDetector(
                     onTap: () => widget.onTabChange?.call(1),
                     child: featureCard(
@@ -144,7 +143,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                   const SizedBox(height: 18),
 
                   // ================= MY SHOP BUTTON =================
-                  // Tab index 2 = MyShopScreen in SellerDashboardScreen
                   GestureDetector(
                     onTap: () => widget.onTabChange?.call(2),
                     child: featureCard(

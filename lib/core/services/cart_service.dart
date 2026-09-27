@@ -68,7 +68,6 @@ class CartService extends GetxController {
 
       return requestedTotal > stock ? "capped" : "added";
     } else {
-      // New item  add a fresh entry.
       final int newQty = quantity > stock ? stock : quantity;
 
       if (newQty <= 0) {

@@ -35,8 +35,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   // =========================
   // TAB SWITCH
   // =========================
-  // Called by SellerHomeScreen buttons
-  // and SellerDrawer to switch tabs.
+
   void _switchTab(int index) {
     setState(() {
       currentIndex = index;
@@ -72,49 +71,41 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     // SCREENS
     // =========================
     //
-    // IMPORTANT:
-    // These permission names MUST match
-    // the permissions assigned to the seller
-    // role in Laravel/Spatie.
-    //
+
     final List<Widget> screens = [
       // =========================
-      // 0 — HOME / DASHBOARD
+      // DASHBOARD
       // =========================
       SellerHomeScreen(onTabChange: _switchTab),
 
       // =========================
-      // 1 — MY RICE
+      // MY RICE
       // =========================
       PermissionService.hasPermission('create products')
           ? const AddRiceScreen()
           : const _NoAccess(),
 
       // =========================
-      // 2 — MY SHOP
+      // MY SHOP
       // =========================
-      // Correct seller permission:
-      // "view own shop"
       PermissionService.hasPermission('view own shop')
           ? const MyShopScreen()
           : const _NoAccess(),
 
       // =========================
-      // 3 — CHAT
+      // CHAT
       // =========================
       ConversationsScreen(),
 
       // =========================
-      // 4 — ORDERS
+      // ORDERS
       // =========================
-      // Correct seller permission:
-      // "view shop orders"
       PermissionService.hasPermission('view shop orders')
           ? const SellerOrdersScreen()
           : const _NoAccess(),
 
       // =========================
-      // 5 — PROFILE
+      // PROFILE
       // =========================
       const ProfileScreen(),
     ];
@@ -144,9 +135,6 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
         // =========================
         drawer: SellerDrawer(onTabSelected: _switchTab),
 
-        // =========================
-        // CURRENT SCREEN
-        // =========================
         body: screens[currentIndex],
 
         // =========================

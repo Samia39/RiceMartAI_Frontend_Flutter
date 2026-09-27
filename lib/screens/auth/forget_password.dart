@@ -115,7 +115,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     decoration: AppDecorations.inputField,
                     child: TextField(
                       controller: emailController,
-                      enabled: !_otpSent, // lock email after OTP sent
+                      enabled: !_otpSent,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         hintText: "Enter your email",

@@ -13,8 +13,6 @@ class SellerOrderDetailScreen extends StatefulWidget {
 }
 
 class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
-  // The seller-controlled progression. A button for a step only shows
-  // if that step is still AHEAD of the current status.
   static const List<String> _statusSteps = [
     "processing",
     "shipped",
@@ -29,8 +27,6 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Local mutable copy so we can update status in place instead of
-    // popping the screen.
     order = Map.from(Get.arguments as Map);
   }
 
@@ -53,7 +49,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
     setState(() {
       isUpdating = false;
       if (res["success"] == true) {
-        order["status"] = status; // <-- this is the "refresh"
+        order["status"] = status;
         for (final item in order["items"]) {
           item["status"] = status;
         }
@@ -150,9 +146,7 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
       0,
       (sum, i) => sum + asNum(i["commission_amount"]),
     );
-    // Computed from this order's own numbers (not the current global
-    // setting) so old orders keep showing the % they were actually
-    // charged, even after Super Admin changes the setting later.
+
     final commissionPercent = totalRiceGross > 0
         ? (totalCommission / totalRiceGross * 100)
         : 0;
@@ -264,9 +258,6 @@ class _SellerOrderDetailScreenState extends State<SellerOrderDetailScreen> {
                               "Rs ${grandTotal.toStringAsFixed(2)}",
                             ),
 
-                            // Buttons only for steps still ahead of the
-                            // current status — this is what makes them
-                            // disappear one by one as the seller progresses.
                             if (status != "delivered") ...[
                               const SizedBox(height: 20),
                               Wrap(

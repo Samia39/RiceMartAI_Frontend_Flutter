@@ -49,7 +49,6 @@ class _AdminDrawerState extends State<AdminDrawer> {
       backgroundColor: AppColors.cream,
       child: Column(
         children: [
-          // HEADER
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: AppColors.darkGreen),
             accountName: Text(userName),
@@ -64,12 +63,10 @@ class _AdminDrawerState extends State<AdminDrawer> {
             ),
           ),
 
-          // SCROLLABLE MENU ITEMS
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // DASHBOARD
                 if (PermissionService.hasPermission('view admin dashboard'))
                   drawerItem(
                     icon: Icons.dashboard,
@@ -78,7 +75,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                       Navigator.pop(context);
                       Get.find<AdminShellController>().goToTab(
                         AdminTab.dashboard,
-                      ); // was: goToTab(0)
+                      );
                     },
                   ),
 
@@ -109,9 +106,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     title: "Orders",
                     onTap: () {
                       Navigator.pop(context);
-                      Get.find<AdminShellController>().goToTab(
-                        AdminTab.orders,
-                      ); // was: goToTab(2)
+                      Get.find<AdminShellController>().goToTab(AdminTab.orders);
                     },
                   ),
                 // PAYMENT APPROVALS
@@ -123,7 +118,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                       Navigator.pop(context);
                       Get.find<AdminShellController>().goToTab(
                         AdminTab.payments,
-                      ); // was: goToTab(3)
+                      );
                     },
                   ),
 
@@ -218,9 +213,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ),
                   childrenPadding: const EdgeInsets.only(left: 20),
                   children: [
-                    // CITY SCREEN — converted from Get.to() to a named
-                    // route so AuthMiddleware/PermissionMiddleware
-                    // ('manage cities') actually run for it.
+                    // CITY SCREEN
                     ListTile(
                       leading: const Icon(
                         Icons.location_city,
@@ -233,7 +226,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                         });
                       },
                     ),
-                    // COURIER CHARGES — same conversion as above.
+                    // COURIER CHARGES
                     ListTile(
                       leading: const Icon(
                         Icons.attach_money,
@@ -260,9 +253,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   },
                 ),
 
-                // SELLER PAYOUTS — converted from Get.to() to a named
-                // route so AuthMiddleware/PermissionMiddleware actually
-                // run for it.
+                // SELLER PAYOUTS
                 drawerItem(
                   icon: Icons.account_balance_wallet,
                   title: "Seller Payouts",
@@ -273,11 +264,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   },
                 ),
 
-                // COMPLAINTS — converted from Get.to() to a named route.
-                // Functionally super_admin-only on the backend ('view
-                // complaints' isn't assigned to plain admin), so a plain
-                // admin tapping this now gets redirected to Access
-                // Denied immediately instead of seeing a broken screen.
+                // COMPLAINTS
                 drawerItem(
                   icon: Icons.report_problem,
                   title: "Complaints",
@@ -288,7 +275,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   },
                 ),
 
-                // SETTINGS → navigates to profile.dart
+                // SETTINGS
                 drawerItem(
                   icon: Icons.person,
                   title: "profile",
@@ -311,7 +298,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
             ),
           ),
 
-          // LOGOUT - always visible at bottom
+          // LOGOUT
           const Divider(height: 1),
           drawerItem(
             icon: Icons.logout,
