@@ -15,6 +15,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _chargeController = TextEditingController();
+  final TextEditingController _extraPercentController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
   List _charges = [];
@@ -40,6 +41,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
   @override
   void dispose() {
     _chargeController.dispose();
+    _extraPercentController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -95,6 +97,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
   void _resetForm() {
     _formKey.currentState?.reset();
     _chargeController.clear();
+    _extraPercentController.clear();
     setState(() {
       _editingChargeId = null;
       _selectedCityId = null;
@@ -108,6 +111,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
       _editingCityData = item['city'];
       _selectedCityId = item['city']?['id'];
       _chargeController.text = (item['charge'] ?? '').toString();
+      _extraPercentController.text = (item['extra_percent'] ?? '').toString();
     });
   }
 
@@ -134,18 +138,21 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     setState(() => _isSaving = true);
 
     final charge = _chargeController.text.trim();
+    final extraPercent = _extraPercentController.text.trim();
 
     Map<String, dynamic> result;
     if (_editingChargeId == null) {
       result = await _chargeService.addCourierCharge(
         cityId: _selectedCityId!,
         charge: charge,
+        extraPercent: extraPercent,
       );
     } else {
       result = await _chargeService.updateCourierCharge(
         chargeId: _editingChargeId!,
         cityId: _selectedCityId!,
         charge: charge,
+        extraPercent: extraPercent,
       );
     }
 
@@ -243,7 +250,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     );
   }
 
-  // ── Add / Edit form card ───────────────────────────────────
+  // Add / Edit form card
   Widget _buildFormCard() {
     return Container(
       width: double.infinity,
@@ -326,6 +333,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
                 hintText: 'Charge (PKR)',
                 prefixIcon: Icon(Icons.attach_money),
               ),
+
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Charge amount is required';
@@ -334,6 +342,26 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
                 if (parsed == null || parsed < 0) {
                   return 'Enter a valid amount';
                 }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _extraPercentController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              style: AppTextStyles.bodyLarge,
+              decoration: const InputDecoration(
+                hintText: 'Extra % per kg beyond first',
+                prefixIcon: Icon(Icons.percent),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty)
+                  return null; // optional, defaults to 0
+                final parsed = num.tryParse(value.trim());
+                if (parsed == null || parsed < 0)
+                  return 'Enter a valid percentage';
                 return null;
               },
             ),
@@ -449,7 +477,7 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
           ),
           const SizedBox(width: 12),
 
-          // City name + charge amount.
+          // City name + charge amount
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -467,6 +495,14 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.darkGreen.withOpacity(0.75),
                     fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '+${item['extra_percent'] ?? 0}% per extra kg',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.darkGreen,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
