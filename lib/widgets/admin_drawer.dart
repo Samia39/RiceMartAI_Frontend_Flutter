@@ -34,7 +34,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
   }
 
   void _navigate(BuildContext context, VoidCallback action) {
-    Navigator.pop(context);
+    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      Scaffold.maybeOf(context)?.closeDrawer();
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       action();
     });
@@ -72,7 +74,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     icon: Icons.dashboard,
                     title: "Dashboard",
                     onTap: () {
-                      Navigator.pop(context);
+                      if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      Scaffold.maybeOf(context)?.closeDrawer();
+    }
                       Get.find<AdminShellController>().goToTab(
                         AdminTab.dashboard,
                       );
@@ -84,7 +88,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   icon: Icons.pending_actions,
                   title: "Pending Shops",
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      Scaffold.maybeOf(context)?.closeDrawer();
+    }
                     Get.find<AdminShellController>().goToShopsTab(0);
                   },
                 ),
@@ -94,7 +100,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   icon: Icons.verified,
                   title: "Approved Shops",
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      Scaffold.maybeOf(context)?.closeDrawer();
+    }
                     Get.find<AdminShellController>().goToShopsTab(1);
                   },
                 ),
@@ -105,7 +113,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     icon: Icons.shopping_bag,
                     title: "Orders",
                     onTap: () {
-                      Navigator.pop(context);
+                      if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      Scaffold.maybeOf(context)?.closeDrawer();
+    }
                       Get.find<AdminShellController>().goToTab(AdminTab.orders);
                     },
                   ),
@@ -115,7 +125,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     icon: Icons.pending_actions,
                     title: "Payment Approvals",
                     onTap: () {
-                      Navigator.pop(context);
+                      if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      Scaffold.maybeOf(context)?.closeDrawer();
+    }
                       Get.find<AdminShellController>().goToTab(
                         AdminTab.payments,
                       );

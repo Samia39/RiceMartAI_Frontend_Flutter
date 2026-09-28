@@ -340,6 +340,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (confirmed != true) return;
 
+    if (paymentMethod == "card") {
+      Get.snackbar(
+        "Test Environment",
+        "Stripe is currently in demo mode. Please select Cash/Easypaisa to place an order. Card payments will be available in the future.",
+        snackPosition: SnackPosition.TOP,
+        duration: const Duration(seconds: 5),
+      );
+      return;
+    }
+
     // =========================
     // CONVERT CART FOR API
     // =========================
