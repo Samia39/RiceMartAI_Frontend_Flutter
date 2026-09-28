@@ -34,7 +34,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
   }
 
   void _navigate(BuildContext context, VoidCallback action) {
-    Navigator.pop(context);
+    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+      Scaffold.maybeOf(context)?.closeDrawer();
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       action();
     });
@@ -72,53 +74,67 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     icon: Icons.dashboard,
                     title: "Dashboard",
                     onTap: () {
-                      Navigator.pop(context);
+                      if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                        Scaffold.maybeOf(context)?.closeDrawer();
+                      }
                       Get.find<AdminShellController>().goToTab(
                         AdminTab.dashboard,
                       );
                     },
                   ),
 
+                // PENDING SHOPS
                 drawerItem(
                   icon: Icons.pending_actions,
                   title: "Pending Shops",
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                      Scaffold.maybeOf(context)?.closeDrawer();
+                    }
                     Get.find<AdminShellController>().goToShopsTab(0);
                   },
                 ),
 
+                // APPROVED SHOPS
                 drawerItem(
                   icon: Icons.verified,
                   title: "Approved Shops",
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                      Scaffold.maybeOf(context)?.closeDrawer();
+                    }
                     Get.find<AdminShellController>().goToShopsTab(1);
                   },
                 ),
 
+                // ORDERS
                 if (PermissionService.hasPermission('view all orders'))
                   drawerItem(
                     icon: Icons.shopping_bag,
                     title: "Orders",
                     onTap: () {
-                      Navigator.pop(context);
+                      if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                        Scaffold.maybeOf(context)?.closeDrawer();
+                      }
                       Get.find<AdminShellController>().goToTab(AdminTab.orders);
                     },
                   ),
-
+                // PAYMENT APPROVALS
                 if (PermissionService.hasPermission('view all payments'))
                   drawerItem(
                     icon: Icons.pending_actions,
                     title: "Payment Approvals",
                     onTap: () {
-                      Navigator.pop(context);
+                      if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                        Scaffold.maybeOf(context)?.closeDrawer();
+                      }
                       Get.find<AdminShellController>().goToTab(
                         AdminTab.payments,
                       );
                     },
                   ),
 
+                //categories
                 drawerItem(
                   icon: Icons.category,
                   title: "Manage Categories",
@@ -129,6 +145,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   },
                 ),
 
+                // USER MANAGEMENT
                 ExpansionTile(
                   leading: const Icon(
                     Icons.admin_panel_settings,
@@ -143,6 +160,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ),
                   childrenPadding: const EdgeInsets.only(left: 20),
                   children: [
+                    // USERS
                     ListTile(
                       leading: const Icon(
                         Icons.people,
@@ -156,6 +174,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                       },
                     ),
 
+                    // ROLES
                     ListTile(
                       leading: const Icon(
                         Icons.badge,
@@ -169,6 +188,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                       },
                     ),
 
+                    // ASSIGN PERMISSIONS
                     ListTile(
                       leading: const Icon(
                         Icons.lock_open,
@@ -190,6 +210,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ],
                 ),
 
+                // COURIER MANAGEMENT
                 ExpansionTile(
                   leading: const Icon(
                     Icons.local_shipping,
@@ -204,6 +225,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ),
                   childrenPadding: const EdgeInsets.only(left: 20),
                   children: [
+                    // CITY SCREEN
                     ListTile(
                       leading: const Icon(
                         Icons.location_city,
@@ -216,7 +238,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                         });
                       },
                     ),
-
+                    // COURIER CHARGES
                     ListTile(
                       leading: const Icon(
                         Icons.attach_money,
@@ -232,6 +254,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ],
                 ),
 
+                // PAYMENT SETTINGS
                 drawerItem(
                   icon: Icons.payment,
                   title: "Payment Settings",
@@ -242,6 +265,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   },
                 ),
 
+                // SELLER PAYOUTS
                 drawerItem(
                   icon: Icons.account_balance_wallet,
                   title: "Seller Payouts",
@@ -252,6 +276,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   },
                 ),
 
+                // COMPLAINTS
                 drawerItem(
                   icon: Icons.report_problem,
                   title: "Complaints",
@@ -262,6 +287,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   },
                 ),
 
+                // SETTINGS
                 drawerItem(
                   icon: Icons.person,
                   title: "profile",
@@ -284,6 +310,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
             ),
           ),
 
+          // LOGOUT
           const Divider(height: 1),
           drawerItem(
             icon: Icons.logout,

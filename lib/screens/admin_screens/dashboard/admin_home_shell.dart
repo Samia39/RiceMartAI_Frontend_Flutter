@@ -94,12 +94,14 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+
     if (_visibleTabs.isEmpty) {
       return Container(
         decoration: AppDecorations.gradientBackground,
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          drawer: const AdminDrawer(),
+          drawer: isDesktop ? null : const AdminDrawer(),
           appBar: AppBar(title: const Text("Admin")),
           body: const Center(
             child: Padding(
@@ -114,11 +116,18 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
       );
     }
 
+    Widget bodyContent = Obx(
+      () => IndexedStack(
+        index: _selectedIndex,
+        children: _visibleTabs.map((t) => t.page).toList(),
+      ),
+    );
+
     return Container(
       decoration: AppDecorations.gradientBackground,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        drawer: const AdminDrawer(),
+        drawer: isDesktop ? null : const AdminDrawer(),
         appBar: AppBar(
           title: Obx(() => Text(_visibleTabs[_selectedIndex].title)),
           centerTitle: true,
@@ -157,13 +166,17 @@ class _AdminHomeShellState extends State<AdminHomeShell> {
               ),
           ],
         ),
-        body: Obx(
-          () => IndexedStack(
-            index: _selectedIndex,
-            children: _visibleTabs.map((t) => t.page).toList(),
-          ),
-        ),
-        bottomNavigationBar: _visibleTabs.length > 1 ? _buildBottomNav() : null,
+        body: isDesktop
+            ? Row(
+                children: [
+                  const SizedBox(width: 280, child: AdminDrawer()),
+                  Expanded(child: bodyContent),
+                ],
+              )
+            : bodyContent,
+        bottomNavigationBar: (!isDesktop && _visibleTabs.length > 1)
+            ? _buildBottomNav()
+            : null,
       ),
     );
   }
