@@ -41,7 +41,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Query Badge
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -78,7 +77,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 18),
 
-              // Rice Overview Card
               if (aiData["overview"] != null)
                 _sectionCard(
                   icon: Icons.info_outline,
@@ -91,7 +89,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // Rice Type & Origin
               if (aiData["rice_type"] != null || aiData["origin"] != null)
                 _sectionCard(
                   icon: Icons.grain,
@@ -112,7 +109,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // Best Uses
               if (aiData["best_uses"] != null)
                 _sectionCard(
                   icon: Icons.restaurant_menu,
@@ -125,7 +121,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // Nutritional Info
               if (aiData["nutrition"] != null)
                 _sectionCard(
                   icon: Icons.health_and_safety_outlined,
@@ -138,7 +133,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // Recipe
               if (aiData["recipe"] != null)
                 _sectionCard(
                   icon: Icons.menu_book_outlined,
@@ -179,7 +173,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // Storage Tips
               if (aiData["storage_tips"] != null)
                 _sectionCard(
                   icon: Icons.inventory_2_outlined,
@@ -192,7 +185,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Available Products
               if (!isSeller) ...[
                 Row(
                   children: [
@@ -256,7 +248,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
                         decoration: AppDecorations.card,
                         child: Row(
                           children: [
-                            // Icon container
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
@@ -275,7 +266,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 14),
-                            // Info
+
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,7 +300,7 @@ class AiRecommendationResultScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            // Shop info
+
                             Column(
                               children: [
                                 if (p["shop_name"] != null) ...[
@@ -352,9 +343,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
     );
   }
 
-  // =========================
-  // SECTION CARD WIDGET
-  // =========================
   Widget _sectionCard({
     required IconData icon,
     required String title,
@@ -393,9 +381,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
     );
   }
 
-  // =========================
-  // DETAIL ROW
-  // =========================
   Widget _detailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -416,9 +401,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
     );
   }
 
-  // =========================
-  // BULLET LIST
-  // =========================
   List<Widget> _buildBulletList(dynamic items) {
     if (items is List) {
       return items.map<Widget>((item) {
@@ -447,9 +429,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
     return [Text(items.toString(), style: AppTextStyles.bodyLarge)];
   }
 
-  // =========================
-  // NUMBERED LIST
-  // =========================
   List<Widget> _buildNumberedList(dynamic items) {
     if (items is List) {
       return items.asMap().entries.map<Widget>((entry) {
@@ -491,9 +470,6 @@ class AiRecommendationResultScreen extends StatelessWidget {
     return [Text(items.toString(), style: AppTextStyles.bodyLarge)];
   }
 
-  // =========================
-  // INFO BADGE
-  // =========================
   Widget _infoBadge(String text, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

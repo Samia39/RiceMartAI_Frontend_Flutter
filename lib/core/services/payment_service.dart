@@ -8,9 +8,6 @@ class PaymentService {
   final box = GetStorage();
   final String baseUrl = BaseUrl.url;
 
-  // =========================
-  // Get EasyPaisa / JazzCash numbers
-  // =========================
   Future<Map<String, dynamic>?> getPaymentSettings() async {
     try {
       final token = box.read("token");
@@ -35,9 +32,6 @@ class PaymentService {
     }
   }
 
-  // =========================
-  // Admin update payment settings
-  // =========================
   Future<Map<String, dynamic>> adminUpdatePaymentSettings({
     required String easypaisaNumber,
     String? easypaisaAccountName,
@@ -68,9 +62,6 @@ class PaymentService {
     }
   }
 
-  // =========================
-  // Get admin paymnets
-  // =========================
   Future<List> getAdminPayments() async {
     try {
       final token = box.read("token");
@@ -95,9 +86,6 @@ class PaymentService {
     }
   }
 
-  // =========================
-  // Update payment status by admin
-  // =========================
   Future<Map<String, dynamic>> updatePaymentStatus({
     required int paymentId,
     required String paymentStatus,
@@ -125,9 +113,6 @@ class PaymentService {
     }
   }
 
-  // =========================
-  // Create payment intenet for card
-  // =========================
   Future<Map<String, dynamic>> createStripePaymentIntent({
     required int orderId,
   }) async {

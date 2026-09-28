@@ -14,7 +14,6 @@ class AssignPermissionScreen extends StatefulWidget {
 class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
   final PermissionsController controller = Get.find<PermissionsController>();
 
-  // search for permission by name
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
@@ -62,7 +61,6 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
 
               child: Column(
                 children: [
-                  // ROLE DROPDOWN
                   DropdownButtonFormField<int>(
                     value: controller.selectedRoleId.value,
 
@@ -91,9 +89,6 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
                   Expanded(
                     child: Column(
                       children: [
-                        // =========================
-                        // AVAILABLE PERMISSIONS
-                        // =========================
                         Expanded(
                           flex: 3,
 
@@ -114,9 +109,6 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
 
                                   const SizedBox(height: 10),
 
-                                  // =========================
-                                  // SEARCH FIELD
-                                  // =========================
                                   TextField(
                                     controller: _searchController,
 
@@ -273,9 +265,6 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
 
                         const SizedBox(height: 16),
 
-                        // =========================
-                        // ASSIGNED PERMISSIONS
-                        // =========================
                         Expanded(
                           flex: 2,
                           child: Container(
@@ -382,9 +371,6 @@ class _AssignPermissionScreenState extends State<AssignPermissionScreen> {
 
                   const SizedBox(height: 20),
 
-                  // =========================
-                  // SAVE BUTTON
-                  // =========================
                   SizedBox(
                     width: double.infinity,
                     height: 55,

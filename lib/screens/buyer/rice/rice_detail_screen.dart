@@ -32,9 +32,6 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // =========================
-              // PRODUCT IMAGE
-              // =========================
               Container(
                 height: 280,
                 width: double.infinity,
@@ -91,21 +88,16 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 24),
 
-              // =========================
-              // PRODUCT INFO
-              // =========================
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: AppDecorations.card,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // PRODUCT NAME
                     Text(product["name"] ?? "", style: AppTextStyles.heading2),
 
                     const SizedBox(height: 16),
 
-                    // PRICE
                     Text(
                       "Rs ${product["price"]} / KG",
                       style: AppTextStyles.heading2.copyWith(
@@ -115,7 +107,6 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                     const SizedBox(height: 12),
 
-                    // STOCK
                     Text(
                       "Available Stock: ${product["stock"]} KG",
                       style: AppTextStyles.bodyLarge,
@@ -123,7 +114,6 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                     const SizedBox(height: 10),
 
-                    // CATEGORY
                     Text(
                       "Category: ${product["rice_category"]?["name"] ?? "Rice"}",
                       style: AppTextStyles.bodyLarge,
@@ -131,17 +121,12 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
                     const SizedBox(height: 24),
 
-                    // =========================
-                    // QUANTITY SECTION
-                    // =========================
                     Text("Quantity", style: AppTextStyles.heading4),
 
                     const SizedBox(height: 14),
 
                     Row(
                       children: [
-                        // MINUS BUTTON
-                        // MINUS BUTTON
                         IconButton(
                           onPressed: () {
                             final int baseQty =
@@ -161,7 +146,6 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                           ),
                         ),
 
-                        // QUANTITY BOX
                         Container(
                           width: 70,
                           padding: const EdgeInsets.symmetric(
@@ -226,7 +210,6 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
                           ),
                         ),
 
-                        // PLUS BUTTON
                         IconButton(
                           onPressed: () {
                             final int baseQty =
@@ -251,9 +234,6 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 30),
 
-              // =========================
-              // ADD TO CART BUTTON
-              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -277,14 +257,10 @@ class _RiceDetailScreenState extends State<RiceDetailScreen> {
 
               const SizedBox(height: 14),
 
-              // =========================
-              // GO TO SHOP BUTTON
-              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton.icon(
-                  // fix it to solve the reload shop problem
                   onPressed: () {
                     Get.toNamed(
                       "${AppRoutes.shopDetails}?id=${shop["id"]}",

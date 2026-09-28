@@ -80,7 +80,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     });
   }
 
-  // Cities available for selection in the dropdown
   List get _dropdownCities {
     final list = List<Map>.from(_availableCities);
     if (_editingCityData != null &&
@@ -250,7 +249,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     );
   }
 
-  // Add / Edit form card
   Widget _buildFormCard() {
     return Container(
       width: double.infinity,
@@ -293,11 +291,9 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
             ),
             const SizedBox(height: 16),
 
-            // City label
             Text('City', style: AppTextStyles.label),
             const SizedBox(height: 6),
 
-            // City dropdown
             DropdownButtonFormField<int>(
               initialValue: _selectedCityId,
               isExpanded: true,
@@ -319,7 +315,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Charge amount field.
             TextFormField(
               controller: _chargeController,
               keyboardType: const TextInputType.numberWithOptions(
@@ -385,7 +380,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     );
   }
 
-  // Search field
   Widget _buildSearchField() {
     return Container(
       decoration: AppDecorations.inputField,
@@ -403,7 +397,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
     );
   }
 
-  // Shows how many charges are currently in the filtered list
   Widget _buildCountRow() {
     final count = _filteredCharges.length;
     return Padding(
@@ -414,8 +407,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
       ),
     );
   }
-
-  // Courier charge list
 
   Widget _buildChargeList() {
     if (_filteredCharges.isEmpty) {
@@ -454,7 +445,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
       decoration: AppDecorations.card,
       child: Row(
         children: [
-          // Sequence number badge.
           Container(
             width: 28,
             height: 28,
@@ -473,7 +463,6 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
           ),
           const SizedBox(width: 12),
 
-          // City name + charge amount
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,14 +494,12 @@ class _CourierChargeScreenState extends State<CourierChargeScreen> {
             ),
           ),
 
-          // Edit button.
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(Icons.edit_outlined, size: 19, color: AppColors.info),
             onPressed: () => _startEdit(item),
           ),
 
-          // Delete button.
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(Icons.delete_outline, size: 19, color: AppColors.error),

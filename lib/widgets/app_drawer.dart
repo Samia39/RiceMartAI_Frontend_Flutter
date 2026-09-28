@@ -60,9 +60,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 ),
               ),
 
-              // =========================
-              // HOME TAB
-              // =========================
               drawerItem(
                 icon: Icons.home,
                 title: "Home",
@@ -72,9 +69,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // RICE TAB
-              // =========================
               drawerItem(
                 icon: Icons.rice_bowl,
                 title: "Rice Marketplace",
@@ -84,9 +78,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // SHOPS TAB
-              // =========================
               drawerItem(
                 icon: Icons.store,
                 title: "Shops",
@@ -96,9 +87,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // CART PAGE
-              // =========================
               drawerItem(
                 icon: Icons.shopping_cart,
                 title: "My Cart",
@@ -108,9 +96,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // PROFILE TAB
-              // =========================
               drawerItem(
                 icon: Icons.person,
                 title: "Profile",
@@ -120,9 +105,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // ORDERS PAGE
-              // =========================
               drawerItem(
                 icon: Icons.shopping_bag,
                 title: "My Orders",
@@ -132,9 +114,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // COMPLAINTS
-              // =========================
               drawerItem(
                 icon: Icons.report_problem,
                 title: "Complaints",
@@ -144,9 +123,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // NOTIFICATIONS
-              // =========================
               drawerItem(
                 icon: Icons.notifications,
                 title: "Notifications",
@@ -156,9 +132,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 },
               ),
 
-              // =========================
-              // LOGOUT
-              // =========================
               drawerItem(
                 icon: Icons.logout,
                 title: "Logout",

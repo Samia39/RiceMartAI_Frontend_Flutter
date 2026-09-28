@@ -59,10 +59,6 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
     return "http://ricemart.sandbox.pk/storage/$path";
   }
 
-  // =========================
-  // COMPACT INFO ROW
-  // =========================
-
   Widget _compactRow(IconData icon, String label, dynamic value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -88,10 +84,6 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
       ),
     );
   }
-
-  // =========================
-  // CNIC
-  // =========================
 
   Widget _cnicThumb(String label, String url) {
     return Expanded(
@@ -144,10 +136,6 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
       ),
     );
   }
-
-  // =========================
-  // PRODUCT TILE
-  // =========================
 
   Widget _productTile(Map<String, dynamic> product) {
     final imageUrl = ProductService.getImageUrl(product);
@@ -217,12 +205,8 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
     );
   }
 
-  // =========================
-  // REMOVE SELLER DIALOG
-  // =========================
-
   void _showRemoveDialog() {
-    final shop = widget.shop; // to solve error
+    final shop = widget.shop;
     final reasonController = TextEditingController();
 
     bool permanentBan = false;
@@ -313,9 +297,7 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                           try {
                             final result = await ShopService().removeSeller(
                               token: _token,
-                              shopId: int.parse(
-                                shop["id"].toString(),
-                              ), // <-- use local `shop`, not widget.shop
+                              shopId: int.parse(shop["id"].toString()),
                               reason: reason,
                               permanentlyBan: permanentBan,
                             );
@@ -377,10 +359,6 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
     );
   }
 
-  // =========================
-  // BUILD
-  // =========================
-
   @override
   Widget build(BuildContext context) {
     final shop = widget.shop;
@@ -411,9 +389,6 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // =====================================================
-                      // SHOP INFORMATION
-                      // =====================================================
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
@@ -493,9 +468,6 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
 
                       const SizedBox(height: 18),
 
-                      // =====================================================
-                      // PRODUCTS
-                      // =====================================================
                       Text(
                         "Products (${products.length})",
                         style: AppTextStyles.heading4,
@@ -521,18 +493,12 @@ class _ApprovedShopDetailScreenState extends State<ApprovedShopDetailScreen> {
                       else
                         Column(children: products.map(_productTile).toList()),
 
-                      // =====================================================
-                      // REVIEWS
-                      // =====================================================
                       const SizedBox(height: 24),
 
                       ShopReviewsSection(shopId: shopId),
 
                       const SizedBox(height: 24),
 
-                      // =====================================================
-                      // REMOVE SELLER
-                      // =====================================================
                       SizedBox(
                         width: double.infinity,
                         height: 52,

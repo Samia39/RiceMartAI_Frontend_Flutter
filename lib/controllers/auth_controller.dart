@@ -14,9 +14,6 @@ class AuthController extends GetxController {
 
   var isLoading = false.obs;
 
-  // ======================
-  // LOGIN
-  // ======================
   Future<void> login(String email, String password) async {
     isLoading.value = true;
 
@@ -70,9 +67,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // ======================
-  // REGISTER
-  // ======================
   Future<void> register(String name, String email, String password) async {
     isLoading.value = true;
 
@@ -110,9 +104,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // ======================
-  // LOAD USER
-  // ======================
   Future<void> loadUser() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -146,16 +137,10 @@ class AuthController extends GetxController {
     }
   }
 
-  // ======================
-  // HELPERS
-  // ======================
   bool hasRole(String role) => roles.contains(role);
 
   bool hasPermission(String permission) => permissions.contains(permission);
 
-  // ======================
-  // LOGOUT
-  // ======================
   Future<void> logout() async {
     final box = GetStorage();
     final currentToken = token.value.isNotEmpty
@@ -201,9 +186,6 @@ class AuthController extends GetxController {
     Get.offAllNamed('/login');
   }
 
-  // ======================
-  // REDIRECT
-  // ======================
   void redirectUser(Map data) {
     final roles = List<String>.from(data['roles'] ?? []);
     final hasShop = data['has_shop'] == true;

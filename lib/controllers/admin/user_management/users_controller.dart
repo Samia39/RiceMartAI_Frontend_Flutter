@@ -19,14 +19,9 @@ class UsersController extends GetxController {
 
   RxString selectedRole = ''.obs;
 
-  // to see all users from databse or filter by role
   RxString selectedRoleFilter = 'All Users'.obs;
 
   RxInt editingUserId = 0.obs;
-
-  // =========================
-  // LOAD USERS
-  // =========================
 
   Future<void> fetchUsers() async {
     try {
@@ -41,10 +36,6 @@ class UsersController extends GetxController {
       isLoading.value = false;
     }
   }
-
-  // =========================
-  // LOAD ROLES
-  // =========================
 
   Future<void> fetchRoles() async {
     try {
@@ -61,10 +52,6 @@ class UsersController extends GetxController {
       Get.snackbar("Error", "Failed to load roles");
     }
   }
-
-  // =========================
-  // CREATE USER
-  // =========================
 
   Future<void> createUser() async {
     try {
@@ -89,10 +76,6 @@ class UsersController extends GetxController {
     }
   }
 
-  // =========================
-  // SET EDIT USER
-  // =========================
-
   void setEditUser(dynamic user) {
     editingUserId.value = user['id'];
 
@@ -104,10 +87,6 @@ class UsersController extends GetxController {
       selectedRole.value = user['roles'][0]['name'];
     }
   }
-
-  // =========================
-  // UPDATE USER
-  // =========================
 
   Future<void> updateUser() async {
     try {
@@ -132,10 +111,6 @@ class UsersController extends GetxController {
     }
   }
 
-  // =========================
-  // DELETE USER
-  // =========================
-
   Future<void> deleteUser(int id) async {
     try {
       final response = await service.deleteUser(id);
@@ -151,10 +126,6 @@ class UsersController extends GetxController {
       Get.snackbar("Error", "Failed to delete user");
     }
   }
-
-  // =========================
-  // CLEAR
-  // =========================
 
   void clearFields() {
     nameController.clear();

@@ -46,9 +46,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
     fetchCategories();
   }
 
-  // =========================
-  // FETCH ALL PRODUCTS
-  // =========================
   Future<void> fetchProducts() async {
     final data = await ProductService().fetchAllProducts();
 
@@ -66,9 +63,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
     applyFilters();
   }
 
-  // =========================
-  // FETCH CATEGORIES for buyer
-  // =========================
   Future<void> fetchCategories() async {
     final data = await ProductService().fetchCategories();
 
@@ -80,9 +74,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
     });
   }
 
-  // =========================
-  // APPLY BOTH TEXT SEARCH + CATEGORY FILTER TOGETHER
-  // =========================
   void applyFilters() {
     final query = searchController.text.toLowerCase();
 
@@ -119,9 +110,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
     applyFilters();
   }
 
-  // =========================
-  // BROWSE BY CATEGORY ROW
-  // =========================
   Widget categoryBrowseRow() {
     if (categoriesLoading) {
       return const SizedBox(
@@ -206,9 +194,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
     );
   }
 
-  // =========================
-  // PRODUCT CARD
-  // =========================
   Widget productCard(Map<String, dynamic> product, double imageHeight) {
     final imageUrl = ProductService.getImageUrl(product);
 
@@ -373,10 +358,8 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
             children: [
               const SizedBox(height: 8),
 
-              // BROWSE BY CATEGORY
               categoryBrowseRow(),
 
-              // ACTIVE CATEGORY FILTER CHIP
               if (selectedCategoryId != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
@@ -424,7 +407,6 @@ class _AllRiceScreenState extends State<AllRiceScreen> {
                   ),
                 ),
 
-              // SEARCH BAR
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,

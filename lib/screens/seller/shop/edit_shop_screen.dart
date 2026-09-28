@@ -38,9 +38,6 @@ class _EditShopScreenState extends State<EditShopScreen> {
   Uint8List? newCnicFrontImage;
   Uint8List? newCnicBackImage;
 
-  // =========================
-  // LOAD SHOP DATA
-  // =========================
   @override
   void initState() {
     super.initState();
@@ -67,11 +64,13 @@ class _EditShopScreenState extends State<EditShopScreen> {
     return "$host/storage/$path";
   }
 
-  // =========================
-  // PICK REPLACEMENT CNIC IMAGE
-  // =========================
   Future<void> pickCnic(bool isFront) async {
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? file = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
 
     if (file != null) {
       final bytes = await file.readAsBytes();
@@ -86,9 +85,6 @@ class _EditShopScreenState extends State<EditShopScreen> {
     }
   }
 
-  // =========================
-  // UPDATE SHOP
-  // =========================
   Future<void> updateShop() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -144,9 +140,6 @@ class _EditShopScreenState extends State<EditShopScreen> {
     }
   }
 
-  // =========================
-  // INPUT FIELD
-  // =========================
   Widget inputField({
     required TextEditingController controller,
     required String hint,
@@ -179,9 +172,6 @@ class _EditShopScreenState extends State<EditShopScreen> {
     );
   }
 
-  // =========================
-  // CNIC IMAGE TILE
-  // =========================
   Widget cnicImageTile({
     required String label,
     required Uint8List? newImage,

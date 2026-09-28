@@ -57,7 +57,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search Label
               Text("What are you looking for?", style: AppTextStyles.heading3),
               const SizedBox(height: 6),
               Text(
@@ -66,7 +65,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Search Field
               Container(
                 decoration: AppDecorations.card,
                 padding: const EdgeInsets.all(16),
@@ -105,7 +103,6 @@ class _AiRecommendationScreenState extends State<AiRecommendationScreen> {
 
                     const SizedBox(height: 14),
 
-                    // Search Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,

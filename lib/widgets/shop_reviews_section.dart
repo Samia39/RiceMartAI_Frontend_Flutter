@@ -64,9 +64,6 @@ class _ShopReviewsSectionState extends State<ShopReviewsSection> {
         Text("Reviews ($totalReviews)", style: AppTextStyles.heading4),
         const SizedBox(height: 10),
 
-        // =========================
-        // AVERAGE RATING SUMMARY
-        // =========================
         if (totalReviews > 0)
           Container(
             width: double.infinity,
@@ -96,9 +93,6 @@ class _ShopReviewsSectionState extends State<ShopReviewsSection> {
 
         const SizedBox(height: 12),
 
-        // =========================
-        // INDIVIDUAL REVIEWS
-        // =========================
         if (reviews.isEmpty)
           Container(
             width: double.infinity,

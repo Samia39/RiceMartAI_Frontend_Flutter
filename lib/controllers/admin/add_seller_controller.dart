@@ -7,16 +7,10 @@ import '../../core/services/admin/admin_service.dart';
 class AddSellerController extends GetxController {
   final AdminService _adminService = AdminService();
 
-  // =========================
-  // ACCOUNT INFO
-  // =========================
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // =========================
-  // SHOP INFO
-  // =========================
   final shopNameController = TextEditingController();
   final ownerNameController = TextEditingController();
   final phoneController = TextEditingController();
@@ -25,9 +19,6 @@ class AddSellerController extends GetxController {
   final cnicController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  // =========================
-  // IMAGES
-  // =========================
   final Rx<XFile?> cnicFrontImage = Rx<XFile?>(null);
   final Rx<XFile?> cnicBackImage = Rx<XFile?>(null);
 
@@ -36,12 +27,22 @@ class AddSellerController extends GetxController {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> pickFrontImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
     if (picked != null) cnicFrontImage.value = picked;
   }
 
   Future<void> pickBackImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
     if (picked != null) cnicBackImage.value = picked;
   }
 
@@ -117,9 +118,6 @@ class AddSellerController extends GetxController {
     }
   }
 
-  // =========================
-  // CLEAR FORM after successful create
-  // =========================
   void clearFields() {
     nameController.clear();
     emailController.clear();

@@ -35,8 +35,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   String paymentMethod = "easypaisa";
 
-  // payment setting EasyPaisa / JazzCash numbers, admin-managed
-
   Map<String, dynamic>? paymentSettings;
   bool loadingPaymentSettings = true;
 
@@ -139,19 +137,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }).toList();
   }
 
-  // =========================
-  // SUBTOTAL
-  // =========================
   double get subtotal => Get.find<CartService>().totalPrice();
 
-  // =========================
-  // TOTAL (subtotal + delivery)
-  // =========================
   double get total => subtotal + deliveryCharge;
 
-  // =========================
-  // LOADING
-  // =========================
   bool isLoading = false;
 
   @override
@@ -188,9 +177,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-  // =========================
-  // LOAD PAYMENT SETTINGS
-  // =========================
   Future<void> _loadPaymentSettings() async {
     final settings = await PaymentService().getPaymentSettings();
 
@@ -202,14 +188,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
-  // =========================
-  // PICK IMAGE
-  // =========================
   Future<void> pickImage() async {
     try {
       final picker = ImagePicker();
 
-      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+      final XFile? file = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 50,
+        maxWidth: 800,
+        maxHeight: 800,
+      );
 
       if (file != null) {
         paymentImageBytes = await file.readAsBytes();
@@ -236,9 +224,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  // =========================
-  // EXTRACT LARAVEL VALIDATION ERRORS
-  // =========================
   String _extractErrorMessage(Map<String, dynamic> result) {
     final errors = result["errors"];
 
@@ -261,9 +246,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return result["message"] ?? "Checkout failed";
   }
 
-  // =========================
-  // PLACE ORDER
-  // =========================
   Future<void> placeOrder() async {
     int? orderId;
 
@@ -281,9 +263,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // =========================
-    // TRANSACTION ID REQUIRED
-    // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         transactionIdController.text.trim().isEmpty) {
       Get.snackbar(
@@ -294,9 +273,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // =========================
-    // SCREENSHOT REQUIRED
-    // =========================
     if ((paymentMethod == "easypaisa" || paymentMethod == "jazzcash") &&
         paymentImageBytes == null) {
       Get.snackbar(
@@ -307,9 +283,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // =========================
-    // EMPTY CART CHECK
-    // =========================
     if (cart.isEmpty) {
       Get.snackbar(
         "Error",
@@ -340,9 +313,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (confirmed != true) return;
 
-    // =========================
-    // CONVERT CART FOR API
-    // =========================
     List items = cart.map((item) {
       return {"product_id": item["id"], "quantity": item["quantity"]};
     }).toList();
@@ -377,9 +347,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         return;
       }
 
-      // =========================
-      // 2. IF CARD open Stripe's payment sheet using the new order's id
-      // =========================
       if (paymentMethod == "card") {
         orderId = result["order"]?["id"] ?? result["order_id"];
         // change for strip
@@ -432,24 +399,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         }
 
         // change for strip
+        await OrderService().cancelUnpaidOrder(orderId);
         _pendingCardOrderId = null;
         setState(() => isLoading = false);
 
-        Get.find<CartService>().clearCart();
-
         Get.snackbar(
-          "Success",
-          "Payment submitted — confirming your order...",
+          "Test Environment",
+          "This is a test Stripe environment. Orders cannot be placed and will be available in the future.",
           snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 5),
         );
-
-        Get.offAllNamed(AppRoutes.dashboard, arguments: {'tabIndex': 3});
         return;
       }
 
-      // =========================
-      // EASYPAISA / JAZZCASH
-      // =========================
       setState(() => isLoading = false);
 
       Get.find<CartService>().clearCart();
@@ -474,9 +436,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  // =========================
-  // SEND PAYMENT TO  dynamic number/account name per method
-  // =========================
   Widget _sendPaymentToSection() {
     if (loadingPaymentSettings) {
       return Container(
@@ -539,9 +498,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 700;
 
-            // =========================
-            // FORM FIELDS (name, phone, city, address)
-            // =========================
             final formFields = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -603,9 +559,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
             );
 
-            // =========================
-            // ORDER SUMMARY
-            // =========================
             final orderSummaryCard = Container(
               padding: const EdgeInsets.all(16),
               decoration: AppDecorations.card,
@@ -754,9 +707,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             );
 
-            // =========================
-            // PAYMENT METHOD SECTION
-            // =========================
             final paymentMethodSection = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -885,9 +835,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
             );
 
-            // =========================
-            // PLACE ORDER BUTTON
-            // =========================
             final placeOrderButton = SizedBox(
               height: 55,
               child: ElevatedButton(

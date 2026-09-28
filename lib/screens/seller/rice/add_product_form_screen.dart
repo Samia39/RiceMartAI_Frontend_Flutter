@@ -42,10 +42,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
     loadCategories();
   }
 
-  // =========================
-  // LOAD CATEGORIES
-  // =========================
-
   Future<void> loadCategories() async {
     try {
       final data = await ProductService().fetchCategories();
@@ -71,18 +67,15 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
     }
   }
 
-  // =========================
-  // PICK IMAGE
-  // =========================
-
   Future<void> pickImage() async {
     try {
       final picker = ImagePicker();
 
       final picked = await picker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 75,
-        maxWidth: 1200,
+        imageQuality: 50,
+        maxWidth: 800,
+        maxHeight: 800,
       );
 
       if (picked == null) {
@@ -107,17 +100,11 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
     }
   }
 
-  // =========================
-  // ADD PRODUCT
-  // =========================
-
   Future<void> addProduct() async {
-    // Validate form
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Validate image
     if (selectedImage == null) {
       setState(() {
         imageError = "Product image is required";
@@ -132,7 +119,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
       return;
     }
 
-    // Validate category
     if (selectedCategoryId == null) {
       Get.snackbar(
         "Required",
@@ -215,10 +201,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
     }
   }
 
-  // =========================
-  // REQUIRED LABEL
-  // =========================
-
   Widget requiredLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 7),
@@ -236,10 +218,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
       ),
     );
   }
-
-  // =========================
-  // INPUT FIELD
-  // =========================
 
   Widget inputField({
     required TextEditingController controller,
@@ -279,10 +257,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
       ],
     );
   }
-
-  // =========================
-  // CATEGORY FIELD
-  // =========================
 
   Widget categoryField() {
     return Column(
@@ -379,9 +353,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
       ],
     );
   }
-  // =========================
-  // IMAGE PICKER
-  // =========================
 
   Widget imagePickerField() {
     final hasError = imageError != null;
@@ -422,7 +393,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
                         child: Image.memory(selectedImage!, fit: BoxFit.cover),
                       ),
 
-                      // Remove image
                       Positioned(
                         top: 8,
                         left: 8,
@@ -453,7 +423,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
                         ),
                       ),
 
-                      // Change image
                       Positioned(
                         top: 8,
                         right: 8,
@@ -526,10 +495,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
     );
   }
 
-  // =========================
-  // DISPOSE
-  // =========================
-
   @override
   void dispose() {
     productNameController.dispose();
@@ -538,10 +503,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
     super.dispose();
   }
-
-  // =========================
-  // BUILD
-  // =========================
 
   @override
   Widget build(BuildContext context) {
@@ -578,7 +539,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
 
                         children: [
-                          // Required note
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -622,17 +582,14 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
                           const SizedBox(height: 18),
 
-                          // Image
                           imagePickerField(),
 
                           const SizedBox(height: 18),
 
-                          // Category
                           categoryField(),
 
                           const SizedBox(height: 16),
 
-                          // Product name
                           inputField(
                             controller: productNameController,
                             label: "Product Name",
@@ -642,7 +599,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
                           const SizedBox(height: 16),
 
-                          // Price
                           inputField(
                             controller: priceController,
                             label: "Price Per KG",
@@ -655,7 +611,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
                           const SizedBox(height: 16),
 
-                          // Stock
                           inputField(
                             controller: stockController,
                             label: "Stock KG",
@@ -668,7 +623,6 @@ class _AddProductFormScreenState extends State<AddProductFormScreen> {
 
                           const SizedBox(height: 24),
 
-                          // Add button
                           SizedBox(
                             height: 52,
 

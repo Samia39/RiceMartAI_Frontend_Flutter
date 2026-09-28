@@ -9,9 +9,8 @@ class AppRoutes {
   static const forgotpassword = "/forgot-password";
   static const accessDenied = "/access-denied";
 
-  // =========================
   // BUYER DASHBOARD
-  // =========================
+
   static const dashboard = "/dashboard";
   static const cart = "/cart";
   static const checkout = "/checkout";
@@ -31,12 +30,9 @@ class AppRoutes {
   static const customerNewComplaint = "/customer-complaints/new";
   static const customerComplaintDetail = "/customer-complaints/detail";
 
-  // =========================
   // Seller Dashboard
-  // =========================
   static const sellerDashboard = "/seller-dashboard";
 
-  // Seller Edit Shop
   static const editShop = "/edit-shop";
   static const myShop = "/my-shop";
   static const shopStatus = "/shop-status";
@@ -50,11 +46,10 @@ class AppRoutes {
   static const sellerComplaintDetail = "/seller/complaints/detail";
   static const sellerOrderDetail = "/seller/order-detail";
 
-  // =========================
   // ADMIN DASHBOARD
-  // =========================
+
   static const adminDashboard = "/admin-dashboard";
-  // Admin
+
   static const analytics = "/analytics";
   static const sellerApprovals = "/seller-approvals";
   static const approvedShops = "/approved-shops";
@@ -67,7 +62,7 @@ class AppRoutes {
   static const adminNotifications = "/admin-notifications";
   static const addSeller = "/add-seller";
   static const adminSearch = "/admin-search";
-  // User Management
+
   static const users = "/users";
   static const roles = "/roles";
   static const assignPermissions = "/assign-permissions";

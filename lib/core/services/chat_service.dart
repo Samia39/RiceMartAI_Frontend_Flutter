@@ -14,9 +14,6 @@ class ChatService {
     "Content-Type": "application/json",
   };
 
-  // =============================================
-  // Start conversation with shop
-  // =============================================
   Future<Map<String, dynamic>> startConversation({required int shopId}) async {
     final response = await http.post(
       Uri.parse("$baseUrl/conversations/start"),
@@ -27,9 +24,6 @@ class ChatService {
     return jsonDecode(response.body);
   }
 
-  // =============================================
-  // Fetch all conversations for current user
-  // =============================================
   Future<List<Map<String, dynamic>>> fetchConversations() async {
     final response = await http.get(
       Uri.parse("$baseUrl/conversations"),
@@ -43,9 +37,6 @@ class ChatService {
     return [];
   }
 
-  // =============================================
-  // Fetch messages for a conversation
-  // =============================================
   Future<List<Map<String, dynamic>>> fetchMessages({
     required int conversationId,
   }) async {
@@ -61,9 +52,6 @@ class ChatService {
     return [];
   }
 
-  // =============================================
-  // Send a message
-  // =============================================
   Future<Map<String, dynamic>?> sendMessage({
     required int conversationId,
     required String body,

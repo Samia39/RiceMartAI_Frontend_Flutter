@@ -19,7 +19,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _otpSent = false;
   bool _isLoading = false;
 
-  // STEP 1: send OTP to email
   Future<void> _sendOtp() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -45,7 +44,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
   }
 
-  // STEP 2: verify OTP and reset password
   Future<void> _resetPassword() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -110,7 +108,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                   SizedBox(height: verticalSpacing * 1.5),
 
-                  // EMAIL FIELD
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
@@ -126,7 +123,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // NEW PASSWORD FIELD
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
@@ -152,7 +148,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                   ),
 
-                  // OTP FIELD - only shows after OTP sent
                   if (_otpSent) ...[
                     SizedBox(height: verticalSpacing),
                     Container(
@@ -170,7 +165,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                   SizedBox(height: verticalSpacing * 1.5),
 
-                  // ACTION BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: buttonHeight,
@@ -186,7 +180,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // RESEND OTP link (only when OTP step is active)
                   if (_otpSent)
                     GestureDetector(
                       onTap: _isLoading ? null : _sendOtp,

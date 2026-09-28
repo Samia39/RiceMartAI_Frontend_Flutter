@@ -10,18 +10,10 @@ class AdminService {
 
   final box = GetStorage();
 
-  // =========================
-  // TOKEN HEADER
-  // =========================
-
   Map<String, String> get headers => {
     "Accept": "application/json",
     "Authorization": "Bearer ${box.read('token')}",
   };
-
-  // =========================
-  // CREATE SELLER + SHOP
-  // =========================
 
   Future<Map<String, dynamic>> createSeller({
     required String name,
@@ -80,10 +72,6 @@ class AdminService {
     return jsonDecode(responseData);
   }
 
-  // =========================
-  // PENDING SHOPS
-  // =========================
-
   Future<List<dynamic>> getPendingShops() async {
     final response = await http.get(
       Uri.parse("$baseUrl/pending-shops"),
@@ -92,10 +80,6 @@ class AdminService {
 
     return jsonDecode(response.body);
   }
-
-  // =========================
-  // APPROVED SHOPS
-  // =========================
 
   Future<List<dynamic>> getApprovedShops() async {
     final response = await http.get(
@@ -106,10 +90,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // APPROVE SHOP
-  // =========================
-
   Future<Map<String, dynamic>> approveShop(int shopId) async {
     final response = await http.post(
       Uri.parse("$baseUrl/shops/$shopId/approve"),
@@ -118,10 +98,6 @@ class AdminService {
 
     return jsonDecode(response.body);
   }
-
-  // =========================
-  // REJECT SHOP
-  // =========================
 
   Future<Map<String, dynamic>> rejectShop(int shopId) async {
     final response = await http.delete(
@@ -132,10 +108,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // GET USERS
-  // =========================
-
   Future<List<dynamic>> getUsers() async {
     final response = await http.get(
       Uri.parse("$baseUrl/users"),
@@ -145,10 +117,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // GET ROLES
-  // =========================
-
   Future<List<dynamic>> getRoles() async {
     final response = await http.get(
       Uri.parse("$baseUrl/roles"),
@@ -157,12 +125,6 @@ class AdminService {
 
     return jsonDecode(response.body);
   }
-
-  // for users
-
-  // =========================
-  // CREATE USER
-  // =========================
 
   Future<Map<String, dynamic>> createUser({
     required String name,
@@ -184,10 +146,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // UPDATE USER
-  // =========================
-
   Future<Map<String, dynamic>> updateUser({
     required int id,
     required String name,
@@ -203,10 +161,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // DELETE USER
-  // =========================
-
   Future<Map<String, dynamic>> deleteUser(int id) async {
     final response = await http.delete(
       Uri.parse("$baseUrl/users/$id"),
@@ -216,11 +170,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // for roles
-  // =========================
-  // GET ROLES
-  // =========================
-
   Future<List<dynamic>> getRolesManagement() async {
     final response = await http.get(
       Uri.parse("$baseUrl/roles-management"),
@@ -229,10 +178,6 @@ class AdminService {
 
     return jsonDecode(response.body);
   }
-
-  // =========================
-  // CREATE ROLE
-  // =========================
 
   Future<Map<String, dynamic>> createRole(String name) async {
     final response = await http.post(
@@ -244,10 +189,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // UPDATE ROLE
-  // =========================
-
   Future<Map<String, dynamic>> updateRole(int id, String name) async {
     final response = await http.put(
       Uri.parse("$baseUrl/roles-management/$id"),
@@ -258,10 +199,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // DELETE ROLE
-  // =========================
-
   Future<Map<String, dynamic>> deleteRole(int id) async {
     final response = await http.delete(
       Uri.parse("$baseUrl/roles-management/$id"),
@@ -271,10 +208,6 @@ class AdminService {
     return jsonDecode(response.body);
   }
 
-  // For Permissions
-  // =========================
-  // GET PERMISSIONS
-  // =========================
   Future<List<dynamic>> getPermissions() async {
     final response = await http.get(
       Uri.parse("$baseUrl/permissions"),
@@ -283,10 +216,6 @@ class AdminService {
 
     return jsonDecode(response.body);
   }
-
-  // =========================
-  // GET ROLE PERMISSIONS
-  // =========================
 
   Future<List<dynamic>> getRolePermissions(int roleId) async {
     final response = await http.get(
@@ -298,9 +227,6 @@ class AdminService {
     return data['permissions'];
   }
 
-  // =========================
-  // ASSIGN PERMISSIONS
-  // =========================
   Future<Map<String, dynamic>> assignPermissions({
     required int roleId,
     required List<int> permissions,
@@ -313,10 +239,6 @@ class AdminService {
 
     return jsonDecode(response.body);
   }
-
-  // =========================
-  // ADMIN DASHBOARD STATS
-  // =========================
 
   Future<Map<String, dynamic>> getAdminDashboardStats() async {
     final response = await http.get(

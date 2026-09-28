@@ -20,10 +20,6 @@ class RolesController extends GetxController {
     fetchRoles();
   }
 
-  // =========================
-  // FETCH ROLES
-  // =========================
-
   Future<void> fetchRoles() async {
     try {
       isLoading.value = true;
@@ -37,10 +33,6 @@ class RolesController extends GetxController {
       isLoading.value = false;
     }
   }
-
-  // =========================
-  // CREATE ROLE
-  // =========================
 
   Future<void> createRole() async {
     if (roleController.text.isEmpty) {
@@ -59,19 +51,11 @@ class RolesController extends GetxController {
     }
   }
 
-  // =========================
-  // SET EDIT
-  // =========================
-
   void setEditRole(dynamic role) {
     editingRoleId.value = role['id'];
 
     roleController.text = role['name'];
   }
-
-  // =========================
-  // UPDATE ROLE
-  // =========================
 
   Future<void> updateRole() async {
     final response = await service.updateRole(
@@ -89,10 +73,6 @@ class RolesController extends GetxController {
       fetchRoles();
     }
   }
-
-  // =========================
-  // DELETE ROLE
-  // =========================
 
   Future<void> deleteRole(int id) async {
     final response = await service.deleteRole(id);

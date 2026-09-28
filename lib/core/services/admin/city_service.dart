@@ -8,9 +8,6 @@ class CityService {
 
   final String baseUrl = BaseUrl.url;
 
-  // =========================
-  // GET ALL CITIES
-  // =========================
   Future<List> getCities() async {
     try {
       final token = box.read("token");
@@ -35,9 +32,6 @@ class CityService {
     }
   }
 
-  // =========================
-  // GET AVAILABLE CITIES
-  // =========================
   Future<List> getAvailableCities() async {
     try {
       final token = box.read("token");
@@ -62,9 +56,6 @@ class CityService {
     }
   }
 
-  // =========================
-  // ADD CITY
-  // =========================
   Future<Map<String, dynamic>> addCity({
     required String name,
     String? code,
@@ -88,9 +79,6 @@ class CityService {
     }
   }
 
-  // =========================
-  // UPDATE CITY
-  // =========================
   Future<Map<String, dynamic>> updateCity({
     required int cityId,
     required String name,
@@ -115,9 +103,6 @@ class CityService {
     }
   }
 
-  // =========================
-  // DELETE CITY
-  // =========================
   Future<Map<String, dynamic>> deleteCity(int cityId) async {
     try {
       final token = box.read("token");
@@ -136,9 +121,6 @@ class CityService {
     }
   }
 
-  // =========================
-  // GET CITIES WITH DELIVERY CHARGES
-  // =========================
   Future<List> getCitiesWithCharges() async {
     try {
       final response = await http.get(

@@ -22,7 +22,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     super.initState();
     fetchConversations();
 
-    // Poll every 5 seconds for new conversations unread counts
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       fetchConversations(silent: true);
     });
@@ -116,7 +115,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
 
                           const SizedBox(width: 12),
 
-                          // Name + last message
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +136,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
 
                           const SizedBox(width: 8),
 
-                          // Time + unread badge
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [

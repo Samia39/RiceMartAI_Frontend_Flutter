@@ -19,9 +19,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   static const String imageBaseUrl = "http://ricemart.sandbox.pk";
 
-  // =========================
-  // FILTERED LISTS FOR TABS
-  // =========================
   List get pendingPayments =>
       payments.where((p) => p["status"] == "pending").toList();
 
@@ -140,9 +137,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  // =========================
-  // PAYMENT STATUS COLOR (pending / paid / rejected)
-  // =========================
   Color statusColor(String status) {
     switch (status) {
       case "paid":
@@ -169,9 +163,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  // =========================
-  // STATUS CHIP
-  // =========================
   Widget statusChip(String status) {
     final color = statusColor(status);
 
@@ -188,9 +179,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  // =========================
-  // ORDER ITEMS LIST (product, shop, qty, price)
-  // =========================
   Widget itemsList(List items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,9 +215,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  // =========================
-  // BUILDS ONE TAB'S LIST (Pending / Approved / Rejected)
-  // =========================
   Widget buildPaymentList(List paymentsList) {
     if (paymentsList.isEmpty) {
       return Center(
@@ -287,9 +272,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                         const SizedBox(height: 10),
 
-                        // =========================
-                        // CUSTOMER + DELIVERY INFO
-                        // =========================
                         infoRow("Customer", order["customer_name"].toString()),
                         infoRow("Phone", order["phone"].toString()),
                         infoRow("City", (order["city"] ?? "-").toString()),
@@ -306,9 +288,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         Divider(color: AppColors.divider),
                         const SizedBox(height: 6),
 
-                        // =========================
-                        // ORDER ITEMS
-                        // =========================
                         Text("Items", style: AppTextStyles.label),
                         const SizedBox(height: 6),
                         itemsList(items),
@@ -317,9 +296,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         Divider(color: AppColors.divider),
                         const SizedBox(height: 6),
 
-                        // =========================
-                        // PRICE BREAKDOWN
-                        // =========================
                         infoRow(
                           "Subtotal",
                           "Rs ${subtotal.toStringAsFixed(0)}",
@@ -331,9 +307,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         Divider(color: AppColors.divider),
                         const SizedBox(height: 6),
 
-                        // =========================
-                        // PAYMENT INFO
-                        // =========================
                         infoRow("Method", p["payment_method"].toString()),
                         infoRow(
                           "Transaction",
@@ -471,9 +444,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // =========================
-    // TABS: Pending / Approved / Rejected
-    // =========================
     return DefaultTabController(
       length: 3,
       child: Column(
@@ -508,9 +478,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 }
 
-// =========================
-//  ZOOMABLE IMAGE VIEWER
-// =========================
 class _FullScreenImageViewer extends StatelessWidget {
   final String imageUrl;
 

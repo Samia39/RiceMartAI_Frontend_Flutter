@@ -80,9 +80,6 @@ class RiceService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // Fetch all rice
-  // =========================
   Future<List<Map<String, dynamic>>> fetchAllRice() async {
     final response = await http.get(
       Uri.parse("$baseUrl/all-rice"),

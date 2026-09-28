@@ -24,7 +24,6 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
   bool isLoading = false;
   String? imageSourceLabel;
 
-  // Camera
   CameraController? _cameraController;
   List<CameraDescription>? _cameras;
   bool _cameraOpen = false;
@@ -145,7 +144,9 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     try {
       final XFile? image = await picker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 85,
+        imageQuality: 50,
+        maxWidth: 800,
+        maxHeight: 800,
       );
       if (image != null) {
         setState(() {
@@ -172,7 +173,9 @@ class _AIDetectionScreenState extends State<AIDetectionScreen> {
     try {
       final XFile? image = await picker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 85,
+        imageQuality: 50,
+        maxWidth: 800,
+        maxHeight: 800,
       );
       if (image != null) {
         setState(() {

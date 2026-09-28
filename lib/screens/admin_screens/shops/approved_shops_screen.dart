@@ -69,7 +69,6 @@ class _ApprovedShopsScreenState extends State<ApprovedShopsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
 
                         children: [
-                          // SHOP NAME
                           Text(
                             shop["shop_name"],
 
@@ -78,7 +77,6 @@ class _ApprovedShopsScreenState extends State<ApprovedShopsScreen> {
 
                           const SizedBox(height: 14),
 
-                          // OWNER
                           Row(
                             children: [
                               const Icon(
@@ -100,7 +98,6 @@ class _ApprovedShopsScreenState extends State<ApprovedShopsScreen> {
 
                           const SizedBox(height: 10),
 
-                          // PHONE
                           Row(
                             children: [
                               const Icon(
@@ -122,7 +119,6 @@ class _ApprovedShopsScreenState extends State<ApprovedShopsScreen> {
 
                           const SizedBox(height: 10),
 
-                          // STATUS
                           Row(
                             children: [
                               const Icon(Icons.verified, color: Colors.green),

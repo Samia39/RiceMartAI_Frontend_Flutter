@@ -40,7 +40,9 @@ class _CustomerNewComplaintScreenState
 
     final picked = await picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 70,
+      imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
     );
 
     if (picked != null) {

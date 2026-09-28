@@ -59,7 +59,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       return;
     }
 
-    // Arguments were empty/lost
     final idFromUrl = Get.parameters['id'];
     final parsedId = idFromUrl != null ? int.tryParse(idFromUrl) : null;
 
@@ -108,9 +107,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
     });
   }
 
-  // =============================================
-  // Opens or creates a conversation with the shop
-  // =============================================
   Future<void> openChat() async {
     final id = shopId;
     if (id == null) {
@@ -209,9 +205,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // =========================
-                  // SHOP INFO CARD
-                  // =========================
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: AppDecorations.card,
@@ -243,9 +236,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
                   const SizedBox(height: 16),
 
-                  // =========================
-                  // CHAT WITH SELLER BUTTON
-                  // =========================
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -276,9 +266,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
                   const SizedBox(height: 24),
 
-                  // =========================
-                  // TITLE
-                  // =========================
                   Text("Available Products", style: AppTextStyles.heading3),
                   const SizedBox(height: 14),
 
@@ -325,7 +312,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // PRODUCT IMAGE
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(14),
                                   child: Container(
@@ -368,7 +354,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                 ),
                                 const SizedBox(height: 8),
 
-                                // PRICE + ADD TO CART
                                 Row(
                                   children: [
                                     Expanded(
@@ -435,9 +420,6 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
 
                   const SizedBox(height: 24),
 
-                  // =========================
-                  // SHOP REVIEWS
-                  // =========================
                   Text("Customer Reviews", style: AppTextStyles.heading3),
                   const SizedBox(height: 14),
                   ShopReviewsSection(shopId: shopId!),

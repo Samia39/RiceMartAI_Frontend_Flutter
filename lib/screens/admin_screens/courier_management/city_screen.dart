@@ -215,7 +215,6 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  //  Add / Edit form card
   Widget _buildFormCard() {
     return Container(
       width: double.infinity,
@@ -301,7 +300,6 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  //  Search field
   Widget _buildSearchField() {
     return Container(
       decoration: AppDecorations.inputField,
@@ -330,7 +328,6 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  // City list
   Widget _buildCityList() {
     if (_filteredCities.isEmpty) {
       return Container(
@@ -355,7 +352,6 @@ class _CityScreenState extends State<CityScreen> {
     );
   }
 
-  // A single city row
   Widget _buildCityCard(Map city, int index) {
     return Container(
       width: double.infinity,
@@ -381,7 +377,6 @@ class _CityScreenState extends State<CityScreen> {
           ),
           const SizedBox(width: 12),
 
-          // City name + code
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,14 +402,12 @@ class _CityScreenState extends State<CityScreen> {
             ),
           ),
 
-          // Edit button
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(Icons.edit_outlined, size: 19, color: AppColors.info),
             onPressed: () => _startEdit(city),
           ),
 
-          // Delete button
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(Icons.delete_outline, size: 19, color: AppColors.error),

@@ -25,17 +25,12 @@ class _CartScreenState extends State<CartScreen> {
     loadCart();
   }
 
-  // LOAD CART
-
   void loadCart() {
     cart = Get.find<CartService>().getCart();
     total = Get.find<CartService>().totalPrice();
     setState(() {});
   }
 
-  // =========================
-  // REMOVE ITEM
-  // =========================
   void removeItem(int riceId) {
     Get.find<CartService>().removeItem(riceId);
     loadCart();
@@ -46,9 +41,6 @@ class _CartScreenState extends State<CartScreen> {
     ).showSnackBar(const SnackBar(content: Text("Item removed from cart")));
   }
 
-  // =========================
-  // INCREASE QUANTITY
-  // =========================
   void increaseQuantity(int index) {
     final int stock = int.tryParse(cart[index]["stock"].toString()) ?? 0;
     final controller = quantityControllers[cart[index]["id"]];
@@ -74,9 +66,6 @@ class _CartScreenState extends State<CartScreen> {
     widget.onCartUpdated?.call();
   }
 
-  // =========================
-  // DECREASE QUANTITY
-  // =========================
   void decreaseQuantity(int index) {
     final controller = quantityControllers[cart[index]["id"]];
     final int baseQty =
@@ -141,9 +130,6 @@ class _CartScreenState extends State<CartScreen> {
                 builder: (context, constraints) {
                   final isWide = constraints.maxWidth > 700;
 
-                  // =========================
-                  // SINGLE CART ITEM CARD
-                  // =========================
                   Widget buildItemCard(int index) {
                     final item = cart[index];
 
@@ -173,9 +159,6 @@ class _CartScreenState extends State<CartScreen> {
 
                           const SizedBox(height: 16),
 
-                          // =========================
-                          // QUANTITY CONTROLS
-                          // =========================
                           Row(
                             children: [
                               IconButton(
@@ -233,18 +216,12 @@ class _CartScreenState extends State<CartScreen> {
                     );
                   }
 
-                  // =========================
-                  // CART ITEMS LIST
-                  // =========================
                   final itemsList = ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: cart.length,
                     itemBuilder: (context, index) => buildItemCard(index),
                   );
 
-                  // =========================
-                  // TOTAL SECTION
-                  // =========================
                   final totalSection = Container(
                     padding: const EdgeInsets.all(20),
                     decoration: AppDecorations.card,

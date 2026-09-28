@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// ========================
 //  RICE MART APP THEME
-// ========================
 
 class AppColors {
   AppColors._();
@@ -33,9 +31,7 @@ class AppColors {
   static Color divider = darkGreen.withOpacity(0.15);
 }
 
-// ===================
 //  GRADIENTS
-// ===================
 
 class AppGradients {
   AppGradients._();
@@ -57,9 +53,7 @@ class AppGradients {
   );
 }
 
-// ======================
 //  TEXT STYLES
-// ======================
 
 class AppTextStyles {
   AppTextStyles._();
@@ -171,14 +165,12 @@ class AppTextStyles {
   );
 }
 
-// =========================
 //  DECORATION HELPERS
-// =========================
 
 class AppDecorations {
   AppDecorations._();
 
-  // Standard card — used by Admin, NotificationSettings, SellerHomeScreen, and HomeScreen.
+  // Standard card used by Admin, NotificationSettings, SellerHomeScreen, and HomeScreen.
   static BoxDecoration card = BoxDecoration(
     color: AppColors.cardFill,
     borderRadius: BorderRadius.circular(16),
@@ -219,9 +211,7 @@ class AppDecorations {
   );
 }
 
-// =========================
 //  BUTTON STYLE
-// =========================
 
 class AppButtonStyles {
   AppButtonStyles._();
@@ -247,9 +237,7 @@ class AppButtonStyles {
   );
 }
 
-// =========================
 //  MATERIAL THEME DATA
-// =========================
 
 ThemeData get appTheme {
   return ThemeData(

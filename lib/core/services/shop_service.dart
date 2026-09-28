@@ -7,9 +7,6 @@ import '../constants/app_icons.dart';
 class ShopService {
   static const String baseUrl = BaseUrl.url;
 
-  // =========================
-  // CREATE SHOP
-  // =========================
   Future<Map<String, dynamic>> createShop({
     required String token,
     required String cnic,
@@ -65,7 +62,6 @@ class ShopService {
     }
   }
 
-  // fetch pending shops for admin
   Future<List<Map<String, dynamic>>> fetchPendingShops({
     required String token,
   }) async {
@@ -84,7 +80,6 @@ class ShopService {
     return [];
   }
 
-  // approve shop
   Future approveShop({required String token, required int shopId}) async {
     final response = await http.post(
       Uri.parse("$baseUrl/shops/$shopId/approve"),
@@ -97,7 +92,6 @@ class ShopService {
     return jsonDecode(response.body);
   }
 
-  // reject shops
   Future<List<Map<String, dynamic>>> fetchRejectedShops({
     required String token,
   }) async {
@@ -113,7 +107,6 @@ class ShopService {
     return [];
   }
 
-  // fetch approved shops for customers
   Future<List<Map<String, dynamic>>> fetchApprovedShops() async {
     String token = GetStorage().read("token") ?? "";
 
@@ -132,7 +125,6 @@ class ShopService {
     return [];
   }
 
-  // reject shop
   Future rejectShop({
     required String token,
     required int shopId,
@@ -151,9 +143,6 @@ class ShopService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // Admin request Correction
-  // =========================
   Future<Map<String, dynamic>> requestCorrection({
     required String token,
     required int shopId,
@@ -176,9 +165,6 @@ class ShopService {
     }
   }
 
-  // =========================
-  // UPDATE SHOP
-  // =========================
   Future<Map<String, dynamic>> updateShop({
     required String token,
     required int shopId,
@@ -244,9 +230,6 @@ class ShopService {
     }
   }
 
-  // =========================
-  // SELLER Request shop deletion OTP
-  // =========================
   Future<Map<String, dynamic>> requestShopDeletion({
     required String token,
     required int shopId,
@@ -266,9 +249,6 @@ class ShopService {
     }
   }
 
-  // =========================
-  // SELLER CONFIRM SHOP DELETION VERIFY OTP
-  // =========================
   Future<Map<String, dynamic>> confirmShopDeletion({
     required String token,
     required int shopId,
@@ -291,7 +271,6 @@ class ShopService {
     }
   }
 
-  // get my shop details
   Future<Map<String, dynamic>> getMyShop(String token) async {
     try {
       final response = await http.get(
@@ -313,8 +292,6 @@ class ShopService {
       return {"success": false, "message": e.toString()};
     }
   }
-
-  // Update payout details
 
   Future<Map<String, dynamic>> updatePayoutDetails({
     required String token,
@@ -345,9 +322,6 @@ class ShopService {
     }
   }
 
-  // =========================
-  // Admin parmenetly remove seller
-  // =========================
   Future<Map<String, dynamic>> removeSeller({
     required String token,
     required int shopId,
@@ -383,9 +357,6 @@ class ShopService {
     }
   }
 
-  // =========================
-  // Admin fetch remove shops
-  // =========================
   Future<List<Map<String, dynamic>>> fetchRemovedShops({
     required String token,
   }) async {
@@ -401,9 +372,6 @@ class ShopService {
     return [];
   }
 
-  // =========================
-  // Fetch signle shop by ID
-  // =========================
   Future<Map<String, dynamic>?> fetchShopById(int shopId) async {
     final shops = await fetchApprovedShops();
     try {

@@ -60,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ================= TITLE =================
                   Text(
                     "Rice Mart",
                     style: AppTextStyles.heading1.copyWith(
@@ -70,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 25),
 
-                  // ================= WELCOME CARD =================
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
@@ -79,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Welcome 👋",
+                          "Welcome",
                           style: AppTextStyles.bodyLarge.copyWith(
                             color: AppColors.darkGreen.withOpacity(0.75),
                           ),
@@ -97,7 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 35),
 
-                  // ================= FEATURES TITLE ==================
                   Text(
                     "Features",
                     style: AppTextStyles.heading3.copyWith(
@@ -107,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ================= AI DETECTION =================
                   GestureDetector(
                     onTap: () {
                       Get.toNamed(AppRoutes.aiDetection);
@@ -121,7 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ================= RECOMMENDATION =================
                   GestureDetector(
                     onTap: () {
                       Get.toNamed(AppRoutes.airecommendation);
@@ -135,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 35),
 
-                  // ================= PRODUCTS SECTION =================
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -177,7 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 16),
 
-                  // ================= HORIZONTAL PRODUCT LIST =================
                   isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : productList.isEmpty
@@ -213,14 +206,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Container(
                                   width: 155,
 
-                                  // ================= EXACT ALL PRODUCTS CARD COLOR =================
                                   decoration: AppDecorations.card,
 
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // ================= PRODUCT IMAGE =================
                                       ClipRRect(
                                         borderRadius:
                                             const BorderRadius.vertical(
@@ -282,7 +273,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
 
-                                      // ================= PRODUCT INFO =================
                                       Padding(
                                         padding: const EdgeInsets.all(10),
                                         child: Column(
@@ -314,7 +304,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                             const SizedBox(height: 8),
 
-                                            // ================= PRICE + ADD TO CART =================
                                             Row(
                                               children: [
                                                 Expanded(

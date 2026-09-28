@@ -56,7 +56,12 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
 
   Future<void> pickProof() async {
     final picker = ImagePicker();
-    final file = await picker.pickImage(source: ImageSource.gallery);
+    final file = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
     if (file == null) return;
 
     final bytes = await file.readAsBytes();
@@ -73,7 +78,6 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
     });
   }
 
-  // Step 1: validate
   void goToConfirmStep() {
     if (isSubmitting) return;
 
@@ -105,7 +109,6 @@ class _PaySellerDialogState extends State<PaySellerDialog> {
     });
   }
 
-  // Step 2: send it.
   Future<void> submit() async {
     if (isSubmitting) return;
 

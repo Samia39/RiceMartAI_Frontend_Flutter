@@ -30,9 +30,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
     fetchAllOrders();
   }
 
-  // =========================
-  // FETCH BOTH LISTS
-  // =========================
   Future<void> fetchAllOrders() async {
     setState(() => isLoading = true);
 
@@ -79,10 +76,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                 controller: tabController,
 
                 children: [
-                  // ACTIVE ORDERS
                   buildOrderList(activeOrders),
 
-                  // HISTORY ORDERS
                   buildOrderList(historyOrders),
                 ],
               ),
@@ -90,9 +85,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
     );
   }
 
-  // =========================
-  // COMMON ORDER LIST
-  // =========================
   Widget buildOrderList(List orders) {
     if (orders.isEmpty) {
       return const Center(child: Text("No orders found"));
@@ -110,9 +102,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
           final order = orders[index];
           final items = order["items"] ?? [];
 
-          // =========================
-          // OVERALL STATUS
-          // =========================
           String overallStatus = "pending";
 
           if (order["payment_status"] == "rejected") {

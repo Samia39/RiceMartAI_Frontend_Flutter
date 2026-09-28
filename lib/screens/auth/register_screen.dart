@@ -47,7 +47,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Responsive values
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -73,7 +72,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   SizedBox(height: verticalSpacing * 2),
 
-                  // TITLE
                   Text(
                     "Create Account\nJoin Rice Mart Today!",
                     textAlign: TextAlign.center,
@@ -84,7 +82,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   SizedBox(height: verticalSpacing * 1.5),
 
-                  // NAME
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
@@ -99,7 +96,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // EMAIL
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
@@ -114,7 +110,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // PASSWORD
                   Container(
                     decoration: AppDecorations.inputField,
                     child: TextField(
@@ -141,7 +136,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   SizedBox(height: verticalSpacing * 1.5),
 
-                  // REGISTER BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: buttonHeight,
@@ -153,7 +147,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // LOGIN
                   GestureDetector(
                     onTap: () => Get.offNamed('/login'),
                     child: Text(

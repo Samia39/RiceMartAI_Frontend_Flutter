@@ -14,17 +14,11 @@ class AdminPaymentSettingsScreen extends StatefulWidget {
 
 class _AdminPaymentSettingsScreenState
     extends State<AdminPaymentSettingsScreen> {
-  // =========================
-  // CONTROLLERS
-  // =========================
   final easypaisaNumberController = TextEditingController();
   final easypaisaAccountNameController = TextEditingController();
   final jazzcashNumberController = TextEditingController();
   final jazzcashAccountNameController = TextEditingController();
 
-  // =========================
-  // STATE
-  // =========================
   bool isLoading = true;
   bool isSaving = false;
 
@@ -43,9 +37,6 @@ class _AdminPaymentSettingsScreenState
     super.dispose();
   }
 
-  // =========================
-  // LOAD CURRENT SETTINGS
-  // =========================
   Future<void> _loadSettings() async {
     final settings = await PaymentService().getPaymentSettings();
 
@@ -65,9 +56,6 @@ class _AdminPaymentSettingsScreenState
     });
   }
 
-  // =========================
-  // EXTRACT LARAVEL VALIDATION ERRORS
-  // =========================
   String _extractErrorMessage(Map<String, dynamic> result) {
     final errors = result["errors"];
 
@@ -90,9 +78,6 @@ class _AdminPaymentSettingsScreenState
     return result["message"] ?? "Failed to save payment settings";
   }
 
-  // =========================
-  // SAVE SETTINGS
-  // =========================
   Future<void> _saveSettings() async {
     if (easypaisaNumberController.text.trim().isEmpty ||
         jazzcashNumberController.text.trim().isEmpty) {
@@ -137,9 +122,6 @@ class _AdminPaymentSettingsScreenState
     }
   }
 
-  // =========================
-  // SECTION FOR ONE PAYMENT METHOD
-  // =========================
   Widget _methodSection({
     required String title,
     required TextEditingController numberController,

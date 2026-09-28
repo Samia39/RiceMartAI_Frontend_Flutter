@@ -27,9 +27,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
     fetchShops();
   }
 
-  // =========================
-  // FETCH APPROVED SHOPS
-  // =========================
   Future<void> fetchShops() async {
     final data = await ShopService().fetchApprovedShops();
 
@@ -42,9 +39,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
     });
   }
 
-  // =========================
-  // SEARCH SHOPS
-  // =========================
   void searchShops(String value) {
     if (value.isEmpty) {
       setState(() {
@@ -85,7 +79,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  // SEARCH BAR
                   Padding(
                     padding: const EdgeInsets.all(16),
 
@@ -107,7 +100,6 @@ class _ShopsScreenState extends State<ShopsScreen> {
 
                   if (filteredShops.isEmpty)
                     const Expanded(child: Center(child: Text("No shops found")))
-                  // SHOPS LIST
                   else
                     Expanded(
                       child: ListView.builder(

@@ -29,8 +29,6 @@ String _categoryLabel(String category) {
   }
 }
 
-// ZOOM VIEWER
-
 void _showZoomableImage(BuildContext context, String imageUrl) {
   Navigator.of(context).push(
     PageRouteBuilder(
@@ -102,7 +100,6 @@ class _ZoomableImagePage extends StatelessWidget {
   }
 }
 
-// image inside chat bubble
 class _AttachmentThumbnail extends StatelessWidget {
   final String imageUrl;
   const _AttachmentThumbnail({required this.imageUrl});
@@ -171,9 +168,6 @@ class _AttachmentThumbnail extends StatelessWidget {
   }
 }
 
-// =========================
-// MAIN SCREEN
-// =========================
 class AdminComplaintDetailScreen extends StatefulWidget {
   final int? complaintId;
 
@@ -261,7 +255,6 @@ class _AdminComplaintDetailScreenState
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  // Requester info card
                   Container(
                     margin: const EdgeInsets.fromLTRB(16, 12, 16, 6),
                     padding: const EdgeInsets.all(14),
@@ -295,7 +288,7 @@ class _AdminComplaintDetailScreenState
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  // Role badge
+
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -342,7 +335,6 @@ class _AdminComplaintDetailScreenState
                     ),
                   ),
 
-                  // Status changer
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
@@ -400,7 +392,6 @@ class _AdminComplaintDetailScreenState
                   ),
                   const SizedBox(height: 8),
 
-                  // Message thread
                   Expanded(
                     child: ListView(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -442,7 +433,7 @@ class _AdminComplaintDetailScreenState
                                 ),
                                 const SizedBox(height: 4),
                                 Text(m.message, style: AppTextStyles.bodyLarge),
-                                // Attachment (screenshot) preview + tap-to-zoom
+
                                 if (m.attachmentPath != null) ...[
                                   const SizedBox(height: 8),
                                   _AttachmentThumbnail(
@@ -457,7 +448,6 @@ class _AdminComplaintDetailScreenState
                     ),
                   ),
 
-                  // Reply box
                   if (_complaint!.status != 'resolved')
                     Container(
                       padding: const EdgeInsets.all(12),

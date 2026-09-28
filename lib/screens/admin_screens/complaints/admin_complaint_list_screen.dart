@@ -82,7 +82,6 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
     }
   }
 
-  // Role badge colors seller vs customer for admin
   Color _roleColor(String role) =>
       role == 'seller' ? AppColors.golden : AppColors.lightGreen;
 
@@ -236,7 +235,6 @@ class _AdminComplaintListScreenState extends State<AdminComplaintListScreen> {
                                                   const SizedBox(height: 5),
                                                   Row(
                                                     children: [
-                                                      // Role badge
                                                       Container(
                                                         padding:
                                                             const EdgeInsets.symmetric(

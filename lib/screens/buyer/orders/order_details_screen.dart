@@ -221,9 +221,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 );
               }),
 
-              // =========================
-              // CONFIRM RECEIVED per shop
-              // =========================
               if (allDelivered && !rejected) ...[
                 const SizedBox(height: 10),
                 if (!confirmed)

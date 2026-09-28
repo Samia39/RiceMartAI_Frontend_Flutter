@@ -132,7 +132,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
         return;
       }
 
-      // loadUser() saves
       box.write('roles', freshRoles);
       box.write('permissions', freshPerms);
       box.write('has_shop', res['has_shop']);
@@ -140,7 +139,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       box.write('shop_id', res['shop']?['id']);
       box.write('is_shop_approved', res['shop']?['is_approved'] == 1);
 
-      // controller
       if (Get.isRegistered<AuthController>()) {
         final c = Get.find<AuthController>();
         c.roles.value = freshRoles;
@@ -271,7 +269,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
 
   Widget _approvedCard() {
     if (_isExistingSeller) {
-      // Re-approval after an edit
       return _statusCard(
         icon: Icons.celebration,
         iconColor: AppColors.success,
@@ -288,7 +285,6 @@ class _ShopStatusScreenState extends State<ShopStatusScreen> {
       );
     }
 
-    // First-time approval customer becomes a seller.
     return _statusCard(
       icon: Icons.celebration,
       iconColor: AppColors.success,

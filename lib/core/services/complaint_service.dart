@@ -11,10 +11,6 @@ String attachmentUrl(String path) {
   return '$storageBase/storage/$path';
 }
 
-// =========================
-// Single complaint meassage
-// =========================
-
 class ComplaintMessage {
   final int id;
   final int senderId;
@@ -46,9 +42,6 @@ class ComplaintMessage {
   }
 }
 
-// =========================
-// A complaint filed by a user
-// =========================
 class Complaint {
   final int id;
   final int userId;
@@ -94,10 +87,6 @@ class Complaint {
   }
 }
 
-// =========================
-// SERVICE
-// =========================
-
 class ComplaintService {
   final box = GetStorage();
   final String baseUrl = BaseUrl.url;
@@ -111,7 +100,7 @@ class ComplaintService {
       return jsonDecode(response.body);
     } catch (e) {
       print(
-        '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
+        'Non-JSON response (status ${response.statusCode}): ${response.body}',
       );
       throw Exception(
         'Server returned an invalid response (status ${response.statusCode})',
@@ -119,7 +108,6 @@ class ComplaintService {
     }
   }
 
-  // Create a new complaint
   Future<Map<String, dynamic>> createComplaint({
     required String category,
     required String subject,
@@ -176,7 +164,6 @@ class ComplaintService {
     }
   }
 
-  // My complaints for seller and customer
   Future<List<Complaint>> getMyComplaints() async {
     try {
       final token = box.read("token");
@@ -195,12 +182,11 @@ class ComplaintService {
       }
       return [];
     } catch (e) {
-      print('⚠️ getMyComplaints failed: $e');
+      print('getMyComplaints failed: $e');
       return [];
     }
   }
 
-  // All complients for admin dashboard
   Future<List<Complaint>> getAllComplaints({String? status}) async {
     try {
       final token = box.read("token");
@@ -223,12 +209,11 @@ class ComplaintService {
       }
       return [];
     } catch (e) {
-      print('⚠️ getAllComplaints failed: $e');
+      print('getAllComplaints failed: $e');
       return [];
     }
   }
 
-  // Complient details
   Future<Complaint> getComplaintDetail(int id) async {
     final token = box.read("token");
 
@@ -243,7 +228,6 @@ class ComplaintService {
     throw Exception("Complaint not found");
   }
 
-  // add message reply the complient
   Future<Map<String, dynamic>> addMessage({
     required int complaintId,
     required String message,
@@ -300,7 +284,6 @@ class ComplaintService {
     }
   }
 
-  // Update status of complaint by superadmin
   Future<Map<String, dynamic>> updateStatus({
     required int complaintId,
     required String status,
@@ -327,7 +310,6 @@ class ComplaintService {
     }
   }
 
-  // Emergency contact details
   Future<Map<String, String>> getEmergencyContact() async {
     try {
       final token = box.read("token");
@@ -346,7 +328,7 @@ class ComplaintService {
       }
       return {"email": "", "phone": ""};
     } catch (e) {
-      print('⚠️ getEmergencyContact failed: $e');
+      print('getEmergencyContact failed: $e');
       return {"email": "", "phone": ""};
     }
   }

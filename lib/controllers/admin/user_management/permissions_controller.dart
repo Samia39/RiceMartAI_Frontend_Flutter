@@ -4,20 +4,12 @@ import '../../../core/services/admin/admin_service.dart';
 class PermissionsController extends GetxController {
   final AdminService _service = AdminService();
 
-  // =========================
-  // STATE VARIABLES
-  // =========================
-
   var roles = [].obs;
   var permissions = [].obs;
 
   RxnInt selectedRoleId = RxnInt();
 
   var selectedPermissions = <int>[].obs;
-
-  // =========================
-  // LOAD ROLES
-  // =========================
 
   Future<void> loadRoles() async {
     try {
@@ -29,10 +21,6 @@ class PermissionsController extends GetxController {
     }
   }
 
-  // =========================
-  // LOAD PERMISSIONS
-  // =========================
-
   Future<void> loadPermissions() async {
     try {
       final data = await _service.getPermissions();
@@ -42,10 +30,6 @@ class PermissionsController extends GetxController {
       Get.snackbar("Error", "Failed to load permissions");
     }
   }
-
-  // =========================
-  // LOAD ROLE PERMISSIONS
-  // =========================
 
   Future<void> loadRolePermissions(int roleId) async {
     try {
@@ -58,10 +42,6 @@ class PermissionsController extends GetxController {
     }
   }
 
-  // =========================
-  // HANDLE ROLE CHANGE
-  // =========================
-
   Future<void> onRoleChanged(int? roleId) async {
     selectedRoleId.value = roleId;
 
@@ -72,10 +52,6 @@ class PermissionsController extends GetxController {
     }
   }
 
-  // =========================
-  // TOGGLE PERMISSION
-  // =========================
-
   void togglePermission(int permissionId) {
     if (selectedPermissions.contains(permissionId)) {
       selectedPermissions.remove(permissionId);
@@ -85,10 +61,6 @@ class PermissionsController extends GetxController {
 
     update();
   }
-
-  // =========================
-  // ASSIGN PERMISSIONS
-  // =========================
 
   Future<String> assignPermissions() async {
     try {

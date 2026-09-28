@@ -9,8 +9,6 @@ class RolesScreen extends StatelessWidget {
 
   final controller = Get.put(RolesController());
 
-  // Add / Edit form
-
   Widget _formCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -189,8 +187,6 @@ class RolesScreen extends StatelessWidget {
     );
   }
 
-  // Delete confirmation
-
   void _confirmDelete(BuildContext context, dynamic roleId, String roleName) {
     showDialog(
       context: context,
@@ -230,8 +226,6 @@ class RolesScreen extends StatelessWidget {
       },
     );
   }
-
-  // Roles list
 
   Widget _listCard(BuildContext context) {
     return Obx(() {

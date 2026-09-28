@@ -43,9 +43,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
 
       child: Column(
         children: [
-          // =========================
-          // HEADER
-          // =========================
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: AppColors.darkGreen),
 
@@ -60,14 +57,10 @@ class _SellerDrawerState extends State<SellerDrawer> {
             ),
           ),
 
-          // =========================
-          // SCROLLABLE NAV ITEMS
-          // =========================
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // DASHBOARD TAB
                 drawerItem(
                   icon: Icons.dashboard,
                   title: "Dashboard",
@@ -77,7 +70,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // MY SHOP TAB
                 drawerItem(
                   icon: Icons.store,
                   title: "My Shop",
@@ -87,7 +79,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // MY RICE TAB
                 drawerItem(
                   icon: Icons.rice_bowl,
                   title: "My Rice",
@@ -97,7 +88,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // PAYOUT DETAILS
                 drawerItem(
                   icon: Icons.account_balance_wallet_outlined,
                   title: "Payout Details",
@@ -107,7 +97,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // PAYOUTS TAB
                 drawerItem(
                   icon: Icons.receipt_long,
                   title: "My Payouts",
@@ -117,7 +106,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // ORDERS TAB
                 drawerItem(
                   icon: Icons.shopping_bag,
                   title: "Orders",
@@ -127,7 +115,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // COMPLAINTS TAB
                 drawerItem(
                   icon: Icons.report_problem,
                   title: "Complaints",
@@ -137,7 +124,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // PROFILE TAB
                 drawerItem(
                   icon: Icons.person,
                   title: "Profile",
@@ -147,7 +133,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
                   },
                 ),
 
-                // NOTIFICATIONS
                 drawerItem(
                   icon: Icons.notifications,
                   title: "Notifications",
@@ -162,7 +147,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
 
           const Divider(height: 1),
 
-          // LOGOUT
           drawerItem(
             icon: Icons.logout,
             title: "Logout",
@@ -177,8 +161,6 @@ class _SellerDrawerState extends State<SellerDrawer> {
       ),
     );
   }
-
-  // DRAWER ITEM
 
   Widget drawerItem({
     required IconData icon,

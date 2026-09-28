@@ -45,7 +45,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ================= TITLE =================
                   Text(
                     "Rice Mart",
                     style: AppTextStyles.heading1.copyWith(
@@ -55,7 +54,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
                   const SizedBox(height: 25),
 
-                  // ================= WELCOME CARD =================
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
@@ -82,7 +80,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
                   const SizedBox(height: 35),
 
-                  // ================= FEATURES TITLE =================
                   Text(
                     "Features",
                     style: AppTextStyles.heading3.copyWith(
@@ -92,7 +89,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ================= AI DETECTION =================
                   GestureDetector(
                     onTap: () {
                       Get.toNamed(AppRoutes.aiDetection);
@@ -106,7 +102,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ================= RECOMMENDATION =================
                   GestureDetector(
                     onTap: () {
                       Get.toNamed(AppRoutes.airecommendation);
@@ -120,7 +115,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
                   const SizedBox(height: 35),
 
-                  // ================= SHOP ACTIONS TITLE =================
                   Text(
                     "Manage Shop",
                     style: AppTextStyles.heading3.copyWith(
@@ -130,7 +124,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ================= ADD PRODUCT BUTTON =================
                   GestureDetector(
                     onTap: () => widget.onTabChange?.call(1),
                     child: featureCard(
@@ -142,7 +135,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ================= MY SHOP BUTTON =================
                   GestureDetector(
                     onTap: () => widget.onTabChange?.call(2),
                     child: featureCard(

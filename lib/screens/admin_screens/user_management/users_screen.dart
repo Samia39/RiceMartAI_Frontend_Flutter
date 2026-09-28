@@ -9,8 +9,6 @@ class UsersScreen extends StatelessWidget {
 
   final controller = Get.put(UsersController());
 
-  // Role
-
   Color _roleColor(String role) {
     switch (role.toLowerCase()) {
       case 'admin':
@@ -27,8 +25,6 @@ class UsersScreen extends StatelessWidget {
     }
   }
 
-  // Count of users
-
   int _countFor(String role) {
     if (role == "All Users") return controller.users.length;
     return controller.users.where((u) {
@@ -39,8 +35,6 @@ class UsersScreen extends StatelessWidget {
       );
     }).length;
   }
-
-  // Add / Edit form
 
   Widget _formCard(BuildContext context) {
     return Container(
@@ -256,8 +250,6 @@ class UsersScreen extends StatelessWidget {
     );
   }
 
-  // Role filter
-
   Widget _roleFilters() {
     return Obx(() {
       final roleOptions = ["All Users", ...controller.roles];
@@ -337,8 +329,6 @@ class UsersScreen extends StatelessWidget {
     });
   }
 
-  // Delete confirmation
-
   void _confirmDelete(BuildContext context, dynamic userId, String userName) {
     showDialog(
       context: context,
@@ -378,8 +368,6 @@ class UsersScreen extends StatelessWidget {
       },
     );
   }
-
-  // User list
 
   Widget _listCard(BuildContext context) {
     return Obx(() {

@@ -12,9 +12,6 @@ class NotificationService {
     "Accept": "application/json",
   };
 
-  // =========================
-  // Fetch notifications
-  // =========================
   Future<List<Map<String, dynamic>>> fetchNotifications() async {
     try {
       final response = await http.get(
@@ -34,9 +31,6 @@ class NotificationService {
     }
   }
 
-  // =========================
-  // Unread notifications count
-  // =========================
   Future<int> fetchUnreadCount() async {
     try {
       final response = await http.get(
@@ -56,9 +50,6 @@ class NotificationService {
     }
   }
 
-  // =========================
-  // Mark one notification as a read
-  // =========================
   Future<bool> markAsRead(int id) async {
     try {
       final response = await http.put(
@@ -73,9 +64,6 @@ class NotificationService {
     }
   }
 
-  // =========================
-  // Mark all as read
-  // =========================
   Future<bool> markAllAsRead() async {
     try {
       final response = await http.put(
@@ -90,9 +78,6 @@ class NotificationService {
     }
   }
 
-  // =========================
-  // Clear all notifications
-  // =========================
   Future<bool> clearAll() async {
     try {
       final response = await http.delete(

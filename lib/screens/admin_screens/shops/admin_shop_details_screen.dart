@@ -11,9 +11,6 @@ class ShopDetailsScreen extends StatelessWidget {
   Map<String, dynamic> get shop => Map<String, dynamic>.from(_args['shop']);
   bool get readOnly => _args['readOnly'] == true;
 
-  // =========================
-  // STATUS COLOR (pending / approved / rejected)
-  // =========================
   Color _statusColor(String status) {
     switch (status) {
       case "approved":
@@ -68,7 +65,6 @@ class ShopDetailsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // HEADER
                       Container(
                         padding: const EdgeInsets.all(18),
                         decoration: AppDecorations.card,
@@ -122,7 +118,6 @@ class ShopDetailsScreen extends StatelessWidget {
                         ),
                       ),
 
-                      // PENDING CORRECTION NOTICE
                       if (hasCorrectionReason) ...[
                         const SizedBox(height: 14),
                         Container(
@@ -168,7 +163,6 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // SELLER INFO
                       _sectionTitle("Seller Information"),
 
                       _infoCard([
@@ -181,7 +175,6 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // SHOP INFO
                       _sectionTitle("Shop Information"),
 
                       _infoCard([
@@ -191,7 +184,6 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // CNIC FRONT
                       _sectionTitle("CNIC Document (Front)"),
 
                       _cnicTile(
@@ -202,7 +194,6 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // CNIC BACK
                       _sectionTitle("CNIC Document (Back)"),
 
                       _cnicTile(
@@ -213,7 +204,6 @@ class ShopDetailsScreen extends StatelessWidget {
 
                       const SizedBox(height: 30),
 
-                      // ACTIONS
                       if (!readOnly) ...[
                         Row(
                           children: [
@@ -611,7 +601,6 @@ class ShopDetailsScreen extends StatelessWidget {
   }
 }
 
-//  FULL-SCREEN CNIC VIEWER
 class _CnicFullScreenViewer extends StatelessWidget {
   final String imageUrl;
   final String heroTag;

@@ -14,7 +14,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   final commissionController = TextEditingController();
   final CommissionService _commissionService = CommissionService();
 
-  // Commission section state
   final bool _canManageCommission = PermissionService.hasPermission(
     'manage commission',
   );

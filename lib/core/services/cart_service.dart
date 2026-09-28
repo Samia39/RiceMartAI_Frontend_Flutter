@@ -33,14 +33,8 @@ class CartService extends GetxController {
     }
   }
 
-  // =========================
-  // READ CART
-  // =========================
   List getCart() => cart;
 
-  // =========================
-  // ADD TO CART
-  // =========================
   String addToCart({
     required Map<String, dynamic> rice,
     required int quantity,
@@ -84,17 +78,10 @@ class CartService extends GetxController {
     }
   }
 
-  // =========================
-  // REMOVE ITEM
-  // =========================
   void removeItem(int riceId) {
     cart.removeWhere((item) => item["id"] == riceId);
     _persist();
   }
-
-  // =========================
-  // UPDATE QUANTITY
-  // =========================
 
   int updateQuantity({required int riceId, required int quantity}) {
     final int index = cart.indexWhere((item) => item["id"] == riceId);
@@ -116,9 +103,6 @@ class CartService extends GetxController {
     return quantity;
   }
 
-  // =========================
-  // TOTAL PRICE
-  // =========================
   double totalPrice() {
     double total = 0;
 
@@ -133,9 +117,6 @@ class CartService extends GetxController {
     return total;
   }
 
-  // =========================
-  // CLEAR CART
-  // =========================
   void clearCart() {
     cart.clear();
     if (_currentUserId != null) {
@@ -143,9 +124,6 @@ class CartService extends GetxController {
     }
   }
 
-  // =========================
-  // PERSIST TO STORAGE
-  // =========================
   void _persist() {
     if (_currentUserId == null) return;
     box.write("cart_$_currentUserId", cart.toList());

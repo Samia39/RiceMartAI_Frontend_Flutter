@@ -8,9 +8,6 @@ import 'package:http_parser/http_parser.dart';
 class ProductService {
   final String baseUrl = BaseUrl.url;
 
-  // =========================
-  // Fetch active rice categories
-  // =========================
   Future<List<Map<String, dynamic>>> fetchCategories() async {
     final response = await http.get(
       Uri.parse("$baseUrl/rice-categories"),
@@ -24,9 +21,6 @@ class ProductService {
     return [];
   }
 
-  // =========================
-  // Add rice
-  // =========================
   Future<Map<String, dynamic>> addProduct({
     required String token,
     required int shopId,
@@ -72,9 +66,6 @@ class ProductService {
     }
   }
 
-  // =========================
-  // Fetch shop products
-  // =========================
   Future<List<Map<String, dynamic>>> fetchShopProducts({
     required int shopId,
   }) async {
@@ -90,9 +81,6 @@ class ProductService {
     return [];
   }
 
-  // =========================
-  // Fetch all products
-  // =========================
   Future<List<Map<String, dynamic>>> fetchAllProducts() async {
     final response = await http.get(
       Uri.parse("$baseUrl/all-products"),
@@ -106,9 +94,6 @@ class ProductService {
     return [];
   }
 
-  // =========================
-  // Delete product
-  // =========================
   Future deleteProduct({required String token, required int productId}) async {
     final response = await http.delete(
       Uri.parse("$baseUrl/products/$productId"),
@@ -118,9 +103,6 @@ class ProductService {
     return jsonDecode(response.body);
   }
 
-  // =========================
-  // Update product
-  // =========================
   Future updateProduct({
     required String token,
     required int productId,
@@ -165,9 +147,6 @@ class ProductService {
     }
   }
 
-  // =========================
-  // image URL from stored path
-  // =========================
   static String? getImageUrl(Map<String, dynamic> product) {
     final raw = product["image"];
     if (raw == null || raw.toString().trim().isEmpty) return null;

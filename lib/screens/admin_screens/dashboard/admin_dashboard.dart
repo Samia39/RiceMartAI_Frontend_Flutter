@@ -127,9 +127,6 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
                 onTap: () => Get.toNamed(AppRoutes.addSeller),
               ),
 
-            // =========================
-            // NOTIFICATIONS
-            // =========================
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: NotificationBell(iconColor: Colors.white, size: 24),
@@ -177,9 +174,6 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
     );
   }
 
-  // =========================
-  // STATS SECTION
-  // =========================
   Widget _statsSection() {
     if (_isLoading) {
       return Column(
@@ -383,9 +377,6 @@ class _AdminDashboardTabState extends State<AdminDashboardTab> {
     );
   }
 
-  // =========================
-  // QUICK STATS CARD
-  // =========================
   Widget quickStatCard(
     String title,
     String value, {

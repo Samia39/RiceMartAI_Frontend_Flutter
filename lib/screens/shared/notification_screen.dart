@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:ricemart_ai/controllers/admin/admin_shell_controller.dart';
+import 'package:ricemart_ai/core/services/admin/permission_service.dart';
 
 import '../../core/services/notification_service.dart';
 import '../../core/services/order_service.dart';
@@ -87,10 +88,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  // =========================
-  // ROLE HELPER
-  // =========================
-
   List<String> get _rawRoles {
     final stored = _box.read('roles');
     if (stored is List) {
@@ -121,9 +118,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   bool get _isSeller => _normalizedRoles.contains('seller');
 
-  // =========================
-  // MAIN TAP HANDLER
-  // =========================
+  bool _can(String permission) => PermissionService.hasPermission(permission);
+
+  void _denied() {
+    Get.snackbar("No access", "You don't have permission to open this.");
+  }
 
   Future<void> _onTapNotification(Map<String, dynamic> n) async {
     if (n['is_read'] != true) {
@@ -150,6 +149,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
       case 'payment_pending':
         if (_isAdmin) {
+          if (!_can('view all payments')) {
+            _denied();
+            break;
+          }
           if (Get.isRegistered<AdminShellController>()) {
             Get.find<AdminShellController>().goToTab(AdminTab.payments);
             Get.until((route) => route.isFirst);
@@ -164,13 +167,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         }
         break;
 
-      // Sent to admins when a payout becomes ready to release
       case 'payment_release':
       case 'payout_paid':
         _openPayouts();
         break;
 
       case 'shop_pending':
+        if (!_can('view all shops')) {
+          _denied();
+          break;
+        }
         if (Get.isRegistered<AdminShellController>()) {
           Get.find<AdminShellController>().goToShopsTab(0);
           Get.until((route) => route.isFirst);
@@ -188,7 +194,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         if (data['shop_status'] == 'rejected') {
           _showRejectionDialog(n);
         } else {
-          // approved only sellers get this type
           Get.offAllNamed(
             AppRoutes.sellerDashboard,
             arguments: {'tabIndex': 2},
@@ -209,10 +214,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  // =========================
-  // CHAT
-  // =========================
-
   void _openChat(Map<String, dynamic> data) {
     final conversationId = data['conversation_id'];
 
@@ -220,10 +221,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     Get.toNamed(AppRoutes.chat, arguments: {"conversation_id": conversationId});
   }
-
-  // =========================
-  // COMPLAINT
-  // =========================
 
   void _openComplaint(Map<String, dynamic> data) {
     final complaintId = data['complaint_id'];
@@ -236,12 +233,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         .trim();
 
     if (recipientRole == 'admin') {
+      if (!_can('view complaints')) {
+        _denied();
+        return;
+      }
       Get.toNamed(AppRoutes.adminComplaintDetail, arguments: complaintId);
     } else if (recipientRole == 'seller') {
       Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
     } else if (recipientRole == 'customer') {
       Get.toNamed(AppRoutes.customerComplaintDetail, arguments: complaintId);
     } else if (_isAdmin) {
+      if (!_can('view complaints')) {
+        _denied();
+        return;
+      }
       Get.toNamed(AppRoutes.adminComplaintDetail, arguments: complaintId);
     } else if (_isSeller) {
       Get.toNamed(AppRoutes.sellerComplaintDetail, arguments: complaintId);
@@ -249,10 +254,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       Get.toNamed(AppRoutes.customerComplaintDetail, arguments: complaintId);
     }
   }
-
-  // =========================
-  // ORDER
-  // =========================
 
   Future<void> _openOrder(Map<String, dynamic> data) async {
     final orderId = data['order_id'];
@@ -263,6 +264,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     try {
       if (_isAdmin) {
+        if (!_can('view all orders')) {
+          _denied();
+          return;
+        }
         final active = await _orderService.getAdminOrders();
         final history = await _orderService.getAdminOrderHistory();
 
@@ -294,7 +299,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Get.snackbar("Not found", "This order could not be loaded.");
         }
       } else {
-        // Buyer
         final active = await _orderService.getActiveOrders();
         final history = await _orderService.getOrderHistory();
 
@@ -315,21 +319,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  // =========================
-  // PAYOUT
-  // =========================
-
   void _openPayouts() {
     if (_isAdmin) {
+      if (!_can('view all payments')) {
+        _denied();
+        return;
+      }
       Get.toNamed(AppRoutes.adminPayouts);
     } else if (_isSeller) {
       Get.toNamed(AppRoutes.sellerPayouts);
     }
   }
-
-  // =========================
-  // REVIEW
-  // =========================
 
   Future<void> _openReview(Map<String, dynamic> data) async {
     final shopId = data['shop_id'];
@@ -342,6 +342,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     if (_isAdmin) {
+      if (!_can('view all shops')) {
+        _denied();
+        return;
+      }
       if (isNavigating) return;
       setState(() => isNavigating = true);
 

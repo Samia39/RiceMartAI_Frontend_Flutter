@@ -5,9 +5,6 @@ import '../constants/app_icons.dart';
 class AiRecommendationService {
   final String baseUrl = BaseUrl.url;
 
-  // =========================
-  // GET AI RECOMMENDATION
-  // =========================
   Future<Map<String, dynamic>> getRecommendation({
     required String query,
   }) async {
@@ -38,9 +35,6 @@ class AiRecommendationService {
     }
   }
 
-  // =========================
-  // PARSE AI DATA
-  // =========================
   AiRiceInfo? parseAiData(Map<String, dynamic> aiMap) {
     try {
       return AiRiceInfo.fromJson(aiMap);
@@ -49,9 +43,6 @@ class AiRecommendationService {
     }
   }
 
-  // =========================
-  // PARSE MATCHED PRODUCTS
-  // =========================
   List<MatchedProduct> parseProducts(List<dynamic> productList) {
     return productList
         .map((p) => MatchedProduct.fromJson(p as Map<String, dynamic>))
@@ -59,9 +50,6 @@ class AiRecommendationService {
   }
 }
 
-// =========================================================
-// AI Rice Info
-// =========================================================
 class AiRiceInfo {
   final String overview;
   final String riceType;
@@ -103,9 +91,6 @@ class AiRiceInfo {
   }
 }
 
-// =========================================================
-// Recipe
-// =========================================================
 class RiceRecipe {
   final String name;
   final List<String> ingredients;
@@ -126,9 +111,6 @@ class RiceRecipe {
   }
 }
 
-// =========================================================
-// Matched Product
-// =========================================================
 class MatchedProduct {
   final int id;
   final String name;

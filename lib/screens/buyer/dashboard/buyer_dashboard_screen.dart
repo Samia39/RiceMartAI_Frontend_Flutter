@@ -76,15 +76,12 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        // APP BAR
         appBar: AppBar(
           title: const Text("Marketplace"),
 
           actions: [
-            // NOTIFICATIONS
             const NotificationBell(iconColor: Colors.white, size: 24),
 
-            // CART ICON
             Stack(
               children: [
                 IconButton(
@@ -123,7 +120,6 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           ],
         ),
 
-        // DRAWER
         drawer: AppDrawer(
           onTabSelected: (index) {
             setState(() {
@@ -132,10 +128,8 @@ class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
           },
         ),
 
-        // BODY
         body: screens[currentIndex],
 
-        // BOTTOM NAVIGATION
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: AppColors.cream,
 

@@ -13,23 +13,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Service
   final _service = ProfileService();
 
-  // User data
   String _name = '';
   String _email = '';
   String _role = '';
   bool _isVerified = false;
   bool _hasShop = false;
 
-  // UI state
   bool _loadingProfile = true;
   bool _savingProfile = false;
   bool _showEditForm = false;
   bool _obscurePassword = true;
 
-  // Edit form controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -48,7 +44,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  // Fetch profile
   Future<void> _fetchProfile() async {
     if (_service.token.isEmpty) {
       Get.offAllNamed(AppRoutes.login);
@@ -82,7 +77,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Save profile
   Future<void> _saveProfile() async {
     final newName = _nameController.text.trim();
     final newEmail = _emailController.text.trim();
@@ -132,7 +126,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Logout
   void _logout() {
     Get.defaultDialog(
       title: "Logout",
@@ -147,7 +140,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Step 1: Request deletion OTP
   Future<void> _requestAccountDeletion() async {
     final confirmed = await Get.defaultDialog<bool>(
       title: "Delete Account",
@@ -177,7 +169,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Step 2: OTP dialog + confirm deletion
   void _showOtpDeletionDialog() {
     final otpController = TextEditingController();
 
@@ -299,7 +290,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Profile card
   Widget _buildProfileCard() {
     return Container(
       width: double.infinity,
@@ -362,7 +352,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Edit profile section
   Widget _buildEditSection() {
     return Container(
       decoration: AppDecorations.card,
@@ -394,7 +383,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const SizedBox(height: 12),
 
-                // Name
                 Container(
                   decoration: AppDecorations.inputField,
                   child: TextField(
@@ -409,7 +397,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Email only if not verified
                 if (!_isVerified) ...[
                   Container(
                     decoration: AppDecorations.inputField,
@@ -435,7 +422,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 12),
                 ],
 
-                // Password
                 Container(
                   decoration: AppDecorations.inputField,
                   child: TextField(
@@ -459,7 +445,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Save button
                 SizedBox(
                   height: 52,
                   child: ElevatedButton.icon(
@@ -485,7 +470,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Action buttons
   Widget _buildActionButtons() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -506,7 +490,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         const SizedBox(height: 15),
 
-        // Logout
         SizedBox(
           height: 55,
           child: ElevatedButton.icon(
@@ -518,7 +501,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 10),
 
-        // Delete Account
         SizedBox(
           height: 55,
           child: OutlinedButton.icon(

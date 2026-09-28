@@ -20,7 +20,7 @@ class AuthService {
       return jsonDecode(response.body);
     } catch (e) {
       print(
-        '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
+        'Non-JSON response (status ${response.statusCode}): ${response.body}',
       );
       throw Exception(
         'Server returned an invalid response (status ${response.statusCode})',
@@ -28,7 +28,6 @@ class AuthService {
     }
   }
 
-  // Login
   static Future<Map<String, dynamic>> login(
     String email,
     String password,
@@ -48,7 +47,6 @@ class AuthService {
     }
   }
 
-  // Register
   static Future<Map<String, dynamic>> register(
     String name,
     String email,
@@ -69,7 +67,6 @@ class AuthService {
     }
   }
 
-  // verify OTP
   static Future<Map<String, dynamic>> verifyOtp(
     String email,
     String otp,
@@ -89,7 +86,6 @@ class AuthService {
     }
   }
 
-  // Requests a new OTP to be sent
   static Future<Map<String, dynamic>> resendOtp(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/resend-otp'),
@@ -106,7 +102,6 @@ class AuthService {
     }
   }
 
-  // ME fetch the profile of login user
   static Future<Map<String, dynamic>> me(String token) async {
     final response = await http.get(
       Uri.parse('$baseUrl/me'),
@@ -124,7 +119,6 @@ class AuthService {
     }
   }
 
-  // forget password  sends OTP
   static Future<Map<String, dynamic>> forgotPassword(String email) async {
     final response = await http.post(
       Uri.parse('$baseUrl/forgot-password'),
@@ -141,7 +135,6 @@ class AuthService {
     }
   }
 
-  // Reset Password verifies OTP and update password
   static Future<Map<String, dynamic>> resetPassword(
     String email,
     String otp,
@@ -162,7 +155,6 @@ class AuthService {
     }
   }
 
-  // Update Profile
   static Future<Map<String, dynamic>> updateProfile(
     String token, {
     required String name,
@@ -200,7 +192,6 @@ class AuthService {
     }
   }
 
-  // Logout
   static Future<void> logout(String token) async {
     final response = await http.post(
       Uri.parse('$baseUrl/logout'),

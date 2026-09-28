@@ -33,11 +33,13 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
   bool isLoading = false;
 
-  // ---------------------------------------------------------
-  // Pick CNIC (Front or Back)
-  // ---------------------------------------------------------
   Future<void> pickCnic(bool isFront) async {
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? file = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
 
     if (file != null) {
       final bytes = await file.readAsBytes();
@@ -52,15 +54,11 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     }
   }
 
-  // ---------------------------------------------------------
-  // Create Shop
-  // ---------------------------------------------------------
   Future<void> createShop() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Both CNIC images are required
     if (cnicFrontImage == null || cnicBackImage == null) {
       Get.snackbar(
         "Required",
@@ -129,9 +127,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     }
   }
 
-  // ---------------------------------------------------------
-  // Input Field
-  // ---------------------------------------------------------
   Widget inputField({
     required TextEditingController controller,
     required String hint,
@@ -171,7 +166,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
           ),
         ),
 
-        // Input box
         Container(
           decoration: AppDecorations.inputField,
           child: TextFormField(
@@ -180,7 +174,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
             keyboardType: keyboard,
             inputFormatters: formatters,
 
-            // Only validate required fields
             validator: isRequired
                 ? (v) {
                     if (v == null || v.trim().isEmpty) {
@@ -219,9 +212,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
-  // ---------------------------------------------------------
-  // CNIC Image Tile
-  // ---------------------------------------------------------
   Widget cnicImageTile({
     required String label,
     required Uint8List? image,
@@ -230,7 +220,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // CNIC label with required *
         RichText(
           text: TextSpan(
             text: label,
@@ -291,9 +280,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
-  // ---------------------------------------------------------
-  // Section Card
-  // ---------------------------------------------------------
   Widget sectionCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
@@ -312,9 +298,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
-  // ---------------------------------------------------------
-  // Build
-  // ---------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -341,15 +324,11 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // ==================================================
-                        // CNIC INFORMATION
-                        // ==================================================
                         sectionCard(
                           title: "CNIC Information",
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // CNIC Number
                               inputField(
                                 controller: _cnicController,
                                 hint: "CNIC",
@@ -364,7 +343,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 15),
 
-                              // CNIC Front
                               cnicImageTile(
                                 label: "CNIC Front",
                                 image: cnicFrontImage,
@@ -373,7 +351,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 15),
 
-                              // CNIC Back
                               cnicImageTile(
                                 label: "CNIC Back",
                                 image: cnicBackImage,
@@ -385,15 +362,11 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                         const SizedBox(height: 18),
 
-                        // ==================================================
-                        // SHOP INFORMATION
-                        // ==================================================
                         sectionCard(
                           title: "Shop Information",
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // Shop Name
                               inputField(
                                 controller: _shopController,
                                 hint: "Shop Name",
@@ -402,7 +375,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
-                              // Owner Name
                               inputField(
                                 controller: _ownerController,
                                 hint: "Owner Name",
@@ -411,7 +383,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
-                              // Phone
                               inputField(
                                 controller: _phoneController,
                                 hint: "Phone",
@@ -421,7 +392,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
-                              // City
                               inputField(
                                 controller: _cityController,
                                 hint: "City",
@@ -430,7 +400,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
-                              // Address
                               inputField(
                                 controller: _addressController,
                                 hint: "Address",
@@ -439,7 +408,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                               const SizedBox(height: 12),
 
-                              // Description optional
                               inputField(
                                 controller: _descController,
                                 hint: "Description",
@@ -453,9 +421,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
 
                         const SizedBox(height: 24),
 
-                        // ==================================================
-                        // CREATE SHOP BUTTON
-                        // ==================================================
                         SizedBox(
                           height: 55,
                           child: ElevatedButton(
@@ -479,9 +444,6 @@ class _CreateShopScreenState extends State<CreateShopScreen> {
     );
   }
 
-  // ---------------------------------------------------------
-  // Dispose
-  // ---------------------------------------------------------
   @override
   void dispose() {
     _cnicController.dispose();

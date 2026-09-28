@@ -67,12 +67,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
     }
   }
 
-  // =========================
-  // DELETE SHOP
-  // =========================
-  // =========================
-  // STEP 1: REQUEST OTP
-  // =========================
   Future<void> _requestDeleteOtp() async {
     final box = GetStorage();
     String token = box.read("token") ?? "";
@@ -93,9 +87,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
     }
   }
 
-  // =========================
-  // STEP 2: ENTER OTP + CONFIRM DELETE
-  // =========================
   void _showOtpDialog(int shopId, String token) {
     final otpController = TextEditingController();
     bool isSending = false;
@@ -312,9 +303,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
               const SizedBox(height: 30),
 
-              // =========================
-              // EDIT SHOP
-              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -332,9 +320,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
 
               const SizedBox(height: 14),
 
-              // =========================
-              // DELETE SHOP
-              // =========================
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -362,9 +347,6 @@ class _MyShopScreenState extends State<MyShopScreen> {
                 ),
               ),
 
-              // =========================
-              // SHOP REVIEWS
-              // =========================
               if (shopId != null) ...[
                 const SizedBox(height: 30),
                 ShopReviewsSection(shopId: shopId!),

@@ -89,7 +89,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       Get.snackbar("Success", response['message'] ?? "OTP resent");
       startTimer();
 
-      // Clear all boxes and re-focus first box
       for (var c in otpControllers) {
         c.clear();
       }
@@ -172,7 +171,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 children: [
                   SizedBox(height: screenHeight * 0.06),
 
-                  // Lock icon
                   Container(
                     width: 80,
                     height: 80,
@@ -192,7 +190,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   SizedBox(height: screenHeight * 0.025),
 
-                  // Title
                   Text(
                     "Verify Your Email",
                     textAlign: TextAlign.center,
@@ -201,7 +198,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   const SizedBox(height: 10),
 
-                  // Subtitle shows the email
                   Text(
                     "We sent a 6-digit code to",
                     textAlign: TextAlign.center,
@@ -218,7 +214,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   SizedBox(height: screenHeight * 0.04),
 
-                  // OTP boxes
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(6, buildOtpBox),
@@ -226,7 +221,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   SizedBox(height: screenHeight * 0.04),
 
-                  // Verify button
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -244,7 +238,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   SizedBox(height: screenHeight * 0.025),
 
-                  // Resend OTP
                   secondsLeft > 0
                       ? RichText(
                           textAlign: TextAlign.center,
@@ -276,7 +269,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   SizedBox(height: screenHeight * 0.02),
 
-                  // Back to register
                   GestureDetector(
                     onTap: () => Get.back(),
                     child: Text(

@@ -32,10 +32,6 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
     }
   }
 
-  // =========================
-  // TAB SWITCH
-  // =========================
-
   void _switchTab(int index) {
     setState(() {
       currentIndex = index;
@@ -48,9 +44,6 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
 
     final shopStatus = box.read('shop_status');
 
-    // =========================
-    // SHOP PENDING STATE
-    // =========================
     if (shopStatus == 'pending') {
       return Scaffold(
         body: Center(
@@ -67,46 +60,23 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       );
     }
 
-    // =========================
-    // SCREENS
-    // =========================
-    //
-
     final List<Widget> screens = [
-      // =========================
-      // DASHBOARD
-      // =========================
       SellerHomeScreen(onTabChange: _switchTab),
 
-      // =========================
-      // MY RICE
-      // =========================
       PermissionService.hasPermission('create products')
           ? const AddRiceScreen()
           : const _NoAccess(),
 
-      // =========================
-      // MY SHOP
-      // =========================
       PermissionService.hasPermission('view own shop')
           ? const MyShopScreen()
           : const _NoAccess(),
 
-      // =========================
-      // CHAT
-      // =========================
       ConversationsScreen(),
 
-      // =========================
-      // ORDERS
-      // =========================
       PermissionService.hasPermission('view shop orders')
           ? const SellerOrdersScreen()
           : const _NoAccess(),
 
-      // =========================
-      // PROFILE
-      // =========================
       const ProfileScreen(),
     ];
 
@@ -116,30 +86,16 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
 
-        // =========================
-        // APP BAR
-        // =========================
         appBar: AppBar(
           title: const Text("Seller Dashboard"),
 
-          actions: const [
-            // =========================
-            // NOTIFICATIONS
-            // =========================
-            NotificationBell(iconColor: Colors.white, size: 24),
-          ],
+          actions: const [NotificationBell(iconColor: Colors.white, size: 24)],
         ),
 
-        // =========================
-        // DRAWER
-        // =========================
         drawer: SellerDrawer(onTabSelected: _switchTab),
 
         body: screens[currentIndex],
 
-        // =========================
-        // BOTTOM NAVIGATION
-        // =========================
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: currentIndex,
 
@@ -152,25 +108,19 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
           type: BottomNavigationBarType.fixed,
 
           items: const [
-            // HOME
             BottomNavigationBarItem(icon: Icon(AppIcons.home), label: "Home"),
 
-            // RICE
             BottomNavigationBarItem(icon: Icon(Icons.rice_bowl), label: "Rice"),
 
-            // MY SHOP
             BottomNavigationBarItem(icon: Icon(Icons.store), label: "My Shop"),
 
-            // CHAT
             BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
 
-            // ORDERS
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_bag),
               label: "Orders",
             ),
 
-            // PROFILE
             BottomNavigationBarItem(
               icon: Icon(AppIcons.profile),
               label: "Profile",
@@ -182,9 +132,6 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> {
   }
 }
 
-// =========================
-// NO ACCESS WIDGET
-// =========================
 class _NoAccess extends StatelessWidget {
   const _NoAccess();
 

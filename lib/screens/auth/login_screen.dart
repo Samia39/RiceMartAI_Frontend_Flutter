@@ -49,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   SizedBox(height: verticalSpacing * 2),
 
-                  // TITLE
                   Text(
                     "Welcome  to Rice Mart\nLogin to Continue!",
 
@@ -63,7 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   SizedBox(height: verticalSpacing * 1.5),
 
-                  // EMAIL FIELD
                   Container(
                     decoration: AppDecorations.inputField,
 
@@ -82,7 +80,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // PASSWORD FIELD
                   Container(
                     decoration: AppDecorations.inputField,
 
@@ -115,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   SizedBox(height: verticalSpacing * 1.5),
 
-                  // LOGIN BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: buttonHeight,
@@ -141,7 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   SizedBox(height: verticalSpacing),
 
-                  // REGISTER LINK
                   GestureDetector(
                     onTap: () => Get.toNamed('/register'),
 
@@ -159,7 +154,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: verticalSpacing),
                   SizedBox(height: verticalSpacing),
 
-                  // FORGOT PASSWORD LINK
                   GestureDetector(
                     onTap: () => Get.toNamed(AppRoutes.forgotpassword),
                     child: Text(

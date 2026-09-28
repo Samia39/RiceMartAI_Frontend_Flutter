@@ -21,9 +21,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
   int? shopId;
 
-  // =========================
-  // LOAD SHOP ID
-  // =========================
   Future<void> loadShopId() async {
     final box = GetStorage();
 
@@ -36,9 +33,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     }
   }
 
-  // =========================
-  // FETCH PRODUCTS
-  // =========================
   Future<void> fetchProducts() async {
     setState(() => isLoading = true);
 
@@ -50,9 +44,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     });
   }
 
-  // =========================
-  // DELETE PRODUCT
-  // =========================
   Future<void> deleteProduct(int productId) async {
     String token = GetStorage().read("token") ?? "";
 
@@ -63,9 +54,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     Get.snackbar("Deleted", "Product removed");
   }
 
-  // =========================
-  // EDIT PRODUCT
-  // =========================
   void editRiceDialog(Map<String, dynamic> product) {
     final editPriceController = TextEditingController(
       text: product["price"].toString(),
@@ -97,8 +85,9 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
                         final picker = ImagePicker();
                         final picked = await picker.pickImage(
                           source: ImageSource.gallery,
-                          imageQuality: 75,
-                          maxWidth: 1200,
+                          imageQuality: 50,
+                          maxWidth: 800,
+                          maxHeight: 800,
                         );
                         if (picked != null) {
                           final bytes = await picked.readAsBytes();
@@ -208,9 +197,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     );
   }
 
-  // =========================
-  // GO TO ADD PRODUCT FORM
-  // =========================
   Future<void> openAddProductForm() async {
     if (shopId == null) {
       Get.snackbar("Error", "No approved shop found");
@@ -227,9 +213,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
     }
   }
 
-  // =========================
-  // PRODUCT CARD
-  // =========================
   Widget productCard(Map<String, dynamic> product) {
     final imageUrl = ProductService.getImageUrl(product);
     final categoryName =
@@ -241,9 +224,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // =========================
-          // IMAGE
-          // =========================
           Container(
             width: double.infinity,
             height: 110,
@@ -264,9 +244,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
                   ),
           ),
 
-          // =========================
-          // DETAILS
-          // =========================
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
             child: Column(
@@ -300,9 +277,6 @@ class _AddRiceScreenState extends State<AddRiceScreen> {
 
           const Divider(height: 1),
 
-          // =========================
-          //  EDIT | DELETE
-          // =========================
           IntrinsicHeight(
             child: Row(
               children: [

@@ -24,9 +24,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
     fetchCategories();
   }
 
-  // =========================
-  // FETCH
-  // =========================
   Future<void> fetchCategories() async {
     setState(() => isLoading = true);
 
@@ -40,9 +37,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
     });
   }
 
-  // =========================
-  // TOGGLE STATUS
-  // =========================
   Future<void> toggleStatus(Map<String, dynamic> category, bool value) async {
     final token = GetStorage().read("token") ?? "";
 
@@ -60,9 +54,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
     }
   }
 
-  // =========================
-  // ADD / EDIT DIALOG
-  // =========================
   void openCategoryDialog({Map<String, dynamic>? existing}) {
     final nameController = TextEditingController(
       text: existing?["name"]?.toString() ?? "",
@@ -90,14 +81,14 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // IMAGE PICKER
                     GestureDetector(
                       onTap: () async {
                         final picker = ImagePicker();
                         final picked = await picker.pickImage(
                           source: ImageSource.gallery,
-                          imageQuality: 75,
-                          maxWidth: 1000,
+                          imageQuality: 50,
+                          maxWidth: 800,
+                          maxHeight: 800,
                         );
 
                         if (picked != null) {
@@ -159,7 +150,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
 
                     const SizedBox(height: 14),
 
-                    // NAME FIELD
                     Container(
                       decoration: AppDecorations.inputField,
                       child: TextField(
@@ -248,9 +238,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
     );
   }
 
-  // =========================
-  // CATEGORY CARD
-  // =========================
   Widget categoryCard(Map<String, dynamic> category) {
     final imageUrl = category["image_url"];
     final isActive = category["status"] == true;
@@ -274,7 +261,6 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                 : const Icon(Icons.rice_bowl, color: AppColors.darkGreen),
           ),
 
-          // NAME + STATUS
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -301,13 +287,11 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
             ),
           ),
 
-          // EDIT BUTTON
           IconButton(
             onPressed: () => openCategoryDialog(existing: category),
             icon: const Icon(Icons.edit_outlined, color: AppColors.darkGreen),
           ),
 
-          // STATUS SWITCH
           Switch(
             value: isActive,
             activeColor: AppColors.darkGreen,

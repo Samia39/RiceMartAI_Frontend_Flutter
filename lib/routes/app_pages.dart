@@ -95,9 +95,7 @@ import '../screens/chats/conversation.dart';
 
 class AppPages {
   static final routes = [
-    // =========================================================
     // SPLASH / AUTH
-    // =========================================================
     GetPage(name: AppRoutes.splash, page: () => SplashScreen()),
 
     GetPage(name: AppRoutes.login, page: () => LoginScreen()),
@@ -114,17 +112,13 @@ class AppPages {
       page: () => const ForgotPasswordScreen(),
     ),
 
-    // =========================================================
     // ACCESS DENIED
-    // =========================================================
     GetPage(
       name: AppRoutes.accessDenied,
       page: () => const AccessDeniedScreen(),
     ),
 
-    // =========================================================
-    // BUYER / CUSTOMER ROUTES
-    // =========================================================
+    // CUSTOMER ROUTES
     GetPage(
       name: AppRoutes.dashboard,
       page: () => const BuyerDashboardScreen(),
@@ -200,9 +194,7 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
 
-    // =========================================================
     // CUSTOMER COMPLAINTS
-    // =========================================================
     GetPage(
       name: AppRoutes.customerComplaints,
       page: () => const CustomerComplaintListScreen(),
@@ -221,9 +213,7 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
 
-    // =========================================================
     // SELLER ROUTES
-    // =========================================================
     GetPage(
       name: AppRoutes.sellerDashboard,
       page: () => const SellerDashboardScreen(),
@@ -266,9 +256,7 @@ class AppPages {
       middlewares: [AuthMiddleware(), PermissionMiddleware('create products')],
     ),
 
-    // =========================================================
     // SELLER PAYOUTS
-    // =========================================================
     GetPage(
       name: AppRoutes.sellerPayoutDetails,
       page: () => const SellerPayoutDetailsScreen(),
@@ -281,9 +269,7 @@ class AppPages {
       middlewares: [AuthMiddleware(), PermissionMiddleware('view own payouts')],
     ),
 
-    // =========================================================
     // SELLER COMPLAINTS
-    // =========================================================
     GetPage(
       name: AppRoutes.sellerComplaints,
       page: () => const SellerComplaintListScreen(),
@@ -302,18 +288,14 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
 
-    // =========================================================
     // SELLER ORDER DETAILS
-    // =========================================================
     GetPage(
       name: AppRoutes.sellerOrderDetail,
       page: () => SellerOrderDetailScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('view shop orders')],
     ),
 
-    // =========================================================
     // ADMIN
-    // =========================================================
     GetPage(
       name: AppRoutes.adminDashboard,
       page: () => const AdminHomeShell(),
@@ -323,9 +305,7 @@ class AppPages {
       ],
     ),
 
-    // =========================================================
     // ADMIN SHOP MANAGEMENT
-    // =========================================================
     GetPage(
       name: AppRoutes.sellerApprovals,
       page: () => const ShopApprovalsScreen(),
@@ -356,9 +336,7 @@ class AppPages {
       middlewares: [AuthMiddleware(), PermissionMiddleware('view all shops')],
     ),
 
-    // =========================================================
     // ADMIN ORDERS
-    // =========================================================
     GetPage(
       name: AppRoutes.adminordersscreen,
       page: () => const AdminOrdersScreen(),
@@ -371,9 +349,7 @@ class AppPages {
       middlewares: [AuthMiddleware(), PermissionMiddleware('view all orders')],
     ),
 
-    // =========================================================
     // ADMIN PAYMENTS
-    // =========================================================
     GetPage(
       name: AppRoutes.paymentScreen,
       page: () => const PaymentScreen(),
@@ -398,18 +374,14 @@ class AppPages {
       ],
     ),
 
-    // =========================================================
     // ADMIN SETTINGS
-    // =========================================================
     GetPage(
       name: AppRoutes.adminSettings,
       page: () => const AdminSettingsScreen(),
       middlewares: [AuthMiddleware()],
     ),
 
-    // =========================================================
     // ADMIN USER MANAGEMENT
-    // =========================================================
     GetPage(
       name: AppRoutes.users,
       page: () => UsersScreen(),
@@ -431,9 +403,7 @@ class AppPages {
       ],
     ),
 
-    // =========================================================
     // ADMIN COURIER MANAGEMENT
-    // =========================================================
     GetPage(
       name: AppRoutes.adminCities,
       page: () => const CityScreen(),
@@ -446,9 +416,7 @@ class AppPages {
       middlewares: [AuthMiddleware(), PermissionMiddleware('manage cities')],
     ),
 
-    // =========================================================
     // ADMIN COMPLAINTS
-    // =========================================================
     GetPage(
       name: AppRoutes.adminComplaints,
       page: () => const AdminComplaintListScreen(),
@@ -461,18 +429,14 @@ class AppPages {
       middlewares: [AuthMiddleware(), PermissionMiddleware('view complaints')],
     ),
 
-    // =========================================================
     // ADMIN CATEGORIES
-    // =========================================================
     GetPage(
       name: AppRoutes.manageCategories,
       page: () => const ManageCategoriesScreen(),
       middlewares: [AuthMiddleware(), PermissionMiddleware('view categories')],
     ),
 
-    // =========================================================
-    // SHARED CHAT
-    // =========================================================
+    // CHAT
     GetPage(
       name: AppRoutes.chat,
       page: () => ChatScreen(),
@@ -485,9 +449,7 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
 
-    // =========================================================
-    // AI FEATURES
-    // =========================================================
+    // AI ROUTES
     GetPage(
       name: AppRoutes.airesult,
       page: () => const AIResultScreen(),

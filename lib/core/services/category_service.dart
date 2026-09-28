@@ -9,9 +9,6 @@ import '../constants/app_icons.dart';
 class CategoryService {
   final String baseUrl = BaseUrl.url;
 
-  // =========================
-  // Fetch categories
-  // =========================
   Future<List<Map<String, dynamic>>> fetchAllCategories() async {
     final response = await http.get(
       Uri.parse("$baseUrl/all-rice-categories"),
@@ -25,9 +22,6 @@ class CategoryService {
     return [];
   }
 
-  // =========================
-  // Create a new category
-  // =========================
   Future<Map<String, dynamic>> createCategory({
     required String token,
     required String name,
@@ -67,9 +61,6 @@ class CategoryService {
     }
   }
 
-  // =========================
-  // Update category
-  // =========================
   Future<Map<String, dynamic>> updateCategory({
     required String token,
     required int categoryId,
@@ -114,9 +105,6 @@ class CategoryService {
     }
   }
 
-  // =========================
-  // Toggle status of a category
-  // =========================
   Future<Map<String, dynamic>> updateStatus({
     required String token,
     required int categoryId,

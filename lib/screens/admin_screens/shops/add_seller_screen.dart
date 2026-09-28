@@ -42,9 +42,6 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
 
                     children: [
-                      // =========================
-                      // ACCOUNT INFO
-                      // =========================
                       sectionCard(
                         title: "Account Info",
 
@@ -81,9 +78,6 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
 
                       const SizedBox(height: 18),
 
-                      // =========================
-                      // SHOP INFO
-                      // =========================
                       sectionCard(
                         title: "Shop Info",
 
@@ -176,9 +170,6 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
 
                       const SizedBox(height: 25),
 
-                      // =========================
-                      // BUTTON
-                      // =========================
                       Obx(() {
                         return SizedBox(
                           height: 55,
@@ -210,9 +201,6 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
     );
   }
 
-  // =========================
-  // IMAGE PICKER TILE
-  // =========================
   Widget imagePicker({required Rx image, required VoidCallback onTap}) {
     return Obx(() {
       return GestureDetector(
@@ -248,9 +236,6 @@ class _AddSellerScreenState extends State<AddSellerScreen> {
     });
   }
 
-  // =========================
-  // INPUT FIELD
-  // =========================
   Widget buildField(
     TextEditingController controller,
     String hint, {

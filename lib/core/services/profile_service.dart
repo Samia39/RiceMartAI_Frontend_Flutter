@@ -8,7 +8,6 @@ class ProfileService {
 
   String get token => _box.read('token') ?? '';
 
-  // Safe JSON decode with debug visibility
   dynamic _safeDecode(http.Response response) {
     if (response.body.isEmpty) {
       throw Exception(
@@ -19,7 +18,7 @@ class ProfileService {
       return jsonDecode(response.body);
     } catch (e) {
       print(
-        '⚠️ Non-JSON response (status ${response.statusCode}): ${response.body}',
+        'Non-JSON response (status ${response.statusCode}): ${response.body}',
       );
       throw Exception(
         'Server returned an invalid response (status ${response.statusCode})',
@@ -27,7 +26,6 @@ class ProfileService {
     }
   }
 
-  //Parse role from list
   String parseRole(dynamic apiRoles) {
     if (apiRoles != null && apiRoles is List && apiRoles.isNotEmpty) {
       final first = apiRoles[0];
@@ -43,7 +41,6 @@ class ProfileService {
     return 'customer';
   }
 
-  //Fetch authenticated user
   Future<Map<String, dynamic>> fetchProfile() async {
     final data = await AuthService.me(token);
     final user = data['user'] ?? data;
@@ -66,7 +63,6 @@ class ProfileService {
     };
   }
 
-  // Update profile
   Future<void> updateProfile({
     required String name,
     String? email,
@@ -85,7 +81,6 @@ class ProfileService {
     }
   }
 
-  // Request account deletion OTP
   Future<void> requestAccountDeletion() async {
     final response = await http.post(
       Uri.parse('${AuthService.baseUrl}/delete-account/request'),
@@ -103,7 +98,6 @@ class ProfileService {
     }
   }
 
-  // Confirm account deletion with OTP
   Future<void> confirmAccountDeletion(String otp) async {
     final response = await http.post(
       Uri.parse('${AuthService.baseUrl}/delete-account/confirm'),

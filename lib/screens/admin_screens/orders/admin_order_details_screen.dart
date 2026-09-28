@@ -228,7 +228,7 @@ class _AdminOrderDetailsScreenState extends State<AdminOrderDetailsScreen> {
                                   updateItemStatus(item["id"], "delivered"),
                               child: const Text("Delivered"),
                             ),
-                            // Admin only sellers can't cancel a paid order.
+
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.error,
