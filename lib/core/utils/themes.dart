@@ -185,7 +185,7 @@ class AppDecorations {
     border: Border.all(color: AppColors.cardBorder),
     boxShadow: [
       BoxShadow(
-        color: AppColors.darkGreen.withOpacity(0.07),
+        color: AppColors.darkGreen.withValues(alpha: 0.07),
         blurRadius: 10,
         offset: const Offset(0, 3),
       ),

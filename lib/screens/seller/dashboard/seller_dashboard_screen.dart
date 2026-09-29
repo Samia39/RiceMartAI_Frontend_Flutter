@@ -7,7 +7,7 @@ import 'package:get_storage/get_storage.dart';
 import '../rice/add_rice_screen.dart';
 import '../shop/my_shop_screen.dart';
 import '../order/seller_orders_screen.dart';
-import 'package:ricemart_ai/screens/buyer/profile/profile_screen.dart';
+import '../../buyer/profile/profile_screen.dart';
 import '../../../core/utils/themes.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/services/admin/permission_service.dart';
